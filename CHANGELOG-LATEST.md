@@ -1,3 +1,3 @@
 ### Fixed
 
-- Fixed item blacklist tag.
+- Hopefully fix startup crash with certain mods.
