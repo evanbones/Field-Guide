@@ -67,7 +67,7 @@ public class FieldGuideClient {
     }
 
     public static void onClientTick() {
-        if (OPEN_GUIDE_KEY.consumeClick()) {
+        if (OPEN_GUIDE_KEY != null && OPEN_GUIDE_KEY.consumeClick()) {
             openGuide();
         }
     }
