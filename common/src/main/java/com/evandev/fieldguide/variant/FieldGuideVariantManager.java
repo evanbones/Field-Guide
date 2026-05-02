@@ -426,59 +426,69 @@ public class FieldGuideVariantManager {
         };
     }
 
-    private static VariantProvider<Mob> getReflectionProvider(Mob mob) {
-        Method[] methods = mob.getClass().getMethods();
-
-        for (Method m : methods) {
-            String name = m.getName();
-            if (m.getParameterCount() == 0 && (name.startsWith("get") || name.startsWith("is")) &&
-                    (name.contains("Variant") || name.contains("Variation") || name.contains("Type") || name.contains("Color")) &&
-                    !name.equals("getCollarColor") && !name.contains("Order") && !name.contains("Mode") && !name.contains("Status") &&
-                    !name.contains("Behaviour") && !name.contains("Accessibility") && !name.contains("State") &&
-                    !name.contains("SpawnType")) {
-
-                if (!m.getReturnType().isEnum() || m.getReturnType().getSimpleName().equals("DyeColor")) {
-                    continue;
-                }
-
-                String suffix = name.startsWith("get") ? name.substring(3) : name.substring(2);
-                try {
-                    Method potentialSetter = mob.getClass().getMethod("set" + suffix, m.getReturnType());
-
-                    final Method finalGetter = m;
-                    final Method finalSetter = potentialSetter;
-
-                    return new VariantProvider<>() {
-                        @Override
-                        public List<VariantDef> getVariants(Mob entity) {
-                            return Arrays.stream(finalGetter.getReturnType().getEnumConstants())
-                                    .map(e -> new VariantDef(((Enum<?>) e).name(), e))
-                                    .toList();
-                        }
-
-                        @Override
-                        public void apply(Mob entity, VariantDef def) {
-                            try {
-                                finalSetter.invoke(entity, def.value());
-                            } catch (Exception ignored) {
-                            }
-                        }
-
-                        @Override
-                        public VariantDef getCurrent(Mob entity) {
-                            try {
-                                Object val = finalGetter.invoke(entity);
-                                if (val instanceof Enum<?> e) return new VariantDef(e.name(), e);
-                            } catch (Exception ignored) {
-                            }
-                            return new VariantDef("default", null);
-                        }
-                    };
-                } catch (NoSuchMethodException ignored) {
-                }
-            }
-        }
-        return null;
+    private static VariantProvider<Mob> getReflectionProvider(Mob mob) {  
+        Class<?> clazz = mob.getClass();  
+        while (clazz != null && clazz != Mob.class && clazz != Object.class) {  
+            Method[] methods;  
+            try {  
+                methods = clazz.getDeclaredMethods();  
+            } catch (NoClassDefFoundError | RuntimeException e) {  
+                clazz = clazz.getSuperclass();  
+                continue;  
+            }  
+  
+            for (Method m : methods) {  
+                String name = m.getName();  
+                if (m.getParameterCount() == 0 && (name.startsWith("get") || name.startsWith("is")) &&  
+                        (name.contains("Variant") || name.contains("Variation") || name.contains("Type") || name.contains("Color")) &&  
+                        !name.equals("getCollarColor") && !name.contains("Order") && !name.contains("Mode") && !name.contains("Status") &&  
+                        !name.contains("Behaviour") && !name.contains("Accessibility") && !name.contains("State") &&  
+                        !name.contains("SpawnType")) {  
+  
+                    if (!m.getReturnType().isEnum() || m.getReturnType().getSimpleName().equals("DyeColor")) {  
+                        continue;  
+                    }  
+  
+                    String suffix = name.startsWith("get") ? name.substring(3) : name.substring(2);  
+                    try {  
+                        Method potentialSetter = mob.getClass().getMethod("set" + suffix, m.getReturnType());  
+  
+                        final Method finalGetter = m;  
+                        final Method finalSetter = potentialSetter;  
+  
+                        return new VariantProvider<>() {  
+                            @Override  
+                            public List<VariantDef> getVariants(Mob entity) {  
+                                return Arrays.stream(finalGetter.getReturnType().getEnumConstants())  
+                                        .map(e -> new VariantDef(((Enum<?>) e).name(), e))  
+                                        .toList();  
+                            }  
+  
+                            @Override  
+                            public void apply(Mob entity, VariantDef def) {  
+                                try {  
+                                    finalSetter.invoke(entity, def.value());  
+                                } catch (Exception ignored) {  
+                                }  
+                            }  
+  
+                            @Override  
+                            public VariantDef getCurrent(Mob entity) {  
+                                try {  
+                                    Object val = finalGetter.invoke(entity);  
+                                    if (val instanceof Enum<?> e) return new VariantDef(e.name(), e);  
+                                } catch (Exception ignored) {  
+                                }  
+                                return new VariantDef("default", null);  
+                            }  
+                        };  
+                    } catch (NoSuchMethodException | NoClassDefFoundError | RuntimeException ignored) {  
+                    }  
+                }  
+            }  
+            clazz = clazz.getSuperclass();  
+        }  
+        return null;  
     }
 
     private static class CompositeVariantProvider<T extends Mob> implements VariantProvider<T> {
