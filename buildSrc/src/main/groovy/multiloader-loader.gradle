@@ -45,7 +45,7 @@ tasks.named('sourcesJar', Jar) {
 
 publishMods {
     changelog = rootProject.file("CHANGELOG-LATEST.md").text
-    type = BETA
+    type = STABLE
     version = "${project.version}-${minecraft_version}-${project.name}"
     displayName = "${mod_name} ${project.name.capitalize()} ${minecraft_version} - ${project.version}"
     modLoaders.add(project.name)
