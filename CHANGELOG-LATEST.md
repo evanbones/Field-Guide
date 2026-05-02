@@ -1,3 +1,3 @@
 ### Fixed
 
-- Hopefully fix startup crash with certain mods.
+- Fixed issues with mob loot on dedicated servers.
