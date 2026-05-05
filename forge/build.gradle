@@ -92,6 +92,9 @@ dependencies {
     // Scholar
     modImplementation "maven.modrinth:scholar:yxQA51K6"
 
+    // Curios
+    modImplementation "maven.modrinth:curios:5.14.1+1.20.1"
+
     compileOnly project(":common")
     annotationProcessor("org.spongepowered:mixin:0.8.5-SNAPSHOT:processor")
 }
