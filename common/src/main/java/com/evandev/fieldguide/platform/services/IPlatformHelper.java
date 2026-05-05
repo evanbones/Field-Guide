@@ -57,7 +57,5 @@ public interface IPlatformHelper {
      * @param player The player to check.
      * @return True if a spyglass is equipped in a special slot, false otherwise.
      */
-    default boolean hasSpyglass(Player player) {
-        return true; // TODO
-    }
+    boolean hasSpyglassEquipped(Player player);
 }

@@ -93,6 +93,11 @@ repositories {
             includeGroup "folk.sisby"
         }
     }
+
+    maven {
+        name = "Ladysnake Libs"
+        url = 'https://maven.ladysnake.org/releases'
+    }
 }
 
 ['apiElements', 'runtimeElements'].each { variant ->
