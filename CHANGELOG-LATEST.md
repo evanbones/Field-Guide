@@ -1,3 +1,3 @@
 ### Fixed
 
-- Fixed issues with mob loot on dedicated servers.
+- Simplified scan verification to fix issues with servers rejecting scans.
