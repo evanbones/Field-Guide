@@ -1,9 +1,6 @@
 package com.evandev.fieldguide.platform;
 
-import com.evandev.fieldguide.ModTags;
-import com.evandev.fieldguide.compat.curios.ForgeCuriosCompat;
 import com.evandev.fieldguide.platform.services.IPlatformHelper;
-import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.FMLPaths;
@@ -30,18 +27,5 @@ public class ForgePlatformHelper implements IPlatformHelper {
     @Override
     public Path getConfigDirectory() {
         return FMLPaths.CONFIGDIR.get();
-    }
-
-    @Override
-    public boolean hasSpyglassEquipped(Player player) {
-        if (player.isUsingItem() && player.getUseItem().is(ModTags.Items.SPYGLASSES)) {
-            return true;
-        }
-
-        if (isModLoaded("curios")) {
-            return ForgeCuriosCompat.hasSpyglass(player);
-        }
-
-        return false;
     }
 }

@@ -57,9 +57,6 @@ dependencies {
 
     // Scholar
     modImplementation "maven.modrinth:scholar:FKPdCnvI"
-
-    // Trinkets
-    modImplementation "dev.emi:trinkets:3.7.1"
 }
 
 loom {

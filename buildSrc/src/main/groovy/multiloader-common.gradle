@@ -72,10 +72,6 @@ repositories {
         name = "Sleeping Town"
         url = "https://repo.sleeping.town/"
     }
-    maven {
-        name = "Ladysnake Libs"
-        url = 'https://maven.ladysnake.org/releases'
-    }
     maven { url = "https://maven.impactdev.net/repository/development/" }
 }
 
