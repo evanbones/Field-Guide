@@ -1,3 +1,3 @@
 ### Fixed
 
-- Hopefully fixed issues with Vistas and Curios.
+- Fixed issues with mob loot on dedicated servers.

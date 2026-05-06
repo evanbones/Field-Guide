@@ -78,13 +78,10 @@ dependencies {
     runtimeOnly "maven.modrinth:glitchcore:8wmCpbQ2"
 
     // Ecliptic Seasons
-    // runtimeOnly "maven.modrinth:ecliptic-seasons:${ecliptic_seasons_version}"
+    //runtimeOnly "maven.modrinth:ecliptic-seasons:${ecliptic_seasons_version}"
 
     // Scholar
     implementation "maven.modrinth:scholar:t5aJhKGV"
-
-    // Curios
-    implementation "maven.modrinth:curios:9.5.1+1.21.1"
 }
 
 publishMods {
