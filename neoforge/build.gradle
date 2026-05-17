@@ -48,10 +48,10 @@ dependencies {
     implementation "me.shedaniel.cloth:cloth-config-neoforge:${cloth_config_version}"
 
     // Immersive Overlays
-    runtimeOnly "maven.modrinth:immersive-overlays:${immersive_overlays_version}-neoforge"
+    //runtimeOnly "maven.modrinth:immersive-overlays:${immersive_overlays_version}-neoforge"
 
     // Spyglass Improvements
-    runtimeOnly "maven.modrinth:spyglass-improvements:${spyglass_improvements_version}+neoforge"
+    //runtimeOnly "maven.modrinth:spyglass-improvements:${spyglass_improvements_version}+neoforge"
 
     // ETF & EMF
     compileOnly "maven.modrinth:entitytexturefeatures:${etf_version}-neoforge-1.21"
@@ -61,7 +61,8 @@ dependencies {
     compileOnly "maven.modrinth:reliable-remover:${reliable_remover_version}-neoforge-1.21.1"
 
     // Exposure
-    implementation "maven.modrinth:exposure:${exposure_neoforge_version}"
+    compileOnly "maven.modrinth:exposure:${exposure_neoforge_version}"
+    //runtimeOnly "maven.modrinth:exposure:${exposure_neoforge_version}"
 
     // Mixed Litter
     compileOnly "maven.modrinth:mixed-litter:${mixed_litter_version}"
@@ -74,14 +75,15 @@ dependencies {
 
     // Serene Seasons
     compileOnly "maven.modrinth:serene-seasons:${serene_seasons_neoforge_version}"
-    runtimeOnly "maven.modrinth:serene-seasons:${serene_seasons_neoforge_version}"
-    runtimeOnly "maven.modrinth:glitchcore:8wmCpbQ2"
+    //runtimeOnly "maven.modrinth:serene-seasons:${serene_seasons_neoforge_version}"
+    //runtimeOnly "maven.modrinth:glitchcore:8wmCpbQ2"
 
     // Ecliptic Seasons
     //runtimeOnly "maven.modrinth:ecliptic-seasons:${ecliptic_seasons_version}"
 
     // Scholar
-    implementation "maven.modrinth:scholar:t5aJhKGV"
+    compileOnly "maven.modrinth:scholar:t5aJhKGV"
+    //runtimeOnly "maven.modrinth:scholar:t5aJhKGV"
 }
 
 publishMods {

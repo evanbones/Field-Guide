@@ -57,7 +57,7 @@ public class FieldGuideMod {
     }
 
     private void registerPayloads(final RegisterPayloadHandlersEvent event) {
-        final PayloadRegistrar registrar = event.registrar(Constants.MOD_ID).versioned("1.0");
+        final PayloadRegistrar registrar = event.registrar(Constants.MOD_ID).optional();
 
         // S2C
         registrar.playToClient(SyncLootPacket.TYPE, SyncLootPacket.CODEC, (packet, context) -> context.enqueueWork(() -> FieldGuideNeoForgeClient.handleSyncLoot(packet)));

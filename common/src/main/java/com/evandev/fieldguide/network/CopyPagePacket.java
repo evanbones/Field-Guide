@@ -41,6 +41,7 @@ public record CopyPagePacket(ResourceLocation entryId) implements CustomPacketPa
 
     public void handleServer(ServerPlayer player) {
         if (player == null) return;
+        if (ModItems.PAGE == null) return;
         PlayerFieldGuideProgress progress = FieldGuideProgressManager.getInstance().getProgress(player);
         if (progress == null) return;
 
