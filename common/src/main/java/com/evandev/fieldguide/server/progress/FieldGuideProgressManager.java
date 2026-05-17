@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class FieldGuideProgressManager {
     private static final FieldGuideProgressManager NOOP = new FieldGuideProgressManager();
@@ -21,7 +22,7 @@ public class FieldGuideProgressManager {
 
     private MinecraftServer server;
     private Path progressDir;
-    private final Map<UUID, PlayerFieldGuideProgress> playerProgress = new HashMap<>();
+    private final Map<UUID, PlayerFieldGuideProgress> playerProgress = new ConcurrentHashMap<>();
     private final Map<UUID, Map<Integer, Long>> recentlyScannedEntities = new HashMap<>();
 
     private FieldGuideProgressManager() {
