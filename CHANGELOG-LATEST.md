@@ -1,3 +1,4 @@
 ### Fixed
 
-- Simplified scan verification to fix issues with servers rejecting scans.
+- Made Blaze render look less strange.
+- Fixed MORE issues with Mixed Litter models.

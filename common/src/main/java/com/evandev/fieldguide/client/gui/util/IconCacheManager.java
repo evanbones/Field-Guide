@@ -215,4 +215,18 @@ public class IconCacheManager {
             PENDING_GENERATIONS.remove(key);
         }
     }
+
+    public static boolean hasCache(Object baseEntry, Object cacheKey, boolean isPage) {
+        String entryKey = AutoPopulateRegistry.getEntryKey(baseEntry);
+        if (entryKey.isEmpty()) return false;
+
+        String variantSuffix = "";
+        String cacheKeyStr = cacheKey.toString();
+        if (cacheKeyStr.contains("#")) {
+            variantSuffix = "_" + cacheKeyStr.substring(cacheKeyStr.indexOf('#') + 1).replace(":", "_").toLowerCase(Locale.ROOT);
+        }
+        String key = (entryKey.replace(":", "_").replace("/", "_") + variantSuffix + (isPage ? "_page" : "_grid")).toLowerCase(Locale.ROOT);
+
+        return TEXTURE_CACHE.containsKey(key) || PENDING_GENERATIONS.contains(key);
+    }
 }

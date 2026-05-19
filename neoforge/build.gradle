@@ -48,7 +48,7 @@ dependencies {
     implementation "me.shedaniel.cloth:cloth-config-neoforge:${cloth_config_version}"
 
     // Immersive Overlays
-    //runtimeOnly "maven.modrinth:immersive-overlays:${immersive_overlays_version}-neoforge"
+    implementation "maven.modrinth:immersive-overlays:${immersive_overlays_version}-neoforge"
 
     // Spyglass Improvements
     //runtimeOnly "maven.modrinth:spyglass-improvements:${spyglass_improvements_version}+neoforge"
@@ -65,7 +65,7 @@ dependencies {
     //runtimeOnly "maven.modrinth:exposure:${exposure_neoforge_version}"
 
     // Mixed Litter
-    compileOnly "maven.modrinth:mixed-litter:${mixed_litter_version}"
+    implementation "maven.modrinth:mixed-litter:${mixed_litter_version}"
 
     // Cobblemon
     compileOnly "com.cobblemon:neoforge:${cobblemon_version}"
@@ -83,7 +83,7 @@ dependencies {
 
     // Scholar
     compileOnly "maven.modrinth:scholar:t5aJhKGV"
-    //runtimeOnly "maven.modrinth:scholar:t5aJhKGV"
+    runtimeOnly "maven.modrinth:scholar:t5aJhKGV"
 }
 
 publishMods {

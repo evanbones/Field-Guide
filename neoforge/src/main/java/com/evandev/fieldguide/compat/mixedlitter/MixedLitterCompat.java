@@ -64,6 +64,27 @@ public class MixedLitterCompat {
                 }
 
                 if (!matching.isEmpty()) {
+                    matching.sort((v1, v2) -> {
+                        boolean c1 = v1.conditions().isPresent();
+                        boolean c2 = v2.conditions().isPresent();
+
+                        if (!c1 && c2) return -1;
+                        if (c1 && !c2) return 1;
+
+                        ResourceLocation id1 = variantRegistry.getKey(v1);
+                        ResourceLocation id2 = variantRegistry.getKey(v2);
+                        String p1 = id1 != null ? id1.getPath() : "";
+                        String p2 = id2 != null ? id2.getPath() : "";
+
+                        boolean d1 = p1.contains("default") || p1.equals(entityPath);
+                        boolean d2 = p2.contains("default") || p2.equals(entityPath);
+
+                        if (d1 && !d2) return -1;
+                        if (!d1 && d2) return 1;
+
+                        return p1.compareTo(p2);
+                    });
+
                     selected.add(matching.getFirst());
                 }
             }
@@ -72,7 +93,9 @@ public class MixedLitterCompat {
                 Variant variant = variantRegistry.get(id);
                 if (variant != null && variant.group().isEmpty()) {
                     if (isForEntity(id, entityPath)) {
-                        selected.add(variant);
+                        if (variant.conditions().isEmpty()) {
+                            selected.add(variant);
+                        }
                     }
                 }
             }
@@ -113,6 +136,22 @@ public class MixedLitterCompat {
     }
 
     public static void applyVariant(Entity entity, VariantDef def) {
+        try {
+            List<ResourceLocation> currentIds = entity.getData(MLDataAttachmentTypes.VARIANTS.get());
+            if (currentIds.isEmpty()) {
+                applyDummyVariant(entity);
+            }
+        } catch (Exception ignored) {
+        }
+
+        if (def == null || def.value() == null) {
+            try {
+                applyDummyVariant(entity);
+            } catch (Exception ignored) {
+            }
+            return;
+        }
+
         switch (def.value()) {
             case ResourceLocation newVariantId -> {
                 try {
@@ -120,6 +159,7 @@ public class MixedLitterCompat {
                     Variant newVariant = variantRegistry.get(newVariantId);
                     if (newVariant == null) return;
 
+                    applyDummyVariant(entity);
                     List<ResourceLocation> currentIds = new ArrayList<>(entity.getData(MLDataAttachmentTypes.VARIANTS.get()));
 
                     if (newVariant.group().isPresent()) {
@@ -134,20 +174,21 @@ public class MixedLitterCompat {
                         currentIds.add(newVariantId);
                     }
 
-                    entity.setData(MLDataAttachmentTypes.VARIANTS.get(), currentIds);
+                    List<Variant> updatedVariants = new ArrayList<>();
+                    for (ResourceLocation id : currentIds) {
+                        Variant v = variantRegistry.get(id);
+                        if (v != null) {
+                            updatedVariants.add(v);
+                        }
+                    }
+
+                    VariantUtil.setVariants(entity, updatedVariants);
                 } catch (Exception ignored) {
                 }
             }
             case CompoundTag compoundTag -> {
                 try {
-                    entity.setData(MLDataAttachmentTypes.VARIANTS.get(), new ArrayList<>());
-                } catch (Exception ignored) {
-                }
-            }
-            case null -> {
-                try {
-                    entity.setData(MLDataAttachmentTypes.VARIANTS.get(), new ArrayList<>());
-                    applyDummyVariant(entity);
+                    VariantUtil.setVariants(entity, new ArrayList<>());
                 } catch (Exception ignored) {
                 }
             }

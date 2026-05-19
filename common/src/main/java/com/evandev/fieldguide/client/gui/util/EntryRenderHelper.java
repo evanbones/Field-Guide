@@ -277,7 +277,7 @@ public class EntryRenderHelper {
         entityRenderDispatcher.setRenderHitBoxes(false);
 
         try {
-            float partialTicks = Minecraft.getInstance().getFrameTimeNs();
+            float partialTicks = Minecraft.getInstance().getTimer().getGameTimeDeltaTicks();
             entityRenderDispatcher.render(entity, 0, 0, 0, 0.0F, partialTicks, pose, buffers, LightTexture.FULL_BRIGHT);
         } catch (Exception e) {
             Constants.LOG.error("Failed to render entity in Field Guide: {}", entrySource, e);
