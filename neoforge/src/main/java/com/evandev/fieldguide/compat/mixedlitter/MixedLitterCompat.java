@@ -159,7 +159,6 @@ public class MixedLitterCompat {
                     Variant newVariant = variantRegistry.get(newVariantId);
                     if (newVariant == null) return;
 
-                    applyDummyVariant(entity);
                     List<ResourceLocation> currentIds = new ArrayList<>(entity.getData(MLDataAttachmentTypes.VARIANTS.get()));
 
                     if (newVariant.group().isPresent()) {
