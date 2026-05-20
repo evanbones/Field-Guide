@@ -76,7 +76,7 @@ public class EntryRenderHelper {
         ResourceLocation id = AutoPopulateRegistry.getEntryId(baseEntry);
         if (id != null) {
             if (cacheKey instanceof String str && str.contains("#")) {
-                String variantId = str.substring(str.indexOf('#') + 1).replace(":", "_").toLowerCase(Locale.ROOT);
+                String variantId = str.substring(str.indexOf('#') + 1).replace(":", "_").toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9._\\-]", "_");
                 ResourceLocation specificVariantLoc = ResourceLocation.fromNamespaceAndPath(id.getNamespace(), "textures/fieldguide/entries/" + id.getPath() + "_" + variantId + (isPage ? "_page.png" : "_grid.png"));
                 if (Minecraft.getInstance().getResourceManager().getResource(specificVariantLoc).isPresent()) {
                     OVERRIDE_CACHE.put(key, Optional.of(specificVariantLoc));
@@ -177,19 +177,15 @@ public class EntryRenderHelper {
         renderWithCache(baseId, cacheKey, guiGraphics, x, y, maxWidth, maxHeight, unlocked, isPage, bounceScale, () -> {
 
             VariantDef tempOriginal = null;
-            boolean applied = false;
 
             if (finalProvider != null && entity instanceof Mob mob) {
                 tempOriginal = finalProvider.getCurrent(mob);
-                if (tempOriginal == null || !tempOriginal.id().equals(finalVariant.id())) {
-                    finalProvider.apply(mob, finalVariant);
-                    applied = true;
-                }
+                finalProvider.apply(mob, finalVariant);
             }
 
             renderEntity(entity, entity.getType(), isPage, -30.0F);
 
-            if (applied && entity instanceof Mob mob && tempOriginal != null) {
+            if (finalProvider != null && entity instanceof Mob mob && tempOriginal != null) {
                 finalProvider.apply(mob, tempOriginal);
             }
         });

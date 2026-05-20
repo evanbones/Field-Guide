@@ -38,8 +38,8 @@ Whether you are using it for your personal game or designing a modpack, Field Gu
 * Hide names, entries or whole categories until they are discovered.
 * And much more...
 
-For full information, tutorials, and examples, please refer to the *
-*[Field Guide Wiki](https://moddedmc.wiki/en/project/field-guide/latest/docs)**.
+For full information, tutorials, and examples, please refer to the 
+**[Field Guide Wiki](https://moddedmc.wiki/en/project/field-guide/latest/docs)**.
 
 ![List view](https://raw.githubusercontent.com/evanbones/Field-Guide/refs/heads/1.20.1/images/modded_view.png)
 

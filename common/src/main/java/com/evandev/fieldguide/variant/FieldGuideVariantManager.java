@@ -477,9 +477,10 @@ public class FieldGuideVariantManager {
             boolean hasMLVariants = list.stream().anyMatch(v -> v.value() instanceof ResourceLocation);
             boolean hasVanillaEnums = list.stream().anyMatch(v -> v.value() instanceof Enum<?>);
             boolean hasVanilla = list.stream().anyMatch(v -> v.value() != null && !(v.value() instanceof ResourceLocation));
+            boolean suppressDefault = providers.stream().anyMatch(p -> p.suppressesDefaultVariant(entity));
 
             List<VariantDef> result = new ArrayList<>();
-            if (hasMLVariants && hasVanillaEnums) {
+            if (hasMLVariants && hasVanillaEnums && suppressDefault) {
                 list.stream().filter(v -> !(v.value() instanceof Enum<?>)).forEach(result::add);
             } else if (hasVanilla) {
                 for (VariantDef v : list) {
@@ -487,7 +488,6 @@ public class FieldGuideVariantManager {
                     result.add(v);
                 }
             } else {
-                boolean suppressDefault = providers.stream().anyMatch(p -> p.suppressesDefaultVariant(entity));
                 boolean hasDefault = list.stream().anyMatch(v -> v.id().equals("default") && v.value() == null);
                 if (!suppressDefault && !hasDefault && !list.isEmpty()) {
                     result.add(new VariantDef("default", null));
