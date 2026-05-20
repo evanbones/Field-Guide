@@ -24,6 +24,14 @@ public class MixedLitterCompat {
     private static boolean isForEntity(Variant variant, ResourceLocation variantId, ResourceLocation entityId) {
         if (variantId == null || entityId == null) return false;
 
+        String variantNs = variantId.getNamespace();
+        if (!variantNs.equals("minecraft") && !variantNs.equals("mixed_litter")) {
+            String entityNs = entityId.getNamespace();
+            if (!entityNs.equals("minecraft") && !entityNs.equals(variantNs)) {
+                return false;
+            }
+        }
+
         String entityPath = entityId.getPath().toLowerCase();
         String variantPath = variantId.getPath().toLowerCase();
 
@@ -37,6 +45,27 @@ public class MixedLitterCompat {
         }
 
         return variant.arguments() != null && variant.arguments().toString().toLowerCase().contains(entityPath);
+    }
+
+    private static boolean isAntlerVariant(Variant variant) {
+        return variant.type().getPath().contains("antler");
+    }
+
+    public static boolean hasReplaceDefaultGroup(Entity entity) {
+        try {
+            Registry<VariantGroup> groupRegistry = entity.registryAccess().registryOrThrow(MLRegistries.VARIANT_GROUP_KEY);
+            Registry<Variant> variantRegistry = entity.registryAccess().registryOrThrow(MLRegistries.VARIANT_KEY);
+            ResourceLocation entityId = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
+            for (ResourceLocation id : variantRegistry.keySet()) {
+                Variant variant = variantRegistry.get(id);
+                if (variant == null || !isForEntity(variant, id, entityId)) continue;
+                if (variant.group().isEmpty()) continue;
+                VariantGroup group = groupRegistry.get(variant.group().get());
+                if (group != null && group.replaceDefault()) return true;
+            }
+        } catch (Exception ignored) {
+        }
+        return false;
     }
 
     /**
@@ -128,10 +157,9 @@ public class MixedLitterCompat {
             for (ResourceLocation id : sortedKeys) {
                 Variant variant = variantRegistry.get(id);
                 if (variant == null) continue;
-
-                if (isForEntity(variant, id, entityId)) {
-                    defs.add(new VariantDef(id.toString(), id));
-                }
+                if (!isForEntity(variant, id, entityId)) continue;
+                if (isAntlerVariant(variant)) continue;
+                defs.add(new VariantDef(id.toString(), id));
             }
         } catch (Exception ignored) {
         }
@@ -194,10 +222,19 @@ public class MixedLitterCompat {
     public static VariantDef getCurrentVariant(Entity entity) {
         try {
             if (entity.hasData(MLDataAttachmentTypes.VARIANTS)) {
-                List<ResourceLocation> variants = entity.getData(MLDataAttachmentTypes.VARIANTS);
-                if (!variants.isEmpty()) {
-                    ResourceLocation id = variants.getLast();
-                    return new VariantDef(id.toString(), id);
+                List<ResourceLocation> variantIds = entity.getData(MLDataAttachmentTypes.VARIANTS);
+                if (!variantIds.isEmpty()) {
+                    Registry<Variant> variantRegistry = entity.registryAccess().registryOrThrow(MLRegistries.VARIANT_KEY);
+                    Registry<VariantGroup> groupRegistry = entity.registryAccess().registryOrThrow(MLRegistries.VARIANT_GROUP_KEY);
+                    for (ResourceLocation id : variantIds) {
+                        Variant variant = variantRegistry.get(id);
+                        if (variant == null || variant.group().isEmpty()) continue;
+                        VariantGroup group = groupRegistry.get(variant.group().get());
+                        if (group != null && group.replaceDefault()) {
+                            return new VariantDef(id.toString(), id);
+                        }
+                    }
+                    return new VariantDef(variantIds.getLast().toString(), variantIds.getLast());
                 }
             }
         } catch (Exception ignored) {
@@ -219,6 +256,11 @@ public class MixedLitterCompat {
         @Override
         public VariantDef getCurrent(Mob entity) {
             return MixedLitterCompat.getCurrentVariant(entity);
+        }
+
+        @Override
+        public boolean suppressesDefaultVariant(Mob entity) {
+            return MixedLitterCompat.hasReplaceDefaultGroup(entity);
         }
 
         @Override

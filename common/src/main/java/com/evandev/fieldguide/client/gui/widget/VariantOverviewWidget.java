@@ -189,8 +189,6 @@ public class VariantOverviewWidget extends AbstractWidget {
             }
 
             if (!renderedPhoto) {
-                // Pass the variant id explicitly so the icon cache key is unique per variant,
-                // even when getCurrent() would return the same id for all (e.g. sheep with ML remodel).
                 EntryRenderHelper.renderEntityNormalized(graphics, renderEntity, centerX, centerY, bounds.width(), bounds.height(), isUnlocked, false, 1.0f, variant.id());
             }
 

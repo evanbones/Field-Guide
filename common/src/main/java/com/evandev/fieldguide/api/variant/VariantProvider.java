@@ -15,7 +15,7 @@ public interface VariantProvider<T extends Mob> {
         return entity.getClass().getName();
     }
 
-    default boolean overridesVanilla(T entity) {
+    default boolean suppressesDefaultVariant(T entity) {
         return false;
     }
 }

@@ -201,8 +201,6 @@ public class FieldGuideVariantManager {
 
         if (!FAILED_REFLECTION.contains(mob.getClass())) {
             if (PROVIDERS.containsKey(mob.getClass())) {
-                // An explicit provider is registered for this exact class; reflection would
-                // only produce duplicates with mismatched enum name casing.
                 FAILED_REFLECTION.add(mob.getClass());
             } else {
                 VariantProvider<T> refl = (VariantProvider<T>) getReflectionProvider(mob);
@@ -478,14 +476,10 @@ public class FieldGuideVariantManager {
 
             boolean hasMLVariants = list.stream().anyMatch(v -> v.value() instanceof ResourceLocation);
             boolean hasVanillaEnums = list.stream().anyMatch(v -> v.value() instanceof Enum<?>);
-            // Broadened from the old check: VillagerType values are not enums and their ids
-            // contain ":", but they are still non-null non-RL vanilla provider values.
             boolean hasVanilla = list.stream().anyMatch(v -> v.value() != null && !(v.value() instanceof ResourceLocation));
 
             List<VariantDef> result = new ArrayList<>();
             if (hasMLVariants && hasVanillaEnums) {
-                // ML provides full texture-replacement variants — suppress vanilla enum variants
-                // so only ML variants appear (e.g. rabbit: show ML brown/white, not Rabbit.Variant).
                 list.stream().filter(v -> !(v.value() instanceof Enum<?>)).forEach(result::add);
             } else if (hasVanilla) {
                 for (VariantDef v : list) {
@@ -493,14 +487,20 @@ public class FieldGuideVariantManager {
                     result.add(v);
                 }
             } else {
+                boolean suppressDefault = providers.stream().anyMatch(p -> p.suppressesDefaultVariant(entity));
                 boolean hasDefault = list.stream().anyMatch(v -> v.id().equals("default") && v.value() == null);
-                if (!hasDefault && !list.isEmpty()) {
+                if (!suppressDefault && !hasDefault && !list.isEmpty()) {
                     result.add(new VariantDef("default", null));
                 }
                 result.addAll(list);
             }
 
             return result.stream().distinct().toList();
+        }
+
+        @Override
+        public boolean suppressesDefaultVariant(T entity) {
+            return providers.stream().anyMatch(p -> p.suppressesDefaultVariant(entity));
         }
 
         @Override
