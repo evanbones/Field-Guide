@@ -115,6 +115,20 @@ public class EntryRenderHelper {
         renderEntityNormalized(guiGraphics, entity, x, y, maxWidth, maxHeight, unlocked, isPage, bounceScale, !isPage);
     }
 
+    /**
+     * Renders a pre-configured entity using an explicit variant id as the icon-cache key.
+     * Use this when the entity has already been set up for a specific variant and re-applying
+     * via getCurrent() would produce the wrong (or duplicate) cache key.
+     */
+    public static void renderEntityNormalized(GuiGraphics guiGraphics, Entity entity, int x, int y, int maxWidth, int maxHeight, boolean unlocked, boolean isPage, float bounceScale, String explicitVariantId) {
+        ResourceLocation baseId = AutoPopulateRegistry.getEntryId(entity.getType());
+        if (Services.PLATFORM.isModLoaded("cobblemon") && FieldGuideCobblemonCompat.isPokemon(entity)) {
+            baseId = FieldGuideCobblemonCompat.getPokemonEntryId(entity);
+        }
+        Object cacheKey = (explicitVariantId == null || explicitVariantId.isEmpty()) ? baseId : baseId.toString() + "#" + explicitVariantId;
+        renderWithCache(baseId, cacheKey, guiGraphics, x, y, maxWidth, maxHeight, unlocked, isPage, bounceScale, () -> renderEntity(entity, entity.getType(), isPage, -30.0F));
+    }
+
     public static void renderEntityNormalized(GuiGraphics guiGraphics, Entity entity, int x, int y, int maxWidth, int maxHeight, boolean unlocked, boolean isPage, float bounceScale, boolean syncWithProgress) {
         String variantId = "";
         VariantProvider<Mob> provider = null;
@@ -163,14 +177,19 @@ public class EntryRenderHelper {
         renderWithCache(baseId, cacheKey, guiGraphics, x, y, maxWidth, maxHeight, unlocked, isPage, bounceScale, () -> {
 
             VariantDef tempOriginal = null;
+            boolean applied = false;
+
             if (finalProvider != null && entity instanceof Mob mob) {
                 tempOriginal = finalProvider.getCurrent(mob);
-                finalProvider.apply(mob, finalVariant);
+                if (tempOriginal == null || !tempOriginal.id().equals(finalVariant.id())) {
+                    finalProvider.apply(mob, finalVariant);
+                    applied = true;
+                }
             }
 
             renderEntity(entity, entity.getType(), isPage, -30.0F);
 
-            if (finalProvider != null && entity instanceof Mob mob && tempOriginal != null) {
+            if (applied && entity instanceof Mob mob && tempOriginal != null) {
                 finalProvider.apply(mob, tempOriginal);
             }
         });

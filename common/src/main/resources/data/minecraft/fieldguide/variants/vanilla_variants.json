@@ -109,35 +109,6 @@
       ]
     },
     {
-      "id": "minecraft:rabbit",
-      "variants": [
-        {
-          "id": "brown",
-          "nbt": "{RabbitType:0}"
-        },
-        {
-          "id": "white",
-          "nbt": "{RabbitType:1}"
-        },
-        {
-          "id": "black",
-          "nbt": "{RabbitType:2}"
-        },
-        {
-          "id": "white_splotched",
-          "nbt": "{RabbitType:3}"
-        },
-        {
-          "id": "gold",
-          "nbt": "{RabbitType:4}"
-        },
-        {
-          "id": "salt_and_pepper",
-          "nbt": "{RabbitType:5}"
-        }
-      ]
-    },
-    {
       "id": "minecraft:cow",
       "conditions": [
         {

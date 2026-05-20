@@ -50,6 +50,10 @@ public class FieldGuideMod {
         if (ModList.get().isLoaded("mixed_litter")) {
             FieldGuideVariantManager.registerProvider(Mob.class, new MixedLitterCompat.MixedLitterVariantProvider());
         }
+
+        if (ModList.get().isLoaded("primal")) {
+            FieldGuideVariantManager.registerProvider(Mob.class, new com.evandev.fieldguide.compat.primal.PrimalVariantProvider());
+        }
     }
 
     private void registerExposureCompat() {

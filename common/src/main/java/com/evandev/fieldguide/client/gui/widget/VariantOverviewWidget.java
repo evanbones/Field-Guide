@@ -20,22 +20,24 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.entity.AgeableMob;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class VariantOverviewWidget extends AbstractWidget {
 
     private final Object entry;
-    private final LivingEntity renderedEntity;
+    private final LivingEntity originalRenderedEntity;
     private final List<VariantDef> variants;
     private final Consumer<Integer> onVariantSelected;
     private final Runnable onToggle;
@@ -43,13 +45,14 @@ public class VariantOverviewWidget extends AbstractWidget {
     private final PageTurnButton leftButton;
     private final PageTurnButton rightButton;
     private final float[] hoverScales = new float[9];
+    private final Map<String, LivingEntity> variantEntityCache = new HashMap<>();
     private int currentPage = 0;
     private long lastRenderTime = 0;
 
     public VariantOverviewWidget(int x, int y, int width, int height, Object entry, LivingEntity renderedEntity, List<VariantDef> variants, Consumer<Integer> onVariantSelected, Runnable onToggle) {
         super(x, y, width, height, Component.empty());
         this.entry = entry;
-        this.renderedEntity = renderedEntity;
+        this.originalRenderedEntity = renderedEntity;
         this.variants = variants;
         this.onVariantSelected = onVariantSelected;
         this.onToggle = onToggle;
@@ -70,6 +73,43 @@ public class VariantOverviewWidget extends AbstractWidget {
                 Arrays.fill(hoverScales, 1.0f);
             }
         });
+
+        preGenerateEntities();
+    }
+
+    private void preGenerateEntities() {
+        if (originalRenderedEntity == null || Minecraft.getInstance().level == null) return;
+
+        VariantProvider<Mob> provider = (originalRenderedEntity instanceof Mob mob) ? FieldGuideVariantManager.getProvider(mob) : null;
+
+        CompoundTag originalTag = new CompoundTag();
+        originalRenderedEntity.saveWithoutId(originalTag);
+
+        for (VariantDef variant : variants) {
+            if (Services.PLATFORM.isModLoaded("cobblemon") && FieldGuideCobblemonCompat.isPokemon(originalRenderedEntity)) {
+                ResourceLocation id = ClientFieldGuideManager.getEntryId(entry);
+                if (id != null) {
+                    variantEntityCache.put(variant.id(), ClientFieldGuideCobblemonCompat.getDummyVariant(id, variant.id(), Minecraft.getInstance().level));
+                }
+            } else {
+                Entity newEnt = originalRenderedEntity.getType().create(Minecraft.getInstance().level);
+                if (newEnt instanceof LivingEntity freshLiving) {
+
+                    UUID uuid = freshLiving.getUUID();
+                    freshLiving.load(originalTag);
+                    freshLiving.setUUID(uuid);
+
+                    if (originalRenderedEntity instanceof AgeableMob origAgeable && freshLiving instanceof AgeableMob freshAgeable) {
+                        freshAgeable.setAge(origAgeable.getAge());
+                    }
+
+                    if (provider != null && freshLiving instanceof Mob freshMob) {
+                        provider.apply(freshMob, variant);
+                    }
+                    variantEntityCache.put(variant.id(), freshLiving);
+                }
+            }
+        }
     }
 
     public void toggleVisibility() {
@@ -115,16 +155,6 @@ public class VariantOverviewWidget extends AbstractWidget {
         int startIdx = currentPage * 9;
         int endIdx = Math.min(startIdx + 9, variants.size());
 
-        VariantProvider<Mob> provider = null;
-        VariantDef originalVariant = null;
-
-        if (renderedEntity instanceof Mob mob) {
-            provider = FieldGuideVariantManager.getProvider(mob);
-            if (provider != null) {
-                originalVariant = provider.getCurrent(mob);
-            }
-        }
-
         long currentTime = System.currentTimeMillis();
         float deltaTime = lastRenderTime > 0 ? (currentTime - lastRenderTime) / 1000.0f : 0.0f;
         lastRenderTime = currentTime;
@@ -135,19 +165,7 @@ public class VariantOverviewWidget extends AbstractWidget {
             boolean hovered = bounds.contains(mouseX, mouseY);
             VariantDef variant = variants.get(i);
             boolean isUnlocked = ClientFieldGuideManager.isVariantUnlocked(entry, variant.id());
-
-            LivingEntity renderEntity = renderedEntity;
-
-            if (provider != null && renderedEntity instanceof Mob mob) {
-                if (Services.PLATFORM.isModLoaded("cobblemon") && FieldGuideCobblemonCompat.isPokemon(renderedEntity)) {
-                    ResourceLocation id = ClientFieldGuideManager.getEntryId(entry);
-                    if (id != null && Minecraft.getInstance().level != null) {
-                        renderEntity = ClientFieldGuideCobblemonCompat.getDummyVariant(id, variant.id(), Minecraft.getInstance().level);
-                    }
-                } else {
-                    provider.apply(mob, variant);
-                }
-            }
+            LivingEntity renderEntity = variantEntityCache.getOrDefault(variant.id(), originalRenderedEntity);
 
             graphics.pose().pushPose();
 
@@ -171,14 +189,9 @@ public class VariantOverviewWidget extends AbstractWidget {
             }
 
             if (!renderedPhoto) {
-                EntryRenderHelper.renderEntityNormalized(graphics, renderEntity, centerX, centerY, bounds.width(), bounds.height(), isUnlocked, false, 1.0f, false);
-            }
-
-            if (provider != null && renderedEntity instanceof Mob mob && originalVariant != null) {
-                boolean isCobblemon = Services.PLATFORM.isModLoaded("cobblemon") && FieldGuideCobblemonCompat.isPokemon(renderedEntity);
-                if (!isCobblemon) {
-                    provider.apply(mob, originalVariant);
-                }
+                // Pass the variant id explicitly so the icon cache key is unique per variant,
+                // even when getCurrent() would return the same id for all (e.g. sheep with ML remodel).
+                EntryRenderHelper.renderEntityNormalized(graphics, renderEntity, centerX, centerY, bounds.width(), bounds.height(), isUnlocked, false, 1.0f, variant.id());
             }
 
             float targetScale = (hovered && isUnlocked) ? 1.05f : 1.0f;
@@ -199,13 +212,6 @@ public class VariantOverviewWidget extends AbstractWidget {
                 } else {
                     tooltipText = Component.literal("???");
                 }
-            }
-        }
-
-        if (provider != null && renderedEntity instanceof Mob mob && originalVariant != null) {
-            boolean isCobblemon = Services.PLATFORM.isModLoaded("cobblemon") && FieldGuideCobblemonCompat.isPokemon(renderedEntity);
-            if (!isCobblemon) {
-                provider.apply(mob, originalVariant);
             }
         }
 
@@ -268,5 +274,4 @@ public class VariantOverviewWidget extends AbstractWidget {
         int y = startY + (row * (cell_size + gap));
         return new Bounds(x, y, cell_size, cell_size);
     }
-
 }

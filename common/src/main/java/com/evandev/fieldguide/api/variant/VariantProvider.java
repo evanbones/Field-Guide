@@ -14,4 +14,8 @@ public interface VariantProvider<T extends Mob> {
     default String getCacheKey(T entity) {
         return entity.getClass().getName();
     }
+
+    default boolean overridesVanilla(T entity) {
+        return false;
+    }
 }

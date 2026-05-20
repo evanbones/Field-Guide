@@ -33,14 +33,11 @@ public class IconCacheManager {
     private static final Set<String> PENDING_GENERATIONS = ConcurrentHashMap.newKeySet();
     private static final Deque<Runnable> MAIN_THREAD_TASKS = new ConcurrentLinkedDeque<>();
 
-    private static final ExecutorService IO_EXECUTOR = Executors.newFixedThreadPool(
-            Math.min(4, Runtime.getRuntime().availableProcessors()),
-            r -> {
-                Thread t = new Thread(r, "FieldGuide-IconCache-IO");
-                t.setDaemon(true);
-                return t;
-            }
-    );
+    private static final ExecutorService IO_EXECUTOR = Executors.newFixedThreadPool(Math.min(4, Runtime.getRuntime().availableProcessors()), r -> {
+        Thread t = new Thread(r, "FieldGuide-IconCache-IO");
+        t.setDaemon(true);
+        return t;
+    });
 
     public static void tick() {
         long startTime = System.currentTimeMillis();
@@ -75,9 +72,7 @@ public class IconCacheManager {
         CompletableFuture.runAsync(() -> {
             if (Files.exists(CACHE_DIR)) {
                 try (Stream<Path> walk = Files.walk(CACHE_DIR)) {
-                    walk.sorted(Comparator.reverseOrder())
-                            .map(Path::toFile)
-                            .forEach(File::delete);
+                    walk.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
                 } catch (IOException e) {
                     Constants.LOG.error("Failed to delete icon cache directory", e);
                 }
@@ -192,6 +187,8 @@ public class IconCacheManager {
             nativeImage.downloadTexture(0, false);
             nativeImage.flipY();
 
+            byte[] imageBytes = nativeImage.asByteArray();
+
             DynamicTexture texture = new DynamicTexture(nativeImage);
             ResourceLocation texLoc = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "generated_icon/" + key);
             mc.getTextureManager().register(texLoc, texture);
@@ -200,8 +197,8 @@ public class IconCacheManager {
             CompletableFuture.runAsync(() -> {
                 try {
                     Path cachedFilePath = CACHE_DIR.resolve(namespace).resolve("textures/fieldguide/entries").resolve(fileName);
-                    cachedFilePath.getParent().toFile().mkdirs();
-                    nativeImage.writeToFile(cachedFilePath.toFile());
+                    Files.createDirectories(cachedFilePath.getParent());
+                    Files.write(cachedFilePath, imageBytes);
                 } catch (IOException e) {
                     Constants.LOG.error("Failed to save generated icon", e);
                 }
@@ -214,19 +211,5 @@ public class IconCacheManager {
             renderTarget.destroyBuffers();
             PENDING_GENERATIONS.remove(key);
         }
-    }
-
-    public static boolean hasCache(Object baseEntry, Object cacheKey, boolean isPage) {
-        String entryKey = AutoPopulateRegistry.getEntryKey(baseEntry);
-        if (entryKey.isEmpty()) return false;
-
-        String variantSuffix = "";
-        String cacheKeyStr = cacheKey.toString();
-        if (cacheKeyStr.contains("#")) {
-            variantSuffix = "_" + cacheKeyStr.substring(cacheKeyStr.indexOf('#') + 1).replace(":", "_").toLowerCase(Locale.ROOT);
-        }
-        String key = (entryKey.replace(":", "_").replace("/", "_") + variantSuffix + (isPage ? "_page" : "_grid")).toLowerCase(Locale.ROOT);
-
-        return TEXTURE_CACHE.containsKey(key) || PENDING_GENERATIONS.contains(key);
     }
 }

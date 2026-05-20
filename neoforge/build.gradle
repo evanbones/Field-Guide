@@ -67,6 +67,9 @@ dependencies {
     // Mixed Litter
     implementation "maven.modrinth:mixed-litter:${mixed_litter_version}"
 
+    // Primal
+    compileOnly "maven.modrinth:mod-primal:${primal_version}"
+
     // Cobblemon
     compileOnly "com.cobblemon:neoforge:${cobblemon_version}"
 

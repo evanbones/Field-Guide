@@ -10,7 +10,6 @@ import dev.tazer.mixed_litter.variants.VariantGroup;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
@@ -22,19 +21,45 @@ import java.util.List;
 
 public class MixedLitterCompat {
 
-    private static boolean isForEntity(ResourceLocation id, String entityPath) {
-        if (id == null) return false;
-        String path = id.getPath().toLowerCase();
+    private static boolean isForEntity(Variant variant, ResourceLocation variantId, ResourceLocation entityId) {
+        if (variantId == null || entityId == null) return false;
 
-        if (path.startsWith(entityPath + "/")) {
+        String entityPath = entityId.getPath().toLowerCase();
+        String variantPath = variantId.getPath().toLowerCase();
+
+        int slashIdx = variantPath.indexOf('/');
+        if (slashIdx > 0) {
+            return variantPath.substring(0, slashIdx).equals(entityPath);
+        }
+
+        if (variant.group().isPresent() && variant.group().get().getPath().toLowerCase().contains(entityPath)) {
             return true;
         }
 
-        if (path.equals(entityPath)) {
-            return true;
-        }
+        return variant.arguments() != null && variant.arguments().toString().toLowerCase().contains(entityPath);
+    }
 
-        return path.equals("remodeled_" + entityPath) || path.equals(entityPath + "_variants");
+    /**
+     * Returns true if ML has full visual-replacement variants for this entity (e.g. texture
+     * swaps like rabbit/brown).  Returns false for model-only variants like the sheep remodel,
+     * which complement the vanilla DyeColor system instead of replacing it.
+     */
+    private static boolean hasFullVariants(Entity entity) {
+        try {
+            Registry<Variant> variantRegistry = entity.registryAccess().registryOrThrow(MLRegistries.VARIANT_KEY);
+            ResourceLocation entityId = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
+            for (ResourceLocation id : variantRegistry.keySet()) {
+                Variant variant = variantRegistry.get(id);
+                if (variant == null) continue;
+                if (!isForEntity(variant, id, entityId)) continue;
+                String ns = variant.type().getNamespace();
+                String path = variant.type().getPath();
+                if (ns.equals("mixed_litter") && (path.equals("sheep") || path.equals("simple"))) continue;
+                return true;
+            }
+        } catch (Exception ignored) {
+        }
+        return false;
     }
 
     public static void applyDummyVariant(Entity entity) {
@@ -44,20 +69,18 @@ public class MixedLitterCompat {
         try {
             Registry<VariantGroup> groupRegistry = entity.registryAccess().registryOrThrow(MLRegistries.VARIANT_GROUP_KEY);
             Registry<Variant> variantRegistry = entity.registryAccess().registryOrThrow(MLRegistries.VARIANT_KEY);
-            String entityPath = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).getPath();
+            ResourceLocation entityId = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
 
             List<Variant> selected = new ArrayList<>();
-            for (Holder<VariantGroup> groupHolder : groupRegistry.holders().toList()) {
-                VariantGroup group = groupHolder.value();
-                ResourceLocation groupId = groupRegistry.getKey(group);
-                if (groupId == null) continue;
 
+            for (Holder<VariantGroup> groupHolder : groupRegistry.holders().toList()) {
+                ResourceLocation groupId = groupRegistry.getKey(groupHolder.value());
                 List<Variant> matching = new ArrayList<>();
 
                 for (ResourceLocation id : variantRegistry.keySet()) {
                     Variant variant = variantRegistry.get(id);
                     if (variant != null && variant.group().isPresent() && variant.group().get().equals(groupId)) {
-                        if (isForEntity(id, entityPath) || isForEntity(groupId, entityPath)) {
+                        if (isForEntity(variant, id, entityId)) {
                             matching.add(variant);
                         }
                     }
@@ -67,35 +90,19 @@ public class MixedLitterCompat {
                     matching.sort((v1, v2) -> {
                         boolean c1 = v1.conditions().isPresent();
                         boolean c2 = v2.conditions().isPresent();
-
                         if (!c1 && c2) return -1;
                         if (c1 && !c2) return 1;
-
-                        ResourceLocation id1 = variantRegistry.getKey(v1);
-                        ResourceLocation id2 = variantRegistry.getKey(v2);
-                        String p1 = id1 != null ? id1.getPath() : "";
-                        String p2 = id2 != null ? id2.getPath() : "";
-
-                        boolean d1 = p1.contains("default") || p1.equals(entityPath);
-                        boolean d2 = p2.contains("default") || p2.equals(entityPath);
-
-                        if (d1 && !d2) return -1;
-                        if (!d1 && d2) return 1;
-
-                        return p1.compareTo(p2);
+                        return 0;
                     });
-
                     selected.add(matching.getFirst());
                 }
             }
 
             for (ResourceLocation id : variantRegistry.keySet()) {
                 Variant variant = variantRegistry.get(id);
-                if (variant != null && variant.group().isEmpty()) {
-                    if (isForEntity(id, entityPath)) {
-                        if (variant.conditions().isEmpty()) {
-                            selected.add(variant);
-                        }
+                if (variant != null && variant.group().isEmpty() && isForEntity(variant, id, entityId)) {
+                    if (variant.conditions().isEmpty()) {
+                        selected.add(variant);
                     }
                 }
             }
@@ -108,11 +115,12 @@ public class MixedLitterCompat {
     }
 
     public static List<VariantDef> getVariants(Entity entity) {
+        if (!hasFullVariants(entity)) return List.of();
+
         List<VariantDef> defs = new ArrayList<>();
         try {
             Registry<Variant> variantRegistry = entity.registryAccess().registryOrThrow(MLRegistries.VARIANT_KEY);
-            Registry<VariantGroup> groupRegistry = entity.registryAccess().registryOrThrow(MLRegistries.VARIANT_GROUP_KEY);
-            String entityPath = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).getPath();
+            ResourceLocation entityId = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
 
             List<ResourceLocation> sortedKeys = new ArrayList<>(variantRegistry.keySet());
             Collections.sort(sortedKeys);
@@ -121,12 +129,7 @@ public class MixedLitterCompat {
                 Variant variant = variantRegistry.get(id);
                 if (variant == null) continue;
 
-                boolean matches = isForEntity(id, entityPath);
-                if (!matches && variant.group().isPresent()) {
-                    matches = isForEntity(variant.group().get(), entityPath);
-                }
-
-                if (matches) {
+                if (isForEntity(variant, id, entityId)) {
                     defs.add(new VariantDef(id.toString(), id));
                 }
             }
@@ -136,72 +139,66 @@ public class MixedLitterCompat {
     }
 
     public static void applyVariant(Entity entity, VariantDef def) {
-        try {
-            List<ResourceLocation> currentIds = entity.getData(MLDataAttachmentTypes.VARIANTS.get());
-            if (currentIds.isEmpty()) {
-                applyDummyVariant(entity);
-            }
-        } catch (Exception ignored) {
-        }
-
         if (def == null || def.value() == null) {
             try {
-                applyDummyVariant(entity);
+                VariantUtil.setVariants(entity, new ArrayList<>());
+                entity.removeData(MLDataAttachmentTypes.VARIANTS.get());
             } catch (Exception ignored) {
             }
             return;
         }
+        if (!(def.value() instanceof ResourceLocation newVariantId)) {
+            applyDummyVariant(entity);
+            return;
+        }
 
-        switch (def.value()) {
-            case ResourceLocation newVariantId -> {
-                try {
-                    Registry<Variant> variantRegistry = entity.registryAccess().registryOrThrow(MLRegistries.VARIANT_KEY);
-                    Variant newVariant = variantRegistry.get(newVariantId);
-                    if (newVariant == null) return;
+        try {
+            Registry<Variant> variantRegistry = entity.registryAccess().registryOrThrow(MLRegistries.VARIANT_KEY);
+            Variant newVariant = variantRegistry.get(newVariantId);
+            if (newVariant == null) return;
 
-                    List<ResourceLocation> currentIds = new ArrayList<>(entity.getData(MLDataAttachmentTypes.VARIANTS.get()));
+            List<ResourceLocation> currentIds = entity.hasData(MLDataAttachmentTypes.VARIANTS) ?
+                    new ArrayList<>(entity.getData(MLDataAttachmentTypes.VARIANTS)) : new ArrayList<>();
 
-                    if (newVariant.group().isPresent()) {
-                        ResourceLocation newGroup = newVariant.group().get();
-                        currentIds.removeIf(id -> {
-                            Variant v = variantRegistry.get(id);
-                            return v != null && v.group().isPresent() && v.group().get().equals(newGroup);
-                        });
-                    }
+            if (currentIds.isEmpty()) {
+                applyDummyVariant(entity);
+                currentIds = entity.hasData(MLDataAttachmentTypes.VARIANTS) ?
+                        new ArrayList<>(entity.getData(MLDataAttachmentTypes.VARIANTS)) : new ArrayList<>();
+            }
 
-                    if (!currentIds.contains(newVariantId)) {
-                        currentIds.add(newVariantId);
-                    }
+            if (newVariant.group().isPresent()) {
+                ResourceLocation newGroup = newVariant.group().get();
+                currentIds.removeIf(id -> {
+                    Variant v = variantRegistry.get(id);
+                    return v != null && v.group().isPresent() && v.group().get().equals(newGroup);
+                });
+            }
 
-                    List<Variant> updatedVariants = new ArrayList<>();
-                    for (ResourceLocation id : currentIds) {
-                        Variant v = variantRegistry.get(id);
-                        if (v != null) {
-                            updatedVariants.add(v);
-                        }
-                    }
+            if (!currentIds.contains(newVariantId)) {
+                currentIds.add(newVariantId);
+            }
 
-                    VariantUtil.setVariants(entity, updatedVariants);
-                } catch (Exception ignored) {
+            List<Variant> updatedVariants = new ArrayList<>();
+            for (ResourceLocation id : currentIds) {
+                Variant v = variantRegistry.get(id);
+                if (v != null) {
+                    updatedVariants.add(v);
                 }
             }
-            case CompoundTag compoundTag -> {
-                try {
-                    VariantUtil.setVariants(entity, new ArrayList<>());
-                } catch (Exception ignored) {
-                }
-            }
-            default -> {
-            }
+
+            VariantUtil.setVariants(entity, updatedVariants);
+        } catch (Exception ignored) {
         }
     }
 
     public static VariantDef getCurrentVariant(Entity entity) {
         try {
-            List<ResourceLocation> variants = entity.getData(MLDataAttachmentTypes.VARIANTS.get());
-            if (!variants.isEmpty()) {
-                ResourceLocation id = variants.getLast();
-                return new VariantDef(id.toString(), id);
+            if (entity.hasData(MLDataAttachmentTypes.VARIANTS)) {
+                List<ResourceLocation> variants = entity.getData(MLDataAttachmentTypes.VARIANTS);
+                if (!variants.isEmpty()) {
+                    ResourceLocation id = variants.getLast();
+                    return new VariantDef(id.toString(), id);
+                }
             }
         } catch (Exception ignored) {
         }

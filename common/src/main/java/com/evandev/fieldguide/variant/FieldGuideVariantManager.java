@@ -17,7 +17,6 @@ import net.minecraft.world.entity.animal.Sheep;
 import net.minecraft.world.entity.animal.horse.Horse;
 import net.minecraft.world.entity.animal.horse.Llama;
 import net.minecraft.world.entity.animal.horse.Variant;
-import net.minecraft.world.entity.npc.VillagerData;
 import net.minecraft.world.entity.npc.VillagerDataHolder;
 import net.minecraft.world.entity.npc.VillagerType;
 import net.minecraft.world.item.DyeColor;
@@ -40,16 +39,12 @@ public class FieldGuideVariantManager {
         registerProvider(Sheep.class, new VariantProvider<>() {
             @Override
             public List<VariantDef> getVariants(Sheep entity) {
-                return Arrays.stream(DyeColor.values())
-                        .map(c -> new VariantDef(c.getName(), c))
-                        .toList();
+                return Arrays.stream(DyeColor.values()).map(c -> new VariantDef(c.getName(), c)).toList();
             }
 
             @Override
             public void apply(Sheep entity, VariantDef def) {
-                if (def.value() instanceof DyeColor color) {
-                    entity.setColor(color);
-                }
+                if (def.value() instanceof DyeColor color) entity.setColor(color);
             }
 
             @Override
@@ -62,16 +57,12 @@ public class FieldGuideVariantManager {
         registerProvider(Horse.class, new VariantProvider<>() {
             @Override
             public List<VariantDef> getVariants(Horse entity) {
-                return Arrays.stream(Variant.values())
-                        .map(v -> new VariantDef(v.name(), v))
-                        .toList();
+                return Arrays.stream(Variant.values()).map(v -> new VariantDef(v.name(), v)).toList();
             }
 
             @Override
             public void apply(Horse entity, VariantDef def) {
-                if (def.value() instanceof Variant variant) {
-                    entity.setVariant(variant);
-                }
+                if (def.value() instanceof Variant variant) entity.setVariant(variant);
             }
 
             @Override
@@ -84,16 +75,12 @@ public class FieldGuideVariantManager {
         registerProvider(Llama.class, new VariantProvider<>() {
             @Override
             public List<VariantDef> getVariants(Llama entity) {
-                return Arrays.stream(Llama.Variant.values())
-                        .map(v -> new VariantDef(v.name(), v))
-                        .toList();
+                return Arrays.stream(Llama.Variant.values()).map(v -> new VariantDef(v.name(), v)).toList();
             }
 
             @Override
             public void apply(Llama entity, VariantDef def) {
-                if (def.value() instanceof Llama.Variant variant) {
-                    entity.setVariant(variant);
-                }
+                if (def.value() instanceof Llama.Variant variant) entity.setVariant(variant);
             }
 
             @Override
@@ -101,14 +88,73 @@ public class FieldGuideVariantManager {
                 return new VariantDef(entity.getVariant().name(), entity.getVariant());
             }
         });
+
+        // Fox
+        registerProvider(net.minecraft.world.entity.animal.Fox.class, new VariantProvider<>() {
+            @Override
+            public List<VariantDef> getVariants(net.minecraft.world.entity.animal.Fox entity) {
+                return Arrays.stream(net.minecraft.world.entity.animal.Fox.Type.values()).map(v -> new VariantDef(v.getSerializedName(), v)).toList();
+            }
+
+            @Override
+            public void apply(net.minecraft.world.entity.animal.Fox entity, VariantDef def) {
+                if (def.value() instanceof net.minecraft.world.entity.animal.Fox.Type type) entity.setVariant(type);
+            }
+
+            @Override
+            public VariantDef getCurrent(net.minecraft.world.entity.animal.Fox entity) {
+                return new VariantDef(entity.getVariant().getSerializedName(), entity.getVariant());
+            }
+        });
+
+        // Parrot
+        registerProvider(net.minecraft.world.entity.animal.Parrot.class, new VariantProvider<>() {
+            @Override
+            public List<VariantDef> getVariants(net.minecraft.world.entity.animal.Parrot entity) {
+                return Arrays.stream(net.minecraft.world.entity.animal.Parrot.Variant.values()).map(v -> new VariantDef(v.getSerializedName(), v)).toList();
+            }
+
+            @Override
+            public void apply(net.minecraft.world.entity.animal.Parrot entity, VariantDef def) {
+                if (def.value() instanceof net.minecraft.world.entity.animal.Parrot.Variant type)
+                    entity.setVariant(type);
+            }
+
+            @Override
+            public VariantDef getCurrent(net.minecraft.world.entity.animal.Parrot entity) {
+                return new VariantDef(entity.getVariant().getSerializedName(), entity.getVariant());
+            }
+        });
+
+        // Rabbit
+        registerProvider(net.minecraft.world.entity.animal.Rabbit.class, new VariantProvider<>() {
+            @Override
+            public List<VariantDef> getVariants(net.minecraft.world.entity.animal.Rabbit entity) {
+                return Arrays.stream(net.minecraft.world.entity.animal.Rabbit.Variant.values()).map(v -> new VariantDef(v.getSerializedName(), v)).toList();
+            }
+
+            @Override
+            public void apply(net.minecraft.world.entity.animal.Rabbit entity, VariantDef def) {
+                if (def.value() instanceof net.minecraft.world.entity.animal.Rabbit.Variant type)
+                    entity.setVariant(type);
+            }
+
+            @Override
+            public VariantDef getCurrent(net.minecraft.world.entity.animal.Rabbit entity) {
+                return new VariantDef(entity.getVariant().getSerializedName(), entity.getVariant());
+            }
+        });
     }
 
+    @SuppressWarnings("unchecked")
     public static <T extends Mob> void registerProvider(Class<T> entityClass, VariantProvider<T> provider) {
         if (PROVIDERS.containsKey(entityClass)) {
             VariantProvider<T> existing = (VariantProvider<T>) PROVIDERS.get(entityClass);
-            if (existing instanceof CompositeVariantProvider) {
-                ((CompositeVariantProvider<T>) existing).addProvider(provider);
-            } else {
+            if (existing instanceof CompositeVariantProvider<T> composite) {
+                if (composite.providers.stream().noneMatch(p -> p.getClass().equals(provider.getClass()))) {
+                    composite.addProvider(provider);
+                }
+            } else if (!existing.getClass().equals(provider.getClass())) {
                 CompositeVariantProvider<T> composite = new CompositeVariantProvider<>(existing);
                 composite.addProvider(provider);
                 PROVIDERS.put(entityClass, composite);
@@ -150,18 +196,37 @@ public class FieldGuideVariantManager {
 
         ResourceLocation entityId = BuiltInRegistries.ENTITY_TYPE.getKey(mob.getType());
 
-        if (DATAPACK_VARIANTS.containsKey(entityId)) {
-            return (VariantProvider<T>) getDatapackProvider(entityId);
+        VariantProvider<T> classProvider = getProvider((Class<T>) mob.getClass());
+
+
+        if (!FAILED_REFLECTION.contains(mob.getClass())) {
+            if (PROVIDERS.containsKey(mob.getClass())) {
+                // An explicit provider is registered for this exact class; reflection would
+                // only produce duplicates with mismatched enum name casing.
+                FAILED_REFLECTION.add(mob.getClass());
+            } else {
+                VariantProvider<T> refl = (VariantProvider<T>) getReflectionProvider(mob);
+                if (refl != null) {
+                    registerProvider((Class<T>) mob.getClass(), refl);
+                    classProvider = getProvider((Class<T>) mob.getClass());
+                } else {
+                    FAILED_REFLECTION.add(mob.getClass());
+                }
+            }
         }
 
-        VariantProvider<T> classProvider = getProvider((Class<T>) mob.getClass());
-        if (classProvider == null && !FAILED_REFLECTION.contains(mob.getClass())) {
-            classProvider = (VariantProvider<T>) getReflectionProvider(mob);
+        if (DATAPACK_VARIANTS.containsKey(entityId)) {
+            VariantProvider<T> dataProvider = (VariantProvider<T>) getDatapackProvider(entityId);
             if (classProvider != null) {
-                registerProvider((Class<T>) mob.getClass(), classProvider);
-            } else {
-                FAILED_REFLECTION.add(mob.getClass());
+                if (classProvider instanceof CompositeVariantProvider<T> comp) {
+                    comp.addProvider(dataProvider);
+                    return comp;
+                }
+                CompositeVariantProvider<T> composite = new CompositeVariantProvider<>(classProvider);
+                composite.addProvider(dataProvider);
+                return composite;
             }
+            return dataProvider;
         }
 
         return classProvider;
@@ -169,21 +234,36 @@ public class FieldGuideVariantManager {
 
     @SuppressWarnings("unchecked")
     public static <T extends Mob> VariantProvider<T> getProvider(Class<T> entityClass) {
-        if (ServerConfig.get().disableVariants) return null;
         List<VariantProvider<T>> matching = new ArrayList<>();
         Class<?> clazz = entityClass;
+
         while (clazz != null && clazz != Object.class) {
             if (PROVIDERS.containsKey(clazz)) {
-                matching.add((VariantProvider<T>) PROVIDERS.get(clazz));
+                VariantProvider<T> p = (VariantProvider<T>) PROVIDERS.get(clazz);
+                if (p instanceof CompositeVariantProvider<T> comp) {
+                    for (VariantProvider<T> inner : comp.providers) {
+                        if (matching.stream().noneMatch(m -> m.getClass().equals(inner.getClass()))) {
+                            matching.add(inner);
+                        }
+                    }
+                } else {
+                    if (matching.stream().noneMatch(m -> m.getClass().equals(p.getClass()))) {
+                        matching.add(p);
+                    }
+                }
             }
             if (clazz == Mob.class) break;
             clazz = clazz.getSuperclass();
         }
 
-        if (matching.isEmpty()) {
-            if (VillagerDataHolder.class.isAssignableFrom(entityClass)) {
-                return (VariantProvider<T>) getVillagerProvider();
+        if (VillagerDataHolder.class.isAssignableFrom(entityClass)) {
+            VariantProvider<T> vp = (VariantProvider<T>) getVillagerProvider();
+            if (matching.stream().noneMatch(m -> m.getClass().equals(vp.getClass()))) {
+                matching.add(vp);
             }
+        }
+
+        if (matching.isEmpty()) {
             return null;
         }
 
@@ -262,18 +342,20 @@ public class FieldGuideVariantManager {
         return new VariantProvider<>() {
             @Override
             public List<VariantDef> getVariants(Mob entity) {
-                return variants.stream()
-                        .map(v -> new VariantDef(v.id(), v.nbt()))
-                        .toList();
+                return variants.stream().map(v -> new VariantDef(v.id(), v.nbt())).toList();
             }
 
             @Override
             public void apply(Mob entity, VariantDef def) {
                 if (def.value() instanceof CompoundTag nbt) {
-                    CompoundTag current = new CompoundTag();
-                    entity.saveWithoutId(current);
-                    current.merge(nbt);
-                    entity.load(current);
+                    if ("default".equals(def.id())) {
+                        entity.load(nbt);
+                    } else {
+                        CompoundTag current = new CompoundTag();
+                        entity.saveWithoutId(current);
+                        current.merge(nbt);
+                        entity.load(current);
+                    }
                 }
             }
 
@@ -286,7 +368,7 @@ public class FieldGuideVariantManager {
                         return new VariantDef(v.id(), v.nbt());
                     }
                 }
-                return new VariantDef("default", null);
+                return new VariantDef("default", entityNbt);
             }
 
             @Override
@@ -307,87 +389,73 @@ public class FieldGuideVariantManager {
 
             @Override
             public void apply(Mob entity, VariantDef def) {
-                if (entity instanceof VillagerDataHolder holder) {
-                    VillagerData data = holder.getVillagerData();
-                    holder.setVillagerData(data.setType((VillagerType) def.value()));
-                }
+                if (entity instanceof VillagerDataHolder holder)
+                    holder.setVillagerData(holder.getVillagerData().setType((VillagerType) def.value()));
             }
 
             @Override
             public VariantDef getCurrent(Mob entity) {
-                if (entity instanceof VillagerDataHolder holder) {
-                    VillagerType type = holder.getVillagerData().getType();
-                    ResourceLocation id = BuiltInRegistries.VILLAGER_TYPE.getKey(type);
-                    return new VariantDef(id.toString(), type);
-                }
+                if (entity instanceof VillagerDataHolder holder)
+                    return new VariantDef(BuiltInRegistries.VILLAGER_TYPE.getKey(holder.getVillagerData().getType()).toString(), holder.getVillagerData().getType());
                 return new VariantDef("default", null);
             }
         };
     }
 
-    private static VariantProvider<Mob> getReflectionProvider(Mob mob) {  
-        Class<?> clazz = mob.getClass();  
-        while (clazz != null && clazz != Mob.class && clazz != Object.class) {  
-            Method[] methods;  
-            try {  
-                methods = clazz.getDeclaredMethods();  
-            } catch (NoClassDefFoundError | RuntimeException e) {  
-                clazz = clazz.getSuperclass();  
-                continue;  
-            }  
-  
-            for (Method m : methods) {  
-                String name = m.getName();  
-                if (m.getParameterCount() == 0 && (name.startsWith("get") || name.startsWith("is")) &&  
-                        (name.contains("Variant") || name.contains("Variation") || name.contains("Type") || name.contains("Color")) &&  
-                        !name.equals("getCollarColor") && !name.contains("Order") && !name.contains("Mode") && !name.contains("Status") &&  
-                        !name.contains("Behaviour") && !name.contains("Accessibility") && !name.contains("State") &&  
-                        !name.contains("SpawnType")) {  
-  
-                    if (!m.getReturnType().isEnum() || m.getReturnType().getSimpleName().equals("DyeColor")) {  
-                        continue;  
-                    }  
-  
-                    String suffix = name.startsWith("get") ? name.substring(3) : name.substring(2);  
-                    try {  
-                        Method potentialSetter = mob.getClass().getMethod("set" + suffix, m.getReturnType());  
-  
-                        final Method finalGetter = m;  
-                        final Method finalSetter = potentialSetter;  
-  
-                        return new VariantProvider<>() {  
-                            @Override  
-                            public List<VariantDef> getVariants(Mob entity) {  
-                                return Arrays.stream(finalGetter.getReturnType().getEnumConstants())  
-                                        .map(e -> new VariantDef(((Enum<?>) e).name(), e))  
-                                        .toList();  
-                            }  
-  
-                            @Override  
-                            public void apply(Mob entity, VariantDef def) {  
-                                try {  
-                                    finalSetter.invoke(entity, def.value());  
-                                } catch (Exception ignored) {  
-                                }  
-                            }  
-  
-                            @Override  
-                            public VariantDef getCurrent(Mob entity) {  
-                                try {  
-                                    Object val = finalGetter.invoke(entity);  
-                                    if (val instanceof Enum<?> e) return new VariantDef(e.name(), e);  
-                                } catch (Exception ignored) {  
-                                }  
-                                return new VariantDef("default", null);  
-                            }  
-                        };  
-                    } catch (NoSuchMethodException | NoClassDefFoundError | RuntimeException ignored) {  
-                    }  
-                }  
-            }  
-            clazz = clazz.getSuperclass();  
-        }  
-        return null;  
+    private static VariantProvider<Mob> getReflectionProvider(Mob mob) {
+        Class<?> clazz = mob.getClass();
+        while (clazz != null && clazz != Mob.class && clazz != Object.class) {
+            Method[] methods;
+            try {
+                methods = clazz.getDeclaredMethods();
+            } catch (NoClassDefFoundError | RuntimeException e) {
+                clazz = clazz.getSuperclass();
+                continue;
+            }
+            for (Method m : methods) {
+                String name = m.getName();
+                if (m.getParameterCount() == 0 && (name.startsWith("get") || name.startsWith("is")) &&
+                        (name.contains("Variant") || name.contains("Variation") || name.contains("Type") || name.contains("Color")) &&
+                        !name.equals("getCollarColor") && !name.contains("Order") && !name.contains("Mode") && !name.contains("Status") &&
+                        !name.contains("Behaviour") && !name.contains("Accessibility") && !name.contains("State") &&
+                        !name.contains("SpawnType")) {
+                    if (!m.getReturnType().isEnum() || m.getReturnType().getSimpleName().equals("DyeColor")) continue;
+                    String suffix = name.startsWith("get") ? name.substring(3) : name.substring(2);
+                    try {
+                        Method potentialSetter = mob.getClass().getMethod("set" + suffix, m.getReturnType());
+                        final Method finalGetter = m;
+                        final Method finalSetter = potentialSetter;
+                        return new VariantProvider<>() {
+                            @Override
+                            public List<VariantDef> getVariants(Mob entity) {
+                                return Arrays.stream(finalGetter.getReturnType().getEnumConstants()).map(e -> new VariantDef(((Enum<?>) e).name(), e)).toList();
+                            }
+
+                            @Override
+                            public void apply(Mob entity, VariantDef def) {
+                                try {
+                                    finalSetter.invoke(entity, def.value());
+                                } catch (Exception ignored) {
+                                }
+                            }
+
+                            @Override
+                            public VariantDef getCurrent(Mob entity) {
+                                try {
+                                    Object val = finalGetter.invoke(entity);
+                                    if (val instanceof Enum<?> e) return new VariantDef(e.name(), e);
+                                } catch (Exception ignored) {
+                                }
+                                return new VariantDef("default", null);
+                            }
+                        };
+                    } catch (NoSuchMethodException | NoClassDefFoundError | RuntimeException ignored) {
+                    }
+                }
+            }
+            clazz = clazz.getSuperclass();
+        }
+        return null;
     }
 
     private static class CompositeVariantProvider<T extends Mob> implements VariantProvider<T> {
@@ -403,26 +471,69 @@ public class FieldGuideVariantManager {
 
         @Override
         public List<VariantDef> getVariants(T entity) {
-            return providers.stream()
+            List<VariantDef> list = providers.stream()
                     .flatMap(p -> p.getVariants(entity).stream())
                     .distinct()
                     .toList();
+
+            boolean hasMLVariants = list.stream().anyMatch(v -> v.value() instanceof ResourceLocation);
+            boolean hasVanillaEnums = list.stream().anyMatch(v -> v.value() instanceof Enum<?>);
+            // Broadened from the old check: VillagerType values are not enums and their ids
+            // contain ":", but they are still non-null non-RL vanilla provider values.
+            boolean hasVanilla = list.stream().anyMatch(v -> v.value() != null && !(v.value() instanceof ResourceLocation));
+
+            List<VariantDef> result = new ArrayList<>();
+            if (hasMLVariants && hasVanillaEnums) {
+                // ML provides full texture-replacement variants — suppress vanilla enum variants
+                // so only ML variants appear (e.g. rabbit: show ML brown/white, not Rabbit.Variant).
+                list.stream().filter(v -> !(v.value() instanceof Enum<?>)).forEach(result::add);
+            } else if (hasVanilla) {
+                for (VariantDef v : list) {
+                    if (v.id().equals("default") && v.value() == null) continue;
+                    result.add(v);
+                }
+            } else {
+                boolean hasDefault = list.stream().anyMatch(v -> v.id().equals("default") && v.value() == null);
+                if (!hasDefault && !list.isEmpty()) {
+                    result.add(new VariantDef("default", null));
+                }
+                result.addAll(list);
+            }
+
+            return result.stream().distinct().toList();
         }
 
         @Override
         public void apply(T entity, VariantDef def) {
-            for (VariantProvider<T> p : providers) {
-                p.apply(entity, def);
+            if (def.value() instanceof List<?> list) {
+                for (int i = 0; i < providers.size(); i++) {
+                    if (i < list.size() && list.get(i) instanceof VariantDef subDef) {
+                        providers.get(i).apply(entity, subDef);
+                    }
+                }
+            } else {
+                for (VariantProvider<T> p : providers) {
+                    p.apply(entity, def);
+                }
             }
         }
 
         @Override
         public VariantDef getCurrent(T entity) {
+            List<VariantDef> states = new ArrayList<>();
+            String mainId = "default";
             for (VariantProvider<T> p : providers) {
                 VariantDef current = p.getCurrent(entity);
-                if (current != null && !current.id().equals("default")) return current;
+                if (current != null) {
+                    states.add(current);
+                    if (!current.id().equals("default")) {
+                        mainId = current.id();
+                    }
+                } else {
+                    states.add(new VariantDef("default", null));
+                }
             }
-            return new VariantDef("default", null);
+            return new VariantDef(mainId, states);
         }
 
         @Override
