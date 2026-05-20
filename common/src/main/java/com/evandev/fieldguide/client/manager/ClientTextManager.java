@@ -202,7 +202,10 @@ public class ClientTextManager {
     }
 
     public Component getEntryName(Object entry, String variantId) {
-        String custom = ProgressManager.getInstance().getCustomName(entry.toString() + (variantId != null ? "#" + variantId : ""));
+        ResourceLocation id = EntryResolver.getEntryId(entry);
+        String key = id != null ? id.toString() : entry.toString();
+        if (variantId != null) key += "#" + variantId;
+        String custom = ProgressManager.getInstance().getCustomName(key);
         if (custom != null) return Component.literal(custom);
 
         return getDefaultNameComponent(entry, variantId);
