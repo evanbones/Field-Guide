@@ -29,6 +29,7 @@ dependencies {
     compileOnly "maven.modrinth:serene-seasons:${serene_seasons_neoforge_version}"
     compileOnly "maven.modrinth:scholar:t5aJhKGV"
     compileOnly "maven.modrinth:item-descriptions:${item_descriptions_version}-neoforge"
+    compileOnly "maven.modrinth:spawn-mod:${spawn_version}"
 
     compileOnly group: 'org.spongepowered', name: 'mixin', version: '0.8.5'
     compileOnly group: 'org.ow2.asm', name: 'asm-tree', version: '9.6'

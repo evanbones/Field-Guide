@@ -5,6 +5,7 @@ import com.evandev.fieldguide.api.variant.VariantDef;
 import com.evandev.fieldguide.api.variant.VariantProvider;
 import com.evandev.fieldguide.compat.exposure.ExposureNeoForgeEventHandler;
 import com.evandev.fieldguide.compat.mixedlitter.MixedLitterCompat;
+import com.evandev.fieldguide.compat.spawn.SpawnCompat;
 import com.evandev.fieldguide.entry.EntryResolver;
 import com.evandev.fieldguide.network.*;
 import com.evandev.fieldguide.platform.NeoForgeRegistryHelper;
@@ -53,6 +54,10 @@ public class FieldGuideMod {
 
         if (ModList.get().isLoaded("primal")) {
             FieldGuideVariantManager.registerProvider(Mob.class, new com.evandev.fieldguide.compat.primal.PrimalVariantProvider());
+        }
+
+        if (ModList.get().isLoaded("spawn")) {
+            FieldGuideVariantManager.registerProvider(Mob.class, new SpawnCompat.SpawnVariantProvider());
         }
     }
 

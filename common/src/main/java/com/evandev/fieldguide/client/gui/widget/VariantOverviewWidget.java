@@ -96,7 +96,11 @@ public class VariantOverviewWidget extends AbstractWidget {
                 if (newEnt instanceof LivingEntity freshLiving) {
 
                     UUID uuid = freshLiving.getUUID();
-                    freshLiving.load(originalTag);
+                    try {
+                        freshLiving.load(originalTag);
+                    } catch (Exception e) {
+                        Constants.LOG.warn("Failed to load entity data for variant display ({}): {}", freshLiving.getType().getDescriptionId(), e.getMessage());
+                    }
                     freshLiving.setUUID(uuid);
 
                     if (originalRenderedEntity instanceof AgeableMob origAgeable && freshLiving instanceof AgeableMob freshAgeable) {
