@@ -176,11 +176,7 @@ public class MixedLitterCompat {
             return;
         }
         if (!(def.value() instanceof ResourceLocation newVariantId)) {
-            try {
-                VariantUtil.setVariants(entity, new ArrayList<>());
-                entity.removeData(MLDataAttachmentTypes.VARIANTS.get());
-            } catch (Exception ignored) {
-            }
+            applyDummyVariant(entity);
             return;
         }
 
