@@ -15,8 +15,10 @@ import java.util.function.Consumer;
 
 public class ModRenderTypes extends RenderType {
 
-    private static final Map<RenderType, RenderType> SCAN_WRAP_CACHE = new IdentityHashMap<>();
-    private static final Map<RenderType, RenderType> DEPTH_WRAP_CACHE = new IdentityHashMap<>();
+    private static final Map<RenderType, RenderType> SCAN_BLOCK_CACHE = new IdentityHashMap<>();
+    private static final Map<RenderType, RenderType> SCAN_ENTITY_CACHE = new IdentityHashMap<>();
+    private static final Map<RenderType, RenderType> DEPTH_BLOCK_CACHE = new IdentityHashMap<>();
+    private static final Map<RenderType, RenderType> DEPTH_ENTITY_CACHE = new IdentityHashMap<>();
 
     public static ShaderInstance SCAN_BLOCK_SHADER;
     private static final ShaderStateShard SCAN_BLOCK_STATE = new ShaderStateShard(() -> SCAN_BLOCK_SHADER);
@@ -29,8 +31,9 @@ public class ModRenderTypes extends RenderType {
 
     public static RenderType wrapForDepth(RenderType original, boolean isEntity) {
         try {
-            return DEPTH_WRAP_CACHE.computeIfAbsent(original, type -> new ModRenderTypes(
-                    Constants.MOD_ID + "_scan_depth_wrap",
+            Map<RenderType, RenderType> cache = isEntity ? DEPTH_ENTITY_CACHE : DEPTH_BLOCK_CACHE;
+            return cache.computeIfAbsent(original, type -> new ModRenderTypes(
+                    Constants.MOD_ID + "_scan_depth_wrap" + (isEntity ? "_entity" : "_block"),
                     type.format(),
                     type.mode(),
                     type.bufferSize(),
@@ -54,8 +57,9 @@ public class ModRenderTypes extends RenderType {
 
     public static RenderType wrapForScan(RenderType original, boolean isEntity) {
         try {
-            return SCAN_WRAP_CACHE.computeIfAbsent(original, type -> new ModRenderTypes(
-                    Constants.MOD_ID + "_scan_wrap",
+            Map<RenderType, RenderType> cache = isEntity ? SCAN_ENTITY_CACHE : SCAN_BLOCK_CACHE;
+            return cache.computeIfAbsent(original, type -> new ModRenderTypes(
+                    Constants.MOD_ID + "_scan_wrap" + (isEntity ? "_entity" : "_block"),
                     type.format(),
                     type.mode(),
                     type.bufferSize(),

@@ -1,3 +1,3 @@
 ### Fixed
 
-- Fixed further issues with Mixed Litter sheep.
+- Fixed crashes when scanning certain modified mobs (When Dungeons Arise, Dungeons and Taverns).

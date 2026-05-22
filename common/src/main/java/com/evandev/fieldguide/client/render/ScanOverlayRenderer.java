@@ -44,6 +44,38 @@ import java.util.Queue;
 public class ScanOverlayRenderer {
     private static final float VERTICAL_BUFFER = 1.3f;
 
+    private static final VertexConsumer DUMMY_CONSUMER = new VertexConsumer() {
+        @Override
+        public @NotNull VertexConsumer addVertex(float x, float y, float z) {
+            return this;
+        }
+
+        @Override
+        public @NotNull VertexConsumer setColor(int r, int g, int b, int a) {
+            return this;
+        }
+
+        @Override
+        public @NotNull VertexConsumer setUv(float u, float v) {
+            return this;
+        }
+
+        @Override
+        public @NotNull VertexConsumer setUv1(int u, int v) {
+            return this;
+        }
+
+        @Override
+        public @NotNull VertexConsumer setUv2(int u, int v) {
+            return this;
+        }
+
+        @Override
+        public @NotNull VertexConsumer setNormal(float x, float y, float z) {
+            return this;
+        }
+    };
+
     public static void render(PoseStack poseStack, float partialTick, Camera camera, MultiBufferSource.BufferSource bufferSource) {
         FieldGuideScanner scanner = FieldGuideScanner.getInstance();
         Minecraft mc = Minecraft.getInstance();
@@ -454,12 +486,31 @@ public class ScanOverlayRenderer {
         poseStack.popPose();
     }
 
-    private record ScanBufferSourceWrapper(BufferSource delegate, float r, float g, float b, float a,
-                                           boolean isDepth) implements MultiBufferSource {
+    private static class ScanBufferSourceWrapper implements MultiBufferSource {
+        private final MultiBufferSource.BufferSource delegate;
+        private final float r, g, b, a;
+        private final boolean isDepth;
+        private final Map<RenderType, RenderType> typeCache = new IdentityHashMap<>();
+
+        public ScanBufferSourceWrapper(MultiBufferSource.BufferSource delegate, float r, float g, float b, float a, boolean isDepth) {
+            this.delegate = delegate;
+            this.r = r;
+            this.g = g;
+            this.b = b;
+            this.a = a;
+            this.isDepth = isDepth;
+        }
 
         @Override
         public @NotNull VertexConsumer getBuffer(@NotNull RenderType type) {
-            RenderType wrappedType = isDepth ? ModRenderTypes.wrapForDepth(type, true) : ModRenderTypes.wrapForScan(type, true);
+            if (type.toString().contains("glint")) {
+                return DUMMY_CONSUMER;
+            }
+
+            RenderType wrappedType = typeCache.computeIfAbsent(type, t ->
+                    isDepth ? ModRenderTypes.wrapForDepth(t, true) : ModRenderTypes.wrapForScan(t, true)
+            );
+
             VertexConsumer buffer = delegate.getBuffer(wrappedType);
             return createTintedConsumer(buffer, this, r, g, b, a);
         }
