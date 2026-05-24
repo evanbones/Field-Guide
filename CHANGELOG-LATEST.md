@@ -1,3 +1,3 @@
-### Fixed
+### Changed
 
-- Fixed crashes when scanning certain modified mobs (When Dungeons Arise, Dungeons and Taverns).
+- Added `#c:bosses` to the bosses tag.
