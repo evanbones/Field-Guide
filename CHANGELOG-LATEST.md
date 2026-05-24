@@ -1,3 +1,3 @@
-### Fixed
+### Changed
 
-- Fixed issues with mob loot on dedicated servers.
+- Added `#c:bosses` to the bosses tag.
