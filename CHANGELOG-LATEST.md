@@ -1,3 +1,3 @@
-### Changed
+### Fixed
 
-- Added `#c:bosses` to the bosses tag.
+- Fixed rendering layer sorting with certain entries.

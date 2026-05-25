@@ -241,7 +241,7 @@ public class EntryRenderHelper {
         }
 
         PoseStack pose = new PoseStack();
-        pose.scale(clampedScale, -clampedScale, -clampedScale);
+        pose.scale(clampedScale, -clampedScale, clampedScale);
         pose.mulPose(Axis.XP.rotationDegrees(30.0F));
         pose.mulPose(Axis.YP.rotationDegrees(yRotation));
         pose.translate((xOff / clampedScale), (entityHeight / -2.0F) + (yOff / clampedScale), 0);
@@ -319,7 +319,7 @@ public class EntryRenderHelper {
             float clampedScale = 100f * getVisualScale(visual, isPage);
 
             PoseStack pose = new PoseStack();
-            pose.scale(clampedScale, -clampedScale, -clampedScale);
+            pose.scale(clampedScale, -clampedScale, clampedScale);
             pose.mulPose(Axis.XP.rotationDegrees(30.0F));
             pose.mulPose(Axis.YP.rotationDegrees(210.0F));
             pose.translate(-0.5, -0.5, -0.5);
@@ -430,7 +430,7 @@ public class EntryRenderHelper {
             int maxDim = Math.max(width, Math.max(height, length));
 
             float scale = 35.0f * (5.0f / maxDim);
-            pose.scale(scale, -scale, -scale);
+            pose.scale(scale, -scale, scale);
 
             pose.mulPose(Axis.XP.rotationDegrees(30.0F));
             pose.mulPose(Axis.YP.rotationDegrees(210.0F));
@@ -503,14 +503,14 @@ public class EntryRenderHelper {
     }
 
     private static void setupFieldGuideEntityLighting() {
-        Vector3f light0 = new Vector3f(1.0F, -1.0F, -1.0F).normalize();
-        Vector3f light1 = new Vector3f(-1.0F, -1.0F, -1.0F).normalize();
+        Vector3f light0 = new Vector3f(-1.0F, -1.0F, 1.0F).normalize();
+        Vector3f light1 = new Vector3f(1.0F, -1.0F, 1.0F).normalize();
         RenderSystem.setShaderLights(light0, light1);
     }
 
     private static void setupFieldGuideBlockLighting() {
-        Vector3f light0 = new Vector3f(0.2F, -1.0F, 0.7F).normalize();
-        Vector3f light1 = new Vector3f(-0.2F, 0.0F, -0.7F).normalize();
+        Vector3f light0 = new Vector3f(-0.2F, -1.0F, -0.7F).normalize();
+        Vector3f light1 = new Vector3f(0.2F, 0.0F, 0.7F).normalize();
         RenderSystem.setShaderLights(light0, light1);
     }
 

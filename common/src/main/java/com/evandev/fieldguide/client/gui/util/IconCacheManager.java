@@ -151,13 +151,13 @@ public class IconCacheManager {
         RenderSystem.enableDepthTest();
         RenderSystem.depthMask(true);
 
-        Matrix4f projectionMatrix = new Matrix4f().setOrtho(0.0F, RENDER_SIZE, RENDER_SIZE, 0.0F, 10000.0F, -10000.0F);
+        Matrix4f projectionMatrix = new Matrix4f().setOrtho(0.0F, RENDER_SIZE, RENDER_SIZE, 0.0F, -1000.0F, 1000.0F);
         RenderSystem.setProjectionMatrix(projectionMatrix, VertexSorting.ORTHOGRAPHIC_Z);
 
         Matrix4fStack poseStack = RenderSystem.getModelViewStack();
         poseStack.pushMatrix();
         poseStack.identity();
-        poseStack.translate(RENDER_SIZE / 2.0f, RENDER_SIZE / 2.0f, 1000.0f);
+        poseStack.translate(RENDER_SIZE / 2.0f, RENDER_SIZE / 2.0f, 0.0f);
         RenderSystem.applyModelViewMatrix();
 
         if (Services.PLATFORM.isModLoaded("entity_model_features")) {
