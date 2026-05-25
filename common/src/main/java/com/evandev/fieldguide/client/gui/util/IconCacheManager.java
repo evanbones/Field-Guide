@@ -190,10 +190,10 @@ public class IconCacheManager {
 
         RenderSystem.backupProjectionMatrix();
 
-        Matrix4f ortho = new Matrix4f().setOrtho(0.0F, RENDER_SIZE, RENDER_SIZE, 0.0F, 10000.0F, -10000.0F);
+        Matrix4f ortho = new Matrix4f().setOrtho(0.0F, RENDER_SIZE, RENDER_SIZE, 0.0F, 1000.0F, -1000.0F);
         GpuBuffer projBuffer = RenderSystem.getDevice().createBuffer(() -> "Icon Proj", 136, RenderSystem.PROJECTION_MATRIX_UBO_SIZE);
 
-        try (org.lwjgl.system.MemoryStack stack = org.lwjgl.system.MemoryStack.stackPush()) {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
             ByteBuffer buffer = stack.malloc(RenderSystem.PROJECTION_MATRIX_UBO_SIZE);
             ortho.get(buffer);
             encoder.writeToBuffer(projBuffer.slice(), buffer);
@@ -201,7 +201,7 @@ public class IconCacheManager {
         RenderSystem.setProjectionMatrix(projBuffer.slice(), ProjectionType.ORTHOGRAPHIC);
 
         PoseStack poseStack = new PoseStack();
-        poseStack.translate(RENDER_SIZE / 2.0f, RENDER_SIZE / 2.0f, 1000.0f);
+        poseStack.translate(RENDER_SIZE / 2.0f, RENDER_SIZE / 2.0f, 0.0f);
 
         Object coreEntry = EntryResolver.resolveCoreEntry(baseEntry);
         boolean isEntity = coreEntry instanceof EntityType<?>;
