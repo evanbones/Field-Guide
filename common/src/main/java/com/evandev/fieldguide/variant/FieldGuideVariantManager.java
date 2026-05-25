@@ -6,6 +6,7 @@ import com.evandev.fieldguide.api.variant.VariantDef;
 import com.evandev.fieldguide.api.variant.VariantProvider;
 import com.evandev.fieldguide.config.ServerConfig;
 import com.evandev.fieldguide.platform.Services;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
@@ -514,6 +515,13 @@ public class FieldGuideVariantManager {
         public void apply(T entity, VariantDef def) {
             for (VariantProvider<T> p : providers) {
                 p.apply(entity, def);
+            }
+        }
+
+        @Override
+        public void applyToRenderState(T entity, EntityRenderState state, VariantDef def) {
+            for (VariantProvider<T> p : providers) {
+                p.applyToRenderState(entity, state, def);
             }
         }
 

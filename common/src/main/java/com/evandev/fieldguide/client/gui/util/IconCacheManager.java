@@ -7,7 +7,6 @@ import com.evandev.fieldguide.entry.EntryResolver;
 import com.evandev.fieldguide.platform.Services;
 import com.mojang.blaze3d.ProjectionType;
 import com.mojang.blaze3d.buffers.GpuBuffer;
-import com.mojang.blaze3d.buffers.Std140Builder;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.platform.Lighting;
@@ -25,7 +24,6 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 import net.minecraft.world.entity.EntityType;
 import org.joml.Matrix4f;
-import org.joml.Vector3f;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
@@ -190,7 +188,7 @@ public class IconCacheManager {
 
         RenderSystem.backupProjectionMatrix();
 
-        Matrix4f ortho = new Matrix4f().setOrtho(0.0F, RENDER_SIZE, RENDER_SIZE, 0.0F, 1000.0F, -1000.0F);
+        Matrix4f ortho = new Matrix4f().setOrtho(0.0F, RENDER_SIZE, RENDER_SIZE, 0.0F, -1000.0F, 1000.0F);
         GpuBuffer projBuffer = RenderSystem.getDevice().createBuffer(() -> "Icon Proj", 136, RenderSystem.PROJECTION_MATRIX_UBO_SIZE);
 
         try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -206,28 +204,16 @@ public class IconCacheManager {
         Object coreEntry = EntryResolver.resolveCoreEntry(baseEntry);
         boolean isEntity = coreEntry instanceof EntityType<?>;
 
-        Vector3f light0;
-        Vector3f light1;
-        if (isEntity) {
-            light0 = new Vector3f(1.0F, -1.0F, -1.0F).normalize();
-            light1 = new Vector3f(-1.0F, -1.0F, -1.0F).normalize();
-        } else {
-            light0 = new Vector3f(0.2F, -1.0F, 0.7F).normalize();
-            light1 = new Vector3f(-0.2F, 0.0F, -0.7F).normalize();
-        }
-
-        GpuBuffer lightBuffer = RenderSystem.getDevice().createBuffer(() -> "FieldGuide Lighting", 136, Lighting.UBO_SIZE);
-        try (MemoryStack memoryStack = MemoryStack.stackPush()) {
-            ByteBuffer buffer = Std140Builder.onStack(memoryStack, Lighting.UBO_SIZE)
-                    .putVec3(light0)
-                    .putVec3(light1)
-                    .get();
-            encoder.writeToBuffer(lightBuffer.slice(), buffer);
-        }
-        RenderSystem.setShaderLights(lightBuffer.slice());
-
         if (Services.PLATFORM.isModLoaded("entity_model_features")) {
             EmfCompat.setInGui(true);
+        }
+
+        Lighting lighting = mc.gameRenderer.getLighting();
+
+        if (isEntity) {
+            lighting.setupFor(Lighting.Entry.ENTITY_IN_UI);
+        } else {
+            lighting.setupFor(Lighting.Entry.ITEMS_3D);
         }
 
         SubmitNodeStorage storage = mc.gameRenderer.getSubmitNodeStorage();
@@ -236,8 +222,12 @@ public class IconCacheManager {
 
         renderAction.accept(poseStack, storage);
 
-        featureDispatcher.renderAllFeatures();
+        featureDispatcher.renderSolidFeatures();
         buffers.endBatch();
+        featureDispatcher.renderTranslucentFeatures();
+        featureDispatcher.renderTranslucentParticles();
+        buffers.endBatch();
+        featureDispatcher.clearSubmitNodes();
 
         storage.clear();
 
@@ -245,7 +235,6 @@ public class IconCacheManager {
             EmfCompat.setInGui(false);
         }
 
-        lightBuffer.close();
         RenderSystem.restoreProjectionMatrix();
 
         RenderSystem.outputColorTextureOverride = null;

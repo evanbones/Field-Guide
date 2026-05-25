@@ -198,8 +198,7 @@ public class EntryRenderHelper {
         }
 
         poseStack.pushPose();
-        poseStack.scale(clampedScale, clampedScale, clampedScale);
-        poseStack.mulPose(new Quaternionf().rotationX((float) Math.PI));
+        poseStack.scale(clampedScale, -clampedScale, clampedScale);
         poseStack.mulPose(new Quaternionf().rotationX((float) Math.toRadians(30.0)));
         poseStack.mulPose(new Quaternionf().rotationY((float) Math.toRadians(yRotation)));
         poseStack.translate(xOff / clampedScale, (entityHeight / -2.0F) + (yOff / clampedScale), 0.0F);
@@ -260,7 +259,7 @@ public class EntryRenderHelper {
             float clampedScale = 100f * getVisualScale(visual, isPage) * bounceScale;
 
             poseStack.pushPose();
-            poseStack.scale(clampedScale, -clampedScale, -clampedScale);
+            poseStack.scale(clampedScale, -clampedScale, clampedScale);
             poseStack.mulPose(new Quaternionf().rotationX((float) Math.toRadians(30.0)));
             poseStack.mulPose(new Quaternionf().rotationY((float) Math.toRadians(210.0)));
             poseStack.translate(-0.5f, -0.5f, -0.5f);
@@ -372,7 +371,7 @@ public class EntryRenderHelper {
             if (mc.level == null) return;
 
             poseStack.pushPose();
-            poseStack.scale(scale, -scale, -scale);
+            poseStack.scale(scale, -scale, scale);
             poseStack.mulPose(new Quaternionf().rotationX((float) Math.toRadians(30.0)));
             poseStack.mulPose(new Quaternionf().rotationY((float) Math.toRadians(210.0)));
             poseStack.translate(-centerX, -centerY, -centerZ);
