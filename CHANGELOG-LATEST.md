@@ -1,3 +1,3 @@
-### Changed
+### Fixed
 
-- Tweaked variant API.
+- Fixed rendering layer sorting with certain entries.

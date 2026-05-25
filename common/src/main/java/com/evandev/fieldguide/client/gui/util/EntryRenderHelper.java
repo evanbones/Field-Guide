@@ -58,6 +58,8 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 
+import static com.mojang.blaze3d.platform.Lighting.Entry.ENTITY_IN_UI;
+
 public class EntryRenderHelper {
 
     private static final Map<String, Optional<Identifier>> OVERRIDE_CACHE = new HashMap<>();
