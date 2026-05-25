@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.5] - 2026-05-25
+
+### Changed
+
+- Tweaked variant API.
+
+## [1.7.4] - 2026-05-25
+
+### Added
+
+- Added a client-side variant provider to the API.
+
+### Changed
+
+- Added `#c:bosses` to the bosses tag.
+- Updated dependencies.
+
 ## [1.7.3] - 2026-05-02
 
 ### Fixed

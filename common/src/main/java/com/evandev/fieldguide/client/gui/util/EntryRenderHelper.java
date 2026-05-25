@@ -8,7 +8,6 @@ import com.evandev.fieldguide.api.variant.VariantProvider;
 import com.evandev.fieldguide.client.ClientFieldGuideManager;
 import com.evandev.fieldguide.client.data.EntryVisual;
 import com.evandev.fieldguide.client.progress.ProgressManager;
-import com.evandev.fieldguide.client.variant.ClientVariantProvider;
 import com.evandev.fieldguide.client.render.FullbrightNodeCollector;
 import com.evandev.fieldguide.compat.tide.ClientTideCompat;
 import com.evandev.fieldguide.config.ClientConfig;
@@ -50,17 +49,14 @@ import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.block.state.properties.Property;
-import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
 
 import java.awt.*;
 import java.io.InputStream;
-import java.lang.reflect.Method;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 public class EntryRenderHelper {
 
@@ -167,15 +163,7 @@ public class EntryRenderHelper {
                 finalProvider.apply(mob, finalVariant);
             }
 
-            Consumer<EntityRenderState> postProcessor = null;
-            if (finalProvider instanceof ClientVariantProvider<?> && entity instanceof Mob && finalVariant != null) {
-                @SuppressWarnings("unchecked")
-                final ClientVariantProvider<Mob> cvp = (ClientVariantProvider<Mob>) finalProvider;
-                final Mob entityMob = (Mob) entity;
-                postProcessor = state -> cvp.postExtractRenderState(entityMob, state, finalVariant);
-            }
-
-            renderEntity(entity, entity.getType(), isPage, -30.0F, x, y, maxWidth, maxHeight, bounceScale, poseStack, collector, postProcessor);
+            renderEntity(entity, entity.getType(), isPage, -30.0F, x, y, maxWidth, maxHeight, bounceScale, poseStack, collector, finalVariant, finalProvider);
 
             if (finalProvider != null && entity instanceof Mob mob && tempOriginal != null) {
                 finalProvider.apply(mob, tempOriginal);
@@ -191,7 +179,7 @@ public class EntryRenderHelper {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T extends Entity, S extends EntityRenderState> void renderEntity(T entity, Object entrySource, boolean isPage, float yRotation, int x, int y, int maxWidth, int maxHeight, float bounceScale, PoseStack poseStack, SubmitNodeCollector collector, Consumer<EntityRenderState> renderStatePostProcessor) {
+    private static <T extends Entity, S extends EntityRenderState> void renderEntity(T entity, Object entrySource, boolean isPage, float yRotation, int x, int y, int maxWidth, int maxHeight, float bounceScale, PoseStack poseStack, SubmitNodeCollector collector, VariantDef variantDef, VariantProvider<Mob> provider) {
         EntryVisual visual = ClientFieldGuideManager.getInstance().getEntryVisual(entrySource);
 
         float visualScale = getVisualScale(visual, isPage);
@@ -245,8 +233,9 @@ public class EntryRenderHelper {
 
             S state = renderer.createRenderState();
             renderer.extractRenderState(entity, state, 0.0F);
-            if (renderStatePostProcessor != null) {
-                renderStatePostProcessor.accept(state);
+
+            if (provider != null && variantDef != null && entity instanceof Mob mob) {
+                provider.applyToRenderState(mob, state, variantDef);
             }
 
             CameraRenderState camera = Minecraft.getInstance().gameRenderer.getGameRenderState().levelRenderState.cameraRenderState;
