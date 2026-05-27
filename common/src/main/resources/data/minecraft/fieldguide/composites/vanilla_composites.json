@@ -121,6 +121,13 @@
       ]
     },
     {
+      "id": "minecraft:vine",
+      "render": [
+        "minecraft:vine|south=true,west=true",
+        "minecraft:vine|south=true,west=true"
+      ]
+    },
+    {
       "id": "minecraft:cave_vines",
       "render": [
         "minecraft:cave_vines",
