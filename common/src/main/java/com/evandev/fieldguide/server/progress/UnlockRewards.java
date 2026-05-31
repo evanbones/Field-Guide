@@ -2,6 +2,7 @@ package com.evandev.fieldguide.server.progress;
 
 import com.evandev.fieldguide.Constants;
 import com.evandev.fieldguide.config.ServerConfig;
+import com.evandev.fieldguide.entry.EntryResolver;
 import com.evandev.fieldguide.server.ServerFieldGuideManager;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
@@ -32,9 +33,19 @@ class UnlockRewards {
     private static void executeCommands(ServerPlayer player, ResourceLocation entryId, ServerConfig config) {
         List<String> commandsToRun = new ArrayList<>(config.globalScanCommands);
 
+        // Check for the unique Field Guide ID (e.g. "entity:minecraft/zombie")
         String idStr = entryId.toString();
         if (config.entryScanCommands.containsKey(idStr)) {
             commandsToRun.addAll(config.entryScanCommands.get(idStr));
+        }
+
+        // Check for the legacy raw ID (e.g. "minecraft:zombie")
+        ResourceLocation rawId = EntryResolver.getRawId(entryId);
+        if (rawId != null) {
+            String rawIdStr = rawId.toString();
+            if (!rawIdStr.equals(idStr) && config.entryScanCommands.containsKey(rawIdStr)) {
+                commandsToRun.addAll(config.entryScanCommands.get(rawIdStr));
+            }
         }
 
         ResourceLocation categoryId = ServerFieldGuideManager.getInstance().getCategoryForEntryId(entryId);

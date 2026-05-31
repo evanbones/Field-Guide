@@ -71,10 +71,33 @@ public class StructureUtils {
                 propIndex = 2;
             }
 
+            // Extract standard Minecraft bracket properties [key=value] if present
+            String bracketProps = null;
+            if (blockIdPart.contains("[")) {
+                int bracketStart = blockIdPart.indexOf('[');
+                int bracketEnd = blockIdPart.indexOf(']');
+                if (bracketEnd > bracketStart) {
+                    bracketProps = blockIdPart.substring(bracketStart + 1, bracketEnd);
+                }
+                blockIdPart = blockIdPart.substring(0, bracketStart);
+            }
+
             ResourceLocation id = ResourceLocation.parse(blockIdPart);
             Block block = BuiltInRegistries.BLOCK.get(id);
+
             if (block != Blocks.AIR) {
                 BlockState state = block.defaultBlockState();
+
+                // Apply properties from brackets
+                if (bracketProps != null) {
+                    String[] props = bracketProps.split(",");
+                    for (String propStr : props) {
+                        String[] kv = propStr.split("=");
+                        if (kv.length == 2) state = setProperty(state, kv[0], kv[1]);
+                    }
+                }
+
+                // Apply properties from pipe notation
                 if (parts.length > propIndex) {
                     String[] props = parts[propIndex].split(",");
                     for (String propStr : props) {

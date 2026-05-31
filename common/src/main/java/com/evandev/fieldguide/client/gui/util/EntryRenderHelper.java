@@ -429,7 +429,12 @@ public class EntryRenderHelper {
             int length = maxZ - minZ + 1;
             int maxDim = Math.max(width, Math.max(height, length));
 
-            float scale = 35.0f * (5.0f / maxDim);
+            EntryVisual visual = ClientFieldGuideManager.getInstance().getEntryVisual(composite);
+            float visualScale = getVisualScale(visual, isPage);
+            float xOff = getXOffset(visual, isPage);
+            float yOff = getYOffset(visual, isPage);
+
+            float scale = 35.0f * (5.0f / maxDim) * visualScale;
             pose.scale(scale, -scale, scale);
 
             pose.mulPose(Axis.XP.rotationDegrees(30.0F));
@@ -439,7 +444,7 @@ public class EntryRenderHelper {
             float centerY = minY + height / 2.0f;
             float centerZ = minZ + length / 2.0f;
 
-            pose.translate(-centerX, -centerY, -centerZ);
+            pose.translate(-centerX + (xOff / scale), -centerY + (yOff / scale), -centerZ);
 
             MultiBufferSource.BufferSource buffers = Minecraft.getInstance().renderBuffers().bufferSource();
             var blockRenderer = Minecraft.getInstance().getBlockRenderer();

@@ -490,7 +490,7 @@ public class ScanOverlayRenderer {
         private final MultiBufferSource.BufferSource delegate;
         private final float r, g, b, a;
         private final boolean isDepth;
-        private final Map<RenderType, RenderType> typeCache = new IdentityHashMap<>();
+        private final Map<RenderType, RenderType> typeCache = new HashMap<>();
 
         public ScanBufferSourceWrapper(MultiBufferSource.BufferSource delegate, float r, float g, float b, float a, boolean isDepth) {
             this.delegate = delegate;
