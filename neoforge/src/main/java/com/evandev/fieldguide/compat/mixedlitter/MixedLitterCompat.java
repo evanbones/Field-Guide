@@ -4,7 +4,9 @@ import com.evandev.fieldguide.api.variant.VariantDef;
 import com.evandev.fieldguide.api.variant.VariantProvider;
 import dev.tazer.mixed_litter.MLRegistries;
 import dev.tazer.mixed_litter.VariantUtil;
+import dev.tazer.mixed_litter.client.RemodelRegistry;
 import dev.tazer.mixed_litter.registry.MLDataAttachmentTypes;
+import dev.tazer.mixed_litter.variants.EntityConditions;
 import dev.tazer.mixed_litter.variants.Variant;
 import dev.tazer.mixed_litter.variants.VariantGroup;
 import net.minecraft.core.Holder;
@@ -18,6 +20,7 @@ import net.minecraft.world.entity.Mob;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public class MixedLitterCompat {
 
@@ -51,15 +54,48 @@ public class MixedLitterCompat {
         return variant.type().getPath().contains("antler");
     }
 
+    /**
+     * Whether ML's remodel (and therefore its texture variants) is currently active for this entity.
+     * Players can disable a remodel via ML's startup config, in which case {@link RemodelRegistry}
+     * stops reporting a remodel for the entity and the vanilla appearance is used.
+     */
+    private static boolean isRemodelActive(Entity entity) {
+        ResourceLocation entityId = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
+        return RemodelRegistry.remodelFor(entityId.toString()) != null;
+    }
+
+    private static boolean conditionsAllow(Optional<EntityConditions> conditions, boolean remodelActive) {
+        if (conditions.isEmpty()) return true;
+        EntityConditions ec = conditions.get();
+        if (ec.unobtainable()) return false;
+        return ec.remodel().map(remodel -> remodel == remodelActive).orElse(true);
+    }
+
+    /**
+     * Mirrors ML's own gating: a variant only renders when its own and its group's {@code remodel}
+     * condition matches the active remodel state, and it isn't flagged unobtainable. This keeps the
+     * field guide in sync with whatever the player has enabled in ML's config.
+     */
+    private static boolean isVariantEnabled(Variant variant, Registry<VariantGroup> groupRegistry, boolean remodelActive) {
+        if (!conditionsAllow(variant.conditions(), remodelActive)) return false;
+        if (variant.group().isPresent()) {
+            VariantGroup group = groupRegistry.get(variant.group().get());
+            return group == null || conditionsAllow(group.conditions(), remodelActive);
+        }
+        return true;
+    }
+
     public static boolean hasReplaceDefaultGroup(Entity entity) {
         try {
             Registry<VariantGroup> groupRegistry = entity.registryAccess().registryOrThrow(MLRegistries.VARIANT_GROUP_KEY);
             Registry<Variant> variantRegistry = entity.registryAccess().registryOrThrow(MLRegistries.VARIANT_KEY);
             ResourceLocation entityId = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
+            boolean remodelActive = isRemodelActive(entity);
             for (ResourceLocation id : variantRegistry.keySet()) {
                 Variant variant = variantRegistry.get(id);
                 if (variant == null || !isForEntity(variant, id, entityId)) continue;
                 if (variant.group().isEmpty()) continue;
+                if (!isVariantEnabled(variant, groupRegistry, remodelActive)) continue;
                 VariantGroup group = groupRegistry.get(variant.group().get());
                 if (group != null && group.replaceDefault()) return true;
             }
@@ -75,12 +111,15 @@ public class MixedLitterCompat {
      */
     private static boolean hasFullVariants(Entity entity) {
         try {
+            Registry<VariantGroup> groupRegistry = entity.registryAccess().registryOrThrow(MLRegistries.VARIANT_GROUP_KEY);
             Registry<Variant> variantRegistry = entity.registryAccess().registryOrThrow(MLRegistries.VARIANT_KEY);
             ResourceLocation entityId = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
+            boolean remodelActive = isRemodelActive(entity);
             for (ResourceLocation id : variantRegistry.keySet()) {
                 Variant variant = variantRegistry.get(id);
                 if (variant == null) continue;
                 if (!isForEntity(variant, id, entityId)) continue;
+                if (!isVariantEnabled(variant, groupRegistry, remodelActive)) continue;
                 String ns = variant.type().getNamespace();
                 String path = variant.type().getPath();
                 if (ns.equals("mixed_litter") && (path.equals("sheep") || path.equals("simple"))) continue;
@@ -99,6 +138,7 @@ public class MixedLitterCompat {
             Registry<VariantGroup> groupRegistry = entity.registryAccess().registryOrThrow(MLRegistries.VARIANT_GROUP_KEY);
             Registry<Variant> variantRegistry = entity.registryAccess().registryOrThrow(MLRegistries.VARIANT_KEY);
             ResourceLocation entityId = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
+            boolean remodelActive = isRemodelActive(entity);
 
             List<Variant> selected = new ArrayList<>();
 
@@ -109,7 +149,7 @@ public class MixedLitterCompat {
                 for (ResourceLocation id : variantRegistry.keySet()) {
                     Variant variant = variantRegistry.get(id);
                     if (variant != null && variant.group().isPresent() && variant.group().get().equals(groupId)) {
-                        if (isForEntity(variant, id, entityId)) {
+                        if (isForEntity(variant, id, entityId) && isVariantEnabled(variant, groupRegistry, remodelActive)) {
                             matching.add(variant);
                         }
                     }
@@ -129,7 +169,8 @@ public class MixedLitterCompat {
 
             for (ResourceLocation id : variantRegistry.keySet()) {
                 Variant variant = variantRegistry.get(id);
-                if (variant != null && variant.group().isEmpty() && isForEntity(variant, id, entityId)) {
+                if (variant != null && variant.group().isEmpty() && isForEntity(variant, id, entityId)
+                        && isVariantEnabled(variant, groupRegistry, remodelActive)) {
                     if (variant.conditions().isEmpty()) {
                         selected.add(variant);
                     }
@@ -148,8 +189,10 @@ public class MixedLitterCompat {
 
         List<VariantDef> defs = new ArrayList<>();
         try {
+            Registry<VariantGroup> groupRegistry = entity.registryAccess().registryOrThrow(MLRegistries.VARIANT_GROUP_KEY);
             Registry<Variant> variantRegistry = entity.registryAccess().registryOrThrow(MLRegistries.VARIANT_KEY);
             ResourceLocation entityId = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
+            boolean remodelActive = isRemodelActive(entity);
 
             List<ResourceLocation> sortedKeys = new ArrayList<>(variantRegistry.keySet());
             Collections.sort(sortedKeys);
@@ -158,6 +201,7 @@ public class MixedLitterCompat {
                 Variant variant = variantRegistry.get(id);
                 if (variant == null) continue;
                 if (!isForEntity(variant, id, entityId)) continue;
+                if (!isVariantEnabled(variant, groupRegistry, remodelActive)) continue;
                 if (isAntlerVariant(variant)) continue;
                 defs.add(new VariantDef(id.toString(), id));
             }

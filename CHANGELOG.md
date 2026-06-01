@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.0] - 2026-05-31
+
+### Added
+
+- Added support for replacing existing variants.
+- Added support for grouping entities, structures, and items as visual variants.
+    - More info on this is available on the Field Guide wiki.
+
+### Changed
+
+- Entity scan commmands now support the legacy ID format (`minecraft:zombie`) in addition to the prefixed ID format
+  (`entity:minecraft/zombie`).
+
+### Fixed
+
+- Fixed crash with IS&S Necromancers.
+- Fixed scaling not working for entries with composites.
+- Fixed Mixed Litter variants unconditionally applying.
+
 ## [1.9.3] - 2026-05-25
 
 ### Fixed

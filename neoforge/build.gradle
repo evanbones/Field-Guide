@@ -68,7 +68,7 @@ dependencies {
     implementation "maven.modrinth:mixed-litter:${mixed_litter_version}"
 
     // Spawn
-    implementation "maven.modrinth:spawn-mod:${spawn_version}"
+    compileOnly "maven.modrinth:spawn-mod:${spawn_version}"
 
     // Primal
     compileOnly "maven.modrinth:mod-primal:${primal_version}"
@@ -88,8 +88,7 @@ dependencies {
     //runtimeOnly "maven.modrinth:ecliptic-seasons:${ecliptic_seasons_version}"
 
     // Scholar
-    compileOnly "maven.modrinth:scholar:t5aJhKGV"
-    runtimeOnly "maven.modrinth:scholar:t5aJhKGV"
+    implementation "maven.modrinth:scholar:t5aJhKGV"
 }
 
 publishMods {

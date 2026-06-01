@@ -361,10 +361,7 @@ public class FieldGuideEntryScreen extends BookScreen {
                 this.renderedEntity = type.create(this.minecraft.level);
 
                 if (Services.PLATFORM.isModLoaded("mixed_litter")) {
-                    List<VariantDef> detectedVariants = FieldGuideVariantManager.getVariants(this.renderedEntity);
-                    if (!detectedVariants.isEmpty()) {
-                        Services.PLATFORM.applyMixedLitterCompat(this.renderedEntity);
-                    }
+                    Services.PLATFORM.applyMixedLitterCompat(this.renderedEntity);
                 }
             } catch (Exception ignored) {
             }

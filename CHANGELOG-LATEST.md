@@ -13,3 +13,4 @@
 
 - Fixed crash with IS&S Necromancers.
 - Fixed scaling not working for entries with composites.
+- Fixed Mixed Litter variants unconditionally applying.
