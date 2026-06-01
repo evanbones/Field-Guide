@@ -19,10 +19,10 @@ public record GuideEntry(
         @Nullable String strategy,
         @Nullable List<ResourceLocation> childEntries,
         @Nullable StructureData structureData,
+        @Nullable List<EntryVariantData> visualVariants,
         @Nullable VirtualData virtualData,
         EntryUnlockData unlockData
 ) {
-
     public static final StreamCodec<RegistryFriendlyByteBuf, GuideEntry> STREAM_CODEC = StreamCodec.of(
             (buf, entry) -> {
                 buf.writeResourceLocation(entry.id());
@@ -32,21 +32,20 @@ public record GuideEntry(
                 buf.writeBoolean(entry.virtual());
                 buf.writeBoolean(entry.autoPopulate());
                 buf.writeNullable(entry.strategy(), FriendlyByteBuf::writeUtf);
-
                 buf.writeNullable(entry.childEntries(), (nb, comps) -> {
                     List<ResourceLocation> safeComps = comps.stream().filter(Objects::nonNull).toList();
                     nb.writeCollection(safeComps, FriendlyByteBuf::writeResourceLocation);
                 });
-
                 buf.writeNullable(entry.structureData(), (nb, data) -> {
                     nb.writeNullable(data.structureNbt(), FriendlyByteBuf::writeResourceLocation);
                     nb.writeCollection(data.stackedBlocks() != null ? data.stackedBlocks() : List.of(), FriendlyByteBuf::writeUtf);
                 });
-
+                buf.writeNullable(entry.visualVariants(), (nb, variants) -> {
+                    nb.writeCollection(variants, (b, v) -> EntryVariantData.STREAM_CODEC.encode((RegistryFriendlyByteBuf) b, v));
+                });
                 buf.writeNullable(entry.virtualData(), (nb, data) -> {
                     nb.writeUtf(data.virtualType() != null ? data.virtualType() : "unknown");
                 });
-
                 EntryUnlockData safeUnlockData = entry.unlockData() != null ? entry.unlockData() : EntryUnlockData.DEFAULT;
                 EntryUnlockData.STREAM_CODEC.encode(buf, safeUnlockData);
             },
@@ -63,6 +62,7 @@ public record GuideEntry(
                             nb.readNullable(FriendlyByteBuf::readResourceLocation),
                             nb.readList(FriendlyByteBuf::readUtf)
                     )),
+                    buf.readNullable(nb -> nb.readList(b -> EntryVariantData.STREAM_CODEC.decode((RegistryFriendlyByteBuf) b))),
                     buf.readNullable(nb -> new VirtualData(nb.readUtf())),
                     EntryUnlockData.STREAM_CODEC.decode(buf)
             )
@@ -82,6 +82,10 @@ public record GuideEntry(
 
     public boolean isAutoPopulate() {
         return autoPopulate;
+    }
+
+    public boolean hasVisualVariants() {
+        return visualVariants != null && visualVariants.size() > 1;
     }
 
     @Override

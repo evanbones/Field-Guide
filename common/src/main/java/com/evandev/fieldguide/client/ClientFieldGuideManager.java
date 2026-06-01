@@ -3,7 +3,7 @@ package com.evandev.fieldguide.client;
 import com.evandev.fieldguide.api.AutoPopulateRegistry;
 import com.evandev.fieldguide.api.Category;
 import com.evandev.fieldguide.api.GuideEntry;
-import com.evandev.fieldguide.api.variant.DatapackVariant;
+import com.evandev.fieldguide.api.variant.DatapackVariantDefinition;
 import com.evandev.fieldguide.client.data.EntryVisual;
 import com.evandev.fieldguide.client.data.JournalPage;
 import com.evandev.fieldguide.client.gui.util.EntryRenderHelper;
@@ -185,7 +185,7 @@ public class ClientFieldGuideManager implements ResourceManagerReloadListener {
         ClientLootManager.getInstance().updateLootCache(lootCache, clearCache);
     }
 
-    public void updateVariants(Map<ResourceLocation, List<DatapackVariant>> variants) {
+    public void updateVariants(Map<ResourceLocation, DatapackVariantDefinition> variants) {
         if (variants != null && !variants.isEmpty()) {
             FieldGuideVariantManager.setDatapackVariants(variants);
         }

@@ -2,6 +2,7 @@ package com.evandev.fieldguide.client.gui.screens;
 
 import com.evandev.fieldguide.Constants;
 import com.evandev.fieldguide.api.Category;
+import com.evandev.fieldguide.api.EntryVariantData;
 import com.evandev.fieldguide.api.GuideEntry;
 import com.evandev.fieldguide.api.seasons.Season;
 import com.evandev.fieldguide.api.variant.VariantDef;
@@ -61,6 +62,7 @@ public class FieldGuideCategoryScreen extends BookScreen {
     private static Registry<Biome> biomeRegistry;
     private static ResourceLocation lastOpenedCategory = null;
     private final Map<ResourceLocation, Entity> entryCache = new HashMap<>();
+    private final Map<String, Entity> variantEntityCache = new HashMap<>();
     public boolean isSearching = false;
     private boolean initialSearchFocus = false;
     private ItemStack searchItemStack;
@@ -727,6 +729,22 @@ public class FieldGuideCategoryScreen extends BookScreen {
         }
     }
 
+    private EntryVariantData selectVisualVariant(GuideEntry ge) {
+        String selected = ProgressManager.getInstance().getSelectedVariant(ge.id());
+        if (selected != null) {
+            for (EntryVariantData vd : ge.visualVariants()) {
+                if (vd.variantId().equals(selected)) return vd;
+            }
+        }
+        return ge.visualVariants().getFirst();
+    }
+
+    private Entity getCachedVariantEntity(ResourceLocation entryId, EntryVariantData variant) {
+        if (this.minecraft == null || this.minecraft.level == null) return null;
+        return variantEntityCache.computeIfAbsent(entryId + "#" + variant.variantId(),
+                k -> EntryRenderHelper.createVariantEntity(this.minecraft.level, variant.displayId(), variant.nbt()));
+    }
+
     private Entity getCachedEntity(Object entry) {
         ResourceLocation id = ClientFieldGuideManager.getEntryId(entry);
         if (id == null) return null;
@@ -861,7 +879,11 @@ public class FieldGuideCategoryScreen extends BookScreen {
             }
         }
 
-        if (entry instanceof GuideEntry ge && ge.isStructure() && coreEntry instanceof Block) {
+        if (entry instanceof GuideEntry ge && ge.hasVisualVariants()) {
+            EntryVariantData variant = selectVisualVariant(ge);
+            Entity variantEntity = variant.displayType() == EntryVariantData.DisplayType.ENTITY ? getCachedVariantEntity(ge.id(), variant) : null;
+            EntryRenderHelper.renderVisualVariant(guiGraphics, ge, variant, variantEntity, x, y, CELL_SIZE, unlocked, false, 1.0F);
+        } else if (entry instanceof GuideEntry ge && ge.isStructure() && coreEntry instanceof Block) {
             EntryRenderHelper.renderStructure(guiGraphics, ge, x, y, CELL_SIZE - 4, unlocked, false, 1.0F);
         } else if (isCobblemon) {
             EntryRenderHelper.renderCobblemon(guiGraphics, (GuideEntry) entry, x, y, CELL_SIZE - 8, CELL_SIZE - 8, unlocked, false, 1.0F);

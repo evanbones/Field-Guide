@@ -2,6 +2,7 @@ package com.evandev.fieldguide.client.gui.util;
 
 import com.evandev.fieldguide.Constants;
 import com.evandev.fieldguide.api.AutoPopulateRegistry;
+import com.evandev.fieldguide.api.EntryVariantData;
 import com.evandev.fieldguide.api.GuideEntry;
 import com.evandev.fieldguide.api.variant.VariantDef;
 import com.evandev.fieldguide.api.variant.VariantProvider;
@@ -31,14 +32,17 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -399,6 +403,43 @@ public class EntryRenderHelper {
                 buffers.endBatch();
             }
         });
+    }
+
+    public static Entity createVariantEntity(Level level, ResourceLocation entityId, CompoundTag nbt) {
+        if (level == null || entityId == null) return null;
+        EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.getOptional(entityId).orElse(null);
+        if (type == null) return null;
+        Entity entity = type.create(level);
+        if (entity != null && nbt != null && !nbt.isEmpty()) {
+            try {
+                entity.load(nbt);
+            } catch (Exception e) {
+                Constants.LOG.warn("Failed to apply nbt to variant entity {}: {}", entityId, e.getMessage());
+            }
+        }
+        return entity;
+    }
+
+    public static void renderVisualVariant(GuiGraphics guiGraphics, GuideEntry baseEntry, EntryVariantData vd, Entity cachedEntity, int centerX, int centerY, int size, boolean unlocked, boolean isPage, float bounceScale) {
+        switch (vd.displayType()) {
+            case ENTITY -> {
+                if (cachedEntity != null) {
+                    int box = isPage ? 112 : size - 8;
+                    renderEntityNormalized(guiGraphics, cachedEntity, centerX, centerY, box, box, unlocked, isPage, bounceScale, vd.variantId());
+                }
+            }
+            case BLOCK -> BuiltInRegistries.BLOCK.getOptional(vd.displayId()).ifPresent(block ->
+                    renderBlock(guiGraphics, block, centerX, centerY, isPage ? 40.0F : size * 0.42F, unlocked, isPage, bounceScale));
+            case ITEM -> BuiltInRegistries.ITEM.getOptional(vd.displayId()).ifPresent(item ->
+                    renderItem(guiGraphics, item, centerX, centerY, isPage ? 60.0F : size * 0.5F, unlocked, isPage, bounceScale));
+            case STRUCTURE -> {
+                if (vd.structureData() != null) {
+                    ResourceLocation dummyId = ResourceLocation.fromNamespaceAndPath(baseEntry.id().getNamespace(), baseEntry.id().getPath() + "_" + vd.variantId().replace(":", "_"));
+                    GuideEntry dummy = new GuideEntry(dummyId, baseEntry.displayId(), vd.icon(), baseEntry.kind(), baseEntry.virtual(), baseEntry.autoPopulate(), baseEntry.strategy(), baseEntry.childEntries(), vd.structureData(), null, baseEntry.virtualData(), baseEntry.unlockData());
+                    renderStructure(guiGraphics, dummy, centerX, centerY, isPage ? size : size - 4, unlocked, isPage, bounceScale);
+                }
+            }
+        }
     }
 
     public static void renderStructure(GuiGraphics guiGraphics, GuideEntry composite, int x, int y, int size, boolean unlocked, boolean isPage, float bounceScale) {

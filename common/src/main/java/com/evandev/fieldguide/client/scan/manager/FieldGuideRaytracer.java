@@ -133,13 +133,21 @@ public class FieldGuideRaytracer {
             }
 
             if (entryForTarget != null && isScannable && !requiresAction) {
-                boolean needsScan = !ProgressManager.getInstance().isUnlocked(entryForTarget);
-                if (hitEntity instanceof Mob mob) {
-                    var provider = FieldGuideVariantManager.getProvider(mob);
-                    if (provider != null && !ServerConfig.get().unlockAllVariants) {
-                        String variantId = provider.getCurrent(mob).id();
-                        if (!ClientFieldGuideManager.isVariantUnlocked(entryForTarget, variantId)) {
-                            needsScan = true;
+                boolean needsScan;
+                if (entryForTarget instanceof GuideEntry ge && ge.hasVisualVariants()) {
+                    ResourceLocation scannedRawId = (hitEntity instanceof ItemEntity ie)
+                            ? BuiltInRegistries.ITEM.getKey(ie.getItem().getItem())
+                            : BuiltInRegistries.ENTITY_TYPE.getKey(hitEntity.getType());
+                    needsScan = FieldGuideScanManager.needsVariantScan(ge, scannedRawId);
+                } else {
+                    needsScan = !ProgressManager.getInstance().isUnlocked(entryForTarget);
+                    if (hitEntity instanceof Mob mob) {
+                        var provider = FieldGuideVariantManager.getProvider(mob);
+                        if (provider != null && !ServerConfig.get().unlockAllVariants) {
+                            String variantId = provider.getCurrent(mob).id();
+                            if (!ClientFieldGuideManager.isVariantUnlocked(entryForTarget, variantId)) {
+                                needsScan = true;
+                            }
                         }
                     }
                 }
@@ -166,7 +174,7 @@ public class FieldGuideRaytracer {
 
                 entryForTarget = getContextAwareEntry(actualTargetKey, minecraft, blockHit.getBlockPos());
                 Category cat = ClientFieldGuideManager.getInstance().getCategoryForEntry(entryForTarget);
-                if (entryForTarget != null && !ProgressManager.getInstance().isUnlocked(entryForTarget) && cat != null) {
+                if (entryForTarget != null && cat != null && FieldGuideScanManager.needsVariantScan(entryForTarget, originalId)) {
                     foundTarget = block;
                 }
             }
@@ -191,7 +199,7 @@ public class FieldGuideRaytracer {
 
                 entryForTarget = getContextAwareEntry(actualTargetKey, minecraft, firstBlockHit.getBlockPos());
                 Category cat = ClientFieldGuideManager.getInstance().getCategoryForEntry(entryForTarget);
-                if (entryForTarget != null && !ProgressManager.getInstance().isUnlocked(entryForTarget) && cat != null) {
+                if (entryForTarget != null && cat != null && FieldGuideScanManager.needsVariantScan(entryForTarget, originalId)) {
                     foundTarget = block;
                     blockHit = firstBlockHit;
                     hitDistSq = eyePos.distanceToSqr(firstBlockHit.getLocation());
@@ -256,9 +264,19 @@ public class FieldGuideRaytracer {
         }
 
         ResourceLocation targetId = actualTargetKey instanceof Block b ? BuiltInRegistries.BLOCK.getKey(b) :
-                actualTargetKey instanceof EntityType t ? BuiltInRegistries.ENTITY_TYPE.getKey(t) : null;
+                actualTargetKey instanceof EntityType t ? BuiltInRegistries.ENTITY_TYPE.getKey(t) :
+                        actualTargetKey instanceof net.minecraft.world.item.Item it ? BuiltInRegistries.ITEM.getKey(it) :
+                                actualTargetKey instanceof ResourceLocation rl ? rl : null;
 
         if (maxScore == 0) {
+            if (targetId != null) {
+                for (Object entry : possibleEntries) {
+                    if (entry instanceof GuideEntry composite && composite.hasVisualVariants()
+                            && composite.childEntries() != null && composite.childEntries().contains(targetId)) {
+                        return entry;
+                    }
+                }
+            }
             for (Object entry : possibleEntries) {
                 if (entry.equals(actualTargetKey)) return entry;
 

@@ -133,15 +133,17 @@ public class EntryResolutionHelper {
 
             boolean hasStructure = def.structureNbt() != null || (def.stackedBlocks() != null && !def.stackedBlocks().isEmpty());
             StructureData structureData = hasStructure ? new StructureData(def.structureNbt(), def.stackedBlocks()) : null;
-            EntryKind kind = hasStructure ? EntryKind.STRUCTURE : EntryKind.NORMAL;
 
-            return new GuideEntry(def.id(), displayLoc, null, kind, false, false, null, components, structureData, null, EntryUnlockData.DEFAULT);
+            boolean hasVisualVariants = def.visualVariants() != null && !def.visualVariants().isEmpty();
+            EntryKind kind = (hasStructure || hasVisualVariants) ? EntryKind.STRUCTURE : EntryKind.NORMAL;
+
+            return new GuideEntry(def.id(), displayLoc, null, kind, false, false, null, components, structureData, def.visualVariants(), null, EntryUnlockData.DEFAULT);
         });
     }
 
     public static Optional<Object> resolveSingleEntry(ResourceLocation id, ResourceLocation categoryId, String strategyHint) {
         if (Services.PLATFORM.isModLoaded("cobblemon") && id.getNamespace().equals(Constants.MOD_ID) && id.getPath().startsWith("cobblemon/")) {
-            return Optional.of(new GuideEntry(id, null, null, EntryKind.NORMAL, true, false, null, null, null, new VirtualData("cobblemon"), EntryUnlockData.DEFAULT));
+            return Optional.of(new GuideEntry(id, null, null, EntryKind.NORMAL, true, false, null, null, null, null, new VirtualData("cobblemon"), EntryUnlockData.DEFAULT));
         }
 
         ResourceLocation finalId = EntryResolver.getRawId(id);

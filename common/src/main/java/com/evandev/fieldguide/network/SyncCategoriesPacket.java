@@ -4,6 +4,7 @@ import com.evandev.fieldguide.Constants;
 import com.evandev.fieldguide.api.Category;
 import com.evandev.fieldguide.api.GuideEntry;
 import com.evandev.fieldguide.api.variant.DatapackVariant;
+import com.evandev.fieldguide.api.variant.DatapackVariantDefinition;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -32,7 +33,7 @@ public class SyncCategoriesPacket implements CustomPacketPayload {
     private final List<String> lootAdditions;
     private final List<String> lootRemovals;
     private final Map<ResourceLocation, ResourceLocation> redirects;
-    private final Map<ResourceLocation, List<DatapackVariant>> variants;
+    private final Map<ResourceLocation, DatapackVariantDefinition> variants;
     private final boolean clearCache;
     private final boolean resolveEntries;
 
@@ -44,7 +45,7 @@ public class SyncCategoriesPacket implements CustomPacketPayload {
             List<String> lootAdditions,
             List<String> lootRemovals,
             Map<ResourceLocation, ResourceLocation> redirects,
-            Map<ResourceLocation, List<DatapackVariant>> variants,
+            Map<ResourceLocation, DatapackVariantDefinition> variants,
             boolean clearCache,
             boolean resolveEntries
     ) {
@@ -68,7 +69,12 @@ public class SyncCategoriesPacket implements CustomPacketPayload {
         this.lootAdditions = buf.readList(FriendlyByteBuf::readUtf);
         this.lootRemovals = buf.readList(FriendlyByteBuf::readUtf);
         this.redirects = buf.readMap(HashMap::new, FriendlyByteBuf::readResourceLocation, FriendlyByteBuf::readResourceLocation);
-        this.variants = buf.readMap(HashMap::new, FriendlyByteBuf::readResourceLocation, b -> b.readList(vb -> new DatapackVariant(vb.readUtf(), vb.readNbt())));
+
+        this.variants = buf.readMap(HashMap::new, FriendlyByteBuf::readResourceLocation, b -> new DatapackVariantDefinition(
+                b.readBoolean(),
+                b.readList(vb -> new DatapackVariant(vb.readUtf(), vb.readNbt()))
+        ));
+
         this.clearCache = buf.readBoolean();
         this.resolveEntries = buf.readBoolean();
     }
@@ -87,10 +93,15 @@ public class SyncCategoriesPacket implements CustomPacketPayload {
         buf.writeCollection(lootAdditions, FriendlyByteBuf::writeUtf);
         buf.writeCollection(lootRemovals, FriendlyByteBuf::writeUtf);
         buf.writeMap(redirects, FriendlyByteBuf::writeResourceLocation, FriendlyByteBuf::writeResourceLocation);
-        buf.writeMap(variants, FriendlyByteBuf::writeResourceLocation, (b, list) -> b.writeCollection(list, (vb, v) -> {
-            vb.writeUtf(v.id());
-            vb.writeNbt(v.nbt());
-        }));
+
+        buf.writeMap(variants, FriendlyByteBuf::writeResourceLocation, (b, def) -> {
+            b.writeBoolean(def.replace());
+            b.writeCollection(def.variants(), (vb, v) -> {
+                vb.writeUtf(v.id());
+                vb.writeNbt(v.nbt());
+            });
+        });
+
         buf.writeBoolean(clearCache);
         buf.writeBoolean(resolveEntries);
     }
@@ -123,7 +134,7 @@ public class SyncCategoriesPacket implements CustomPacketPayload {
         return redirects;
     }
 
-    public Map<ResourceLocation, List<DatapackVariant>> getVariants() {
+    public Map<ResourceLocation, DatapackVariantDefinition> getVariants() {
         return variants;
     }
 

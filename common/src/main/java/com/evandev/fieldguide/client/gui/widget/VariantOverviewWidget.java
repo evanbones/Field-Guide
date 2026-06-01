@@ -1,6 +1,8 @@
 package com.evandev.fieldguide.client.gui.widget;
 
 import com.evandev.fieldguide.Constants;
+import com.evandev.fieldguide.api.EntryVariantData;
+import com.evandev.fieldguide.api.GuideEntry;
 import com.evandev.fieldguide.api.variant.VariantDef;
 import com.evandev.fieldguide.api.variant.VariantProvider;
 import com.evandev.fieldguide.client.ClientConstants;
@@ -45,7 +47,7 @@ public class VariantOverviewWidget extends AbstractWidget {
     private final PageTurnButton leftButton;
     private final PageTurnButton rightButton;
     private final float[] hoverScales = new float[9];
-    private final Map<String, LivingEntity> variantEntityCache = new HashMap<>();
+    private final Map<String, Entity> variantEntityCache = new HashMap<>();
     private int currentPage = 0;
     private long lastRenderTime = 0;
 
@@ -78,7 +80,20 @@ public class VariantOverviewWidget extends AbstractWidget {
     }
 
     private void preGenerateEntities() {
-        if (originalRenderedEntity == null || Minecraft.getInstance().level == null) return;
+        if (Minecraft.getInstance().level == null) return;
+
+        boolean hasEntryVariantData = variants.stream().anyMatch(v -> v.value() instanceof EntryVariantData);
+        if (hasEntryVariantData) {
+            for (VariantDef variant : variants) {
+                if (variant.value() instanceof EntryVariantData vd && vd.displayType() == EntryVariantData.DisplayType.ENTITY) {
+                    Entity entity = EntryRenderHelper.createVariantEntity(Minecraft.getInstance().level, vd.displayId(), vd.nbt());
+                    if (entity != null) variantEntityCache.put(variant.id(), entity);
+                }
+            }
+            return;
+        }
+
+        if (originalRenderedEntity == null) return;
 
         VariantProvider<Mob> provider = (originalRenderedEntity instanceof Mob mob) ? FieldGuideVariantManager.getProvider(mob) : null;
 
@@ -125,6 +140,12 @@ public class VariantOverviewWidget extends AbstractWidget {
         return this.visible;
     }
 
+    private boolean checkUnlocked(VariantDef variant) {
+        if (ServerConfig.get().unlockAllVariants) return true;
+
+        return ClientFieldGuideManager.isVariantUnlocked(this.entry, variant.id());
+    }
+
     @Override
     public boolean isMouseOver(double mouseX, double mouseY) {
         return this.visible && mouseX >= this.getX() && mouseX <= this.getX() + this.width && mouseY >= this.getY() && mouseY <= this.getY() + this.height;
@@ -168,8 +189,10 @@ public class VariantOverviewWidget extends AbstractWidget {
             Bounds bounds = getGridCellBoundsLocal(gridIndex);
             boolean hovered = bounds.contains(mouseX, mouseY);
             VariantDef variant = variants.get(i);
-            boolean isUnlocked = ClientFieldGuideManager.isVariantUnlocked(entry, variant.id());
-            LivingEntity renderEntity = variantEntityCache.getOrDefault(variant.id(), originalRenderedEntity);
+
+            boolean isUnlocked = checkUnlocked(variant);
+
+            Entity renderEntity = variantEntityCache.getOrDefault(variant.id(), originalRenderedEntity);
 
             graphics.pose().pushPose();
 
@@ -193,7 +216,11 @@ public class VariantOverviewWidget extends AbstractWidget {
             }
 
             if (!renderedPhoto) {
-                EntryRenderHelper.renderEntityNormalized(graphics, renderEntity, centerX, centerY, bounds.width(), bounds.height(), isUnlocked, false, 1.0f, variant.id());
+                if (variant.value() instanceof EntryVariantData vd && entry instanceof GuideEntry ge) {
+                    EntryRenderHelper.renderVisualVariant(graphics, ge, vd, renderEntity, centerX, centerY, bounds.width(), isUnlocked, false, 1.0f);
+                } else if (renderEntity != null) {
+                    EntryRenderHelper.renderEntityNormalized(graphics, renderEntity, centerX, centerY, bounds.width(), bounds.height(), isUnlocked, false, 1.0f, variant.id());
+                }
             }
 
             float targetScale = (hovered && isUnlocked) ? 1.05f : 1.0f;
@@ -210,7 +237,12 @@ public class VariantOverviewWidget extends AbstractWidget {
             if (hovered) {
                 if (isUnlocked) {
                     String customVariantName = ProgressManager.getInstance().getCustomName(ClientFieldGuideManager.getEntryId(entry).toString() + "#" + variant.id());
-                    tooltipText = customVariantName != null ? Component.literal(customVariantName) : FieldGuideVariantManager.getVariantDisplayName(variant);
+
+                    if (variant.value() instanceof EntryVariantData vd && vd.displayName() != null) {
+                        tooltipText = customVariantName != null ? Component.literal(customVariantName) : vd.displayName();
+                    } else {
+                        tooltipText = customVariantName != null ? Component.literal(customVariantName) : FieldGuideVariantManager.getVariantDisplayName(variant);
+                    }
                 } else {
                     tooltipText = Component.literal("???");
                 }
@@ -243,7 +275,8 @@ public class VariantOverviewWidget extends AbstractWidget {
 
             if (bounds.contains((int) mouseX, (int) mouseY)) {
                 VariantDef variant = variants.get(i);
-                if (ClientFieldGuideManager.isVariantUnlocked(entry, variant.id())) {
+
+                if (checkUnlocked(variant)) {
                     this.visible = false;
                     this.onVariantSelected.accept(i);
                     if (this.onToggle != null) this.onToggle.run();

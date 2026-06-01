@@ -2,6 +2,7 @@ package com.evandev.fieldguide.client.manager;
 
 import com.evandev.fieldguide.ModDataComponents;
 import com.evandev.fieldguide.api.AutoPopulateRegistry;
+import com.evandev.fieldguide.api.EntryVariantData;
 import com.evandev.fieldguide.api.GuideEntry;
 import com.evandev.fieldguide.compat.cobblemon.ClientFieldGuideCobblemonCompat;
 import com.evandev.fieldguide.network.RequestLootPacket;
@@ -94,6 +95,26 @@ public class ClientLootManager {
 
     public List<ItemStack> getDrops(Object entry, String variantId) {
         List<ItemStack> rawDrops = new ArrayList<>();
+        if (entry instanceof GuideEntry ge && ge.hasVisualVariants() && variantId != null && !variantId.isEmpty()) {
+            EntryVariantData variant = ge.visualVariants().stream()
+                    .filter(v -> v.variantId().equals(variantId)).findFirst().orElse(null);
+            if (variant != null) {
+                Set<Object> targets = new HashSet<>();
+                addLootTarget(targets, variant.displayId());
+                for (String comp : variant.components()) {
+                    int pipe = comp.indexOf('|');
+                    addLootTarget(targets, ResourceLocation.tryParse(pipe >= 0 ? comp.substring(0, pipe) : comp));
+                }
+                for (Object comp : targets) {
+                    ResourceLocation id = AutoPopulateRegistry.getEntryId(comp, true);
+                    if (id != null) {
+                        if (dropCache.containsKey(id)) rawDrops.addAll(dropCache.get(id));
+                        else requestLoot(id);
+                    }
+                }
+                return distinctLoot(rawDrops);
+            }
+        }
         if (entry instanceof GuideEntry ge && ge.isComposite()) {
             Set<Object> uniqueComponents = new HashSet<>();
             if (ge.displayId() != null) {
@@ -133,6 +154,23 @@ public class ClientLootManager {
             rawDrops.addAll(ClientFieldGuideCobblemonCompat.getCobblemonDrops(entry));
         }
 
+        List<ItemStack> distinct = new ArrayList<>();
+        for (ItemStack stack : rawDrops) {
+            if (distinct.stream().noneMatch(s -> isSameLootItem(s, stack))) {
+                distinct.add(stack);
+            }
+        }
+        return distinct;
+    }
+
+    private void addLootTarget(Set<Object> targets, ResourceLocation id) {
+        if (id == null) return;
+        BuiltInRegistries.BLOCK.getOptional(id).ifPresent(targets::add);
+        BuiltInRegistries.ITEM.getOptional(id).ifPresent(targets::add);
+        BuiltInRegistries.ENTITY_TYPE.getOptional(id).ifPresent(targets::add);
+    }
+
+    private List<ItemStack> distinctLoot(List<ItemStack> rawDrops) {
         List<ItemStack> distinct = new ArrayList<>();
         for (ItemStack stack : rawDrops) {
             if (distinct.stream().noneMatch(s -> isSameLootItem(s, stack))) {

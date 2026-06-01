@@ -215,7 +215,18 @@ public final class FieldGuideCobblemonCompat {
                         }
 
                         sortedEntries.add(new AbstractMap.SimpleEntry<>(
-                                new GuideEntry(entryId, null, null, EntryKind.NORMAL, true, false, null, null, null, new VirtualData("cobblemon"), EntryUnlockData.DEFAULT),
+                                new GuideEntry(entryId,
+                                        null,
+                                        null,
+                                        EntryKind.NORMAL,
+                                        true,
+                                        false,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        new VirtualData("cobblemon"),
+                                        EntryUnlockData.DEFAULT),
                                 pokedexNumber
                         ));
                     }

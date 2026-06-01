@@ -3,6 +3,7 @@ package com.evandev.fieldguide.server;
 import com.evandev.fieldguide.Constants;
 import com.evandev.fieldguide.api.*;
 import com.evandev.fieldguide.api.variant.DatapackVariant;
+import com.evandev.fieldguide.api.variant.DatapackVariantDefinition;
 import com.evandev.fieldguide.api.variant.VariantConditionEvaluator;
 import com.evandev.fieldguide.compat.cobblemon.FieldGuideCobblemonCompat;
 import com.evandev.fieldguide.config.ModConfig;
@@ -25,6 +26,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -57,7 +59,8 @@ public class ServerFieldGuideManager extends SimplePreparableReloadListener<Serv
     private List<CompositeDefinition> composites = new ArrayList<>();
     private Map<ResourceLocation, List<ItemStack>> serverLootCache = new HashMap<>();
     private Map<ResourceLocation, ResourceLocation> redirects = new HashMap<>();
-    private Map<ResourceLocation, List<DatapackVariant>> variants = new HashMap<>();
+    private Map<ResourceLocation, DatapackVariantDefinition> variants = new HashMap<>();
+
     private List<String> biomeAdditions = new ArrayList<>();
     private List<String> biomeRemovals = new ArrayList<>();
     private List<String> lootAdditions = new ArrayList<>();
@@ -130,6 +133,17 @@ public class ServerFieldGuideManager extends SimplePreparableReloadListener<Serv
         return EntryResolver.hasEntry(resolvedCategoryEntries, entryId);
     }
 
+    public GuideEntry getResolvedEntry(ResourceLocation entryId) {
+        for (List<Object> entries : resolvedCategoryEntries.values()) {
+            for (Object entry : entries) {
+                if (entry instanceof GuideEntry ge && entryId.equals(EntryResolver.getEntryId(ge))) {
+                    return ge;
+                }
+            }
+        }
+        return null;
+    }
+
     public Map<ResourceLocation, List<Object>> getResolvedEntries() {
         return this.resolvedCategoryEntries;
     }
@@ -173,7 +187,7 @@ public class ServerFieldGuideManager extends SimplePreparableReloadListener<Serv
         return composites;
     }
 
-    public Map<ResourceLocation, List<DatapackVariant>> getVariants() {
+    public Map<ResourceLocation, DatapackVariantDefinition> getVariants() {
         return variants;
     }
 
@@ -241,7 +255,6 @@ public class ServerFieldGuideManager extends SimplePreparableReloadListener<Serv
                         continue;
                     }
 
-                    // Fallback to synthesize missing explicit GuideEntry wrappers for standard objects
                     GuideEntry existing = allEntries.get(id);
                     if (existing != null) {
                         chunkCat.addEntryId(id);
@@ -249,7 +262,7 @@ public class ServerFieldGuideManager extends SimplePreparableReloadListener<Serv
                     } else {
                         EntryUnlockData unlockData = getUnlockData(id);
 
-                        GuideEntry synthesized = new GuideEntry(id, id, null, EntryKind.NORMAL, false, false, null, null, null, null, unlockData);
+                        GuideEntry synthesized = new GuideEntry(id, id, null, EntryKind.NORMAL, false, false, null, null, null, null, null, unlockData);
                         chunkCat.addEntryId(id);
                         if (!flattenedEntries.contains(synthesized)) flattenedEntries.add(synthesized);
                     }
@@ -476,7 +489,7 @@ public class ServerFieldGuideManager extends SimplePreparableReloadListener<Serv
                             switch (typeStr) {
                                 case "entry" -> {
                                     ResourceLocation id = ResourceLocation.parse(GsonHelper.getAsString(obj, "id"));
-                                    GuideEntry ge = new GuideEntry(id, id, null, EntryKind.NORMAL, false, false, null, null, null, null, unlockData);
+                                    GuideEntry ge = new GuideEntry(id, id, null, EntryKind.NORMAL, false, false, null, null, null, null, null, unlockData);
                                     data.allEntries.put(id, ge);
                                     category.addEntryId(id);
                                     data.entryUnlockData.put(id, unlockData);
@@ -485,7 +498,7 @@ public class ServerFieldGuideManager extends SimplePreparableReloadListener<Serv
                                     ResourceLocation id = ResourceLocation.parse(GsonHelper.getAsString(obj, "id"));
                                     String virtualType = GsonHelper.getAsString(obj, "virtual_type");
                                     ResourceLocation icon = obj.has("icon") ? ResourceLocation.parse(GsonHelper.getAsString(obj, "icon")) : null;
-                                    GuideEntry ge = new GuideEntry(id, null, icon, EntryKind.NORMAL, true, false, null, null, null, new VirtualData(virtualType), unlockData);
+                                    GuideEntry ge = new GuideEntry(id, null, icon, EntryKind.NORMAL, true, false, null, null, null, null, new VirtualData(virtualType), unlockData);
                                     data.allEntries.put(id, ge);
                                     category.addEntryId(id);
                                     data.entryUnlockData.put(id, unlockData);
@@ -494,7 +507,7 @@ public class ServerFieldGuideManager extends SimplePreparableReloadListener<Serv
                                     String strategy = GsonHelper.getAsString(obj, "strategy");
                                     String safeStrategyName = strategy.replace(":", "_");
                                     ResourceLocation id = ResourceLocation.fromNamespaceAndPath(categoryId.getNamespace(), categoryId.getPath() + "_auto_" + safeStrategyName);
-                                    GuideEntry ge = new GuideEntry(id, null, null, EntryKind.NORMAL, false, true, strategy, null, null, null, unlockData);
+                                    GuideEntry ge = new GuideEntry(id, null, null, EntryKind.NORMAL, false, true, strategy, null, null, null, null, unlockData);
                                     data.allEntries.put(id, ge);
                                     category.addEntryId(id);
                                 }
@@ -590,7 +603,65 @@ public class ServerFieldGuideManager extends SimplePreparableReloadListener<Serv
                                 }
                             }
 
-                            data.composites.add(new CompositeDefinition(id, displayId, components, structureNbt, stackedBlocks));
+                            List<EntryVariantData> visualVariants = null;
+                            if (obj.has("visual_variants")) {
+                                visualVariants = new ArrayList<>();
+                                for (JsonElement vEl : GsonHelper.getAsJsonArray(obj, "visual_variants")) {
+                                    JsonObject vObj = vEl.getAsJsonObject();
+                                    String variantId = GsonHelper.getAsString(vObj, "variant_id");
+                                    Component displayName = vObj.has("display_name") ? Component.literal(GsonHelper.getAsString(vObj, "display_name")) : Component.literal(variantId);
+
+                                    EntryVariantData.DisplayType displayType;
+                                    ResourceLocation variantDisplayId = null;
+                                    CompoundTag variantNbt = null;
+                                    if (vObj.has("entity")) {
+                                        displayType = EntryVariantData.DisplayType.ENTITY;
+                                        variantDisplayId = ResourceLocation.parse(GsonHelper.getAsString(vObj, "entity"));
+                                        if (vObj.has("nbt")) {
+                                            try {
+                                                variantNbt = TagParser.parseTag(GsonHelper.getAsString(vObj, "nbt"));
+                                            } catch (Exception e) {
+                                                Constants.LOG.error("Invalid nbt for visual variant {} in composite {}: {}", variantId, id, e.getMessage());
+                                            }
+                                        }
+                                    } else if (vObj.has("block")) {
+                                        displayType = EntryVariantData.DisplayType.BLOCK;
+                                        variantDisplayId = ResourceLocation.parse(GsonHelper.getAsString(vObj, "block"));
+                                    } else if (vObj.has("item")) {
+                                        displayType = EntryVariantData.DisplayType.ITEM;
+                                        variantDisplayId = ResourceLocation.parse(GsonHelper.getAsString(vObj, "item"));
+                                    } else {
+                                        displayType = EntryVariantData.DisplayType.STRUCTURE;
+                                    }
+
+                                    ResourceLocation vStructureNbt = vObj.has("structure_nbt") ? ResourceLocation.parse(GsonHelper.getAsString(vObj, "structure_nbt")) : null;
+                                    List<String> vRender = null;
+                                    if (vObj.has("render")) {
+                                        vRender = new ArrayList<>();
+                                        for (JsonElement el2 : GsonHelper.getAsJsonArray(vObj, "render")) {
+                                            vRender.add(el2.getAsString());
+                                        }
+                                    }
+
+                                    StructureData vStructData = (displayType == EntryVariantData.DisplayType.STRUCTURE && (vStructureNbt != null || vRender != null))
+                                            ? new StructureData(vStructureNbt, vRender) : null;
+
+                                    List<String> vComponents = new ArrayList<>();
+                                    if (vObj.has("components")) {
+                                        for (JsonElement el2 : GsonHelper.getAsJsonArray(vObj, "components")) {
+                                            vComponents.add(el2.getAsString());
+                                        }
+                                    } else if (vRender != null) {
+                                        vComponents.addAll(vRender);
+                                    } else if (variantDisplayId != null) {
+                                        vComponents.add(variantDisplayId.toString());
+                                    }
+
+                                    visualVariants.add(new EntryVariantData(variantId, displayName, displayType, vStructData, variantDisplayId, variantNbt, null, vComponents));
+                                }
+                            }
+
+                            data.composites.add(new CompositeDefinition(id, displayId, components, structureNbt, stackedBlocks, visualVariants));
                         }
                     }
                 } catch (Exception e) {
@@ -648,11 +719,8 @@ public class ServerFieldGuideManager extends SimplePreparableReloadListener<Serv
 
                             ResourceLocation entityId = ResourceLocation.parse(GsonHelper.getAsString(obj, "id"));
 
-                            List<DatapackVariant> variantList = data.variants.computeIfAbsent(entityId, k -> new ArrayList<>());
-
-                            if (GsonHelper.getAsBoolean(obj, "replace", false)) {
-                                variantList.clear();
-                            }
+                            boolean replace = GsonHelper.getAsBoolean(obj, "replace", false);
+                            List<DatapackVariant> variantList = new ArrayList<>();
 
                             if (obj.has("variants")) {
                                 for (JsonElement vEl : GsonHelper.getAsJsonArray(obj, "variants")) {
@@ -662,6 +730,7 @@ public class ServerFieldGuideManager extends SimplePreparableReloadListener<Serv
                                     variantList.add(new DatapackVariant(id, nbt));
                                 }
                             }
+                            data.variants.put(entityId, new DatapackVariantDefinition(replace, variantList));
                         }
                     }
                 } catch (Exception e) {
@@ -836,7 +905,8 @@ public class ServerFieldGuideManager extends SimplePreparableReloadListener<Serv
         public List<String> lootAdditions = new ArrayList<>();
         public List<String> lootRemovals = new ArrayList<>();
         public Map<ResourceLocation, ResourceLocation> redirects = new HashMap<>();
-        public Map<ResourceLocation, List<DatapackVariant>> variants = new HashMap<>();
+        public Map<ResourceLocation, DatapackVariantDefinition> variants = new HashMap<>();
+
         public Map<ResourceLocation, EntryUnlockData> entryUnlockData = new HashMap<>();
     }
 }

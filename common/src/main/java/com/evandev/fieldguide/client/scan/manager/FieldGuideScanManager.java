@@ -1,6 +1,8 @@
 package com.evandev.fieldguide.client.scan.manager;
 
 import com.evandev.fieldguide.ModTags;
+import com.evandev.fieldguide.api.EntryVariantData;
+import com.evandev.fieldguide.api.GuideEntry;
 import com.evandev.fieldguide.client.ClientFieldGuideManager;
 import com.evandev.fieldguide.client.FieldGuideClient;
 import com.evandev.fieldguide.client.progress.ProgressManager;
@@ -34,6 +36,31 @@ public class FieldGuideScanManager {
 
     public static FieldGuideScanManager getInstance() {
         return INSTANCE;
+    }
+
+    public static boolean needsVariantScan(Object entryForTarget, ResourceLocation scannedRawId) {
+        if (!ProgressManager.getInstance().isUnlocked(entryForTarget)) return true;
+        if (ServerConfig.get().unlockAllVariants) return false;
+        if (entryForTarget instanceof GuideEntry ge && ge.hasVisualVariants()) {
+            String variantId = resolveVisualVariantId(ge, scannedRawId);
+            return !variantId.isEmpty() && !ClientFieldGuideManager.isVariantUnlocked(ge, variantId);
+        }
+        return false;
+    }
+
+    static String resolveVisualVariantId(GuideEntry entry, ResourceLocation scannedId) {
+        if (entry.visualVariants() == null || scannedId == null) return "";
+        String target = scannedId.toString();
+        for (EntryVariantData vd : entry.visualVariants()) {
+            if (target.equals(vd.variantId())) return vd.variantId();
+            if (vd.displayId() != null && target.equals(vd.displayId().toString())) return vd.variantId();
+            for (String comp : vd.components()) {
+                int pipe = comp.indexOf('|');
+                String id = pipe >= 0 ? comp.substring(0, pipe) : comp;
+                if (target.equals(id)) return vd.variantId();
+            }
+        }
+        return "";
     }
 
     public void onClientTick(Minecraft minecraft) {
@@ -186,12 +213,20 @@ public class FieldGuideScanManager {
             ResourceLocation scannedTargetId;
             String variantId = "";
 
+            boolean compositeVariants = targetKey instanceof GuideEntry ge && ge.hasVisualVariants();
+
             if (foundTarget instanceof Entity entity) {
                 if (entity instanceof ItemEntity itemEntity) {
-                    scannedTargetId = ClientFieldGuideManager.getEntryId(itemEntity.getItem().getItem());
+                    var item = itemEntity.getItem().getItem();
+                    scannedTargetId = ClientFieldGuideManager.getEntryId(item);
+                    if (compositeVariants) {
+                        variantId = resolveVisualVariantId((GuideEntry) targetKey, BuiltInRegistries.ITEM.getKey(item));
+                    }
                 } else {
                     scannedTargetId = ClientFieldGuideManager.getEntryId(entity.getType());
-                    if (entity instanceof Mob mob) {
+                    if (compositeVariants) {
+                        variantId = resolveVisualVariantId((GuideEntry) targetKey, BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()));
+                    } else if (entity instanceof Mob mob) {
                         var provider = FieldGuideVariantManager.getProvider(mob);
                         if (provider != null) {
                             variantId = provider.getCurrent(mob).id();
@@ -201,6 +236,9 @@ public class FieldGuideScanManager {
                 }
             } else if (foundTarget instanceof Block block) {
                 scannedTargetId = ClientFieldGuideManager.getEntryId(block);
+                if (compositeVariants) {
+                    variantId = resolveVisualVariantId((GuideEntry) targetKey, BuiltInRegistries.BLOCK.getKey(block));
+                }
             } else {
                 scannedTargetId = ClientFieldGuideManager.getEntryId(foundTarget);
             }

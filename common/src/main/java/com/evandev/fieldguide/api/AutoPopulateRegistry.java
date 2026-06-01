@@ -15,7 +15,6 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.SpawnEggItem;
-import net.minecraft.world.level.block.BaseCoralWallFanBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BushBlock;
@@ -250,6 +249,7 @@ public class AutoPopulateRegistry {
                         null,
                         components,
                         new StructureData(null, treeStructure),
+                        null,
                         null,
                         EntryUnlockData.DEFAULT
                 ));

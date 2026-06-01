@@ -1,5 +1,6 @@
 package com.evandev.fieldguide.client.manager;
 
+import com.evandev.fieldguide.api.EntryVariantData;
 import com.evandev.fieldguide.api.GuideEntry;
 import com.evandev.fieldguide.client.progress.ProgressManager;
 import com.evandev.fieldguide.compat.itemdescriptions.ItemDescriptionsCompat;
@@ -7,6 +8,7 @@ import com.evandev.fieldguide.config.ServerConfig;
 import com.evandev.fieldguide.entry.EntryResolver;
 import com.evandev.fieldguide.platform.Services;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
@@ -76,6 +78,19 @@ public class ClientTextManager {
         return getEntryDescription(entry, null);
     }
 
+    private Object resolveVariantTarget(Object entry, String variantId) {
+        if (variantId == null || !(entry instanceof GuideEntry ge) || ge.visualVariants() == null) return null;
+        for (EntryVariantData vd : ge.visualVariants()) {
+            if (vd.variantId().equals(variantId) && vd.displayId() != null) {
+                return BuiltInRegistries.ENTITY_TYPE.getOptional(vd.displayId()).map(Object.class::cast)
+                        .or(() -> BuiltInRegistries.BLOCK.getOptional(vd.displayId()).map(Object.class::cast))
+                        .or(() -> BuiltInRegistries.ITEM.getOptional(vd.displayId()).map(Object.class::cast))
+                        .orElse(null);
+            }
+        }
+        return null;
+    }
+
     public String getEntryDescription(Object entry, String variantId) {
         ResourceLocation id = EntryResolver.getEntryId(entry, false);
         ResourceLocation prefixedId = EntryResolver.getEntryId(entry, true);
@@ -104,6 +119,11 @@ public class ClientTextManager {
 
             String oldVariantKey = "fieldguide." + id.getNamespace() + "." + id.getPath() + "." + variantStr + ".description";
             if (I18n.exists(oldVariantKey)) return I18n.get(oldVariantKey);
+
+            Object variantTarget = resolveVariantTarget(entry, variantId);
+            if (variantTarget != null) {
+                return getEntryDescription(variantTarget, null);
+            }
         }
 
         String newOverrideKey = "fieldguide." + entryType + "." + path + ".description";
@@ -172,6 +192,9 @@ public class ClientTextManager {
 
                 String oldVariantKey = "fieldguide.name." + id.getNamespace() + "." + id.getPath() + "." + variantStr;
                 if (I18n.exists(oldVariantKey)) return Component.translatable(oldVariantKey);
+
+                Object variantTarget = resolveVariantTarget(entry, variantId);
+                if (variantTarget != null) return getDefaultNameComponent(variantTarget, null);
             }
 
             String newOverrideKey = "fieldguide.name." + entryType + "." + path;

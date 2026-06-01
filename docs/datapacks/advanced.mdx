@@ -35,6 +35,9 @@ The individual components will automatically be removed from all categories.
 You can define composites by creating a JSON file at:
 `data/<namespace>/fieldguide/composites/<filename>.json`
 
+### Standard Composites
+For a single static scene, use `structure_nbt` or `render`:
+
 ```json
 {
     "values": [
@@ -50,13 +53,73 @@ You can define composites by creating a JSON file at:
         }
     ]
 }
+
+```
+
+### Visual Variants (Multi-Image Composites)
+
+If you want a single entry to feature multiple cycleable images or structures (e.g., grouping multiple mods' trees into one page), you can define an array of `visual_variants`:
+
+```json
+{
+    "values": [
+        {
+            "id": "fieldguide:palm_tree_group",
+            "display": "minecraft:jungle_sapling",
+            "components": [
+                "biomesoplenty:palm_log",
+                "beachparty:palm_log"
+            ],
+            "visual_variants": [
+                {
+                    "variant_id": "bop_palm",
+                    "display_name": "Biomes O' Plenty Palm",
+                    "structure_nbt": "biomesoplenty:palm_tree",
+                    "components": ["biomesoplenty:palm_log", "biomesoplenty:palm_leaves"]
+                },
+                {
+                    "variant_id": "beachparty_palm",
+                    "display_name": "Beachparty Palm",
+                    "render": ["beachparty:palm_log", "beachparty:palm_leaves"]
+                }
+            ]
+        }
+    ]
+}
+
 ```
 
 * `id`: The unique identifier for this custom entry.
-* `display_id`: The primary entity or block ID to represent this entry in the UI.
-* `components`: An array of entity/block IDs that make up this composite entry.
-* `structure_nbt`: Provide the resource location of an NBT structure file to render.
-* `render`: An alternative to `structure_nbt` for simpler structures. Provide an array of block IDs to render.
+* `display`: The primary entity or block ID to represent this entry in the UI.
+* `components`: An array of entity/block/item IDs that make up this composite entry.
+* `structure_nbt` / `render`: Used for a single-image composite.
+* `visual_variants`: An array of variant objects that create interactive tabs on the entry page. Each variant needs a `variant_id` and `display_name`, plus exactly one display source:
+    * `structure_nbt` and/or `render`: render a multi-block structure (as above).
+    * `entity`: render a mob by its entity ID (e.g. `"minecraft:husk"`). Optionally add `nbt` (an SNBT string like `"{IsBaby:1b}"`) to configure it.
+    * `block`: render a single block by ID.
+    * `item`: render an item by ID.
+    * `components` (optional): the entity/block/item IDs belonging to this variant, used to unlock it when scanned. Defaults to the variant's `entity`/`block`/`item` (or its `render` blocks). Scanning any listed target unlocks that specific variant.
+
+This lets you group mobs, blocks, and items from different mods/namespaces under one entry — for example consolidating several mods' palm trees, the maple-tree color variants of Biomes O' Plenty and Mystic's Biomes, or related mobs that other mods register as separate entities.
+
+When a variant uses `entity`/`block`/`item`, its **name, description, and loot are taken from that target automatically** (so each grouped mob/block/item shows its own info instead of the base entry's). You can still override per variant with a custom in-book edit or the lang keys `fieldguide.<type>.<path>.<variant_id>.description` and `fieldguide.name.<type>.<path>.<variant_id>`.
+
+```json
+{
+    "values": [
+        {
+            "id": "fieldguide:zombie_family",
+            "display": "minecraft:zombie",
+            "components": ["minecraft:zombie", "minecraft:husk", "minecraft:drowned"],
+            "visual_variants": [
+                { "variant_id": "zombie",  "display_name": "Zombie",  "entity": "minecraft:zombie",  "components": ["minecraft:zombie"] },
+                { "variant_id": "husk",    "display_name": "Husk",    "entity": "minecraft:husk",    "components": ["minecraft:husk"] },
+                { "variant_id": "drowned", "display_name": "Drowned", "entity": "minecraft:drowned", "components": ["minecraft:drowned"] }
+            ]
+        }
+    ]
+}
+```
 
 ---
 
@@ -64,7 +127,7 @@ You can define composites by creating a JSON file at:
 
 You can manually define variants for entities using NBT.
 
-This is useful for mods that use custom variant systems that Field Guide can't automatically detect.
+This is useful for mods that use custom variant systems that Field Guide can't automatically detect, or for overriding auto-generation.
 
 `data/<namespace>/fieldguide/variants/<filename>.json`
 
@@ -83,4 +146,9 @@ This is useful for mods that use custom variant systems that Field Guide can't a
     }
   ]
 }
+
 ```
+
+* `id`: The target entity registry name.
+* `replace`: If set to `true`, the Field Guide will **completely ignore** any automatically detected variants and only use the variants provided in this list.
+* `variants`: A list of variant definitions. If `replace` is true and this list is empty, the entity will be treated as a standard, non-variant entry (hiding all variant UI and subtitles).

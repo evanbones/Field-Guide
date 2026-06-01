@@ -2,6 +2,8 @@ package com.evandev.fieldguide.server.command;
 
 import com.evandev.fieldguide.Constants;
 import com.evandev.fieldguide.api.Category;
+import com.evandev.fieldguide.api.EntryVariantData;
+import com.evandev.fieldguide.api.GuideEntry;
 import com.evandev.fieldguide.api.variant.VariantDef;
 import com.evandev.fieldguide.compat.cobblemon.FieldGuideCobblemonCompat;
 import com.evandev.fieldguide.entry.EntryResolver;
@@ -172,39 +174,15 @@ public class FieldGuideCommand {
         FieldGuideProgressManager manager = FieldGuideProgressManager.getInstance();
 
         if (variantId.equalsIgnoreCase("all")) {
-            if (Services.PLATFORM.isModLoaded("cobblemon") && entryId.getPath().contains("cobblemon")) {
-                List<String> variants = FieldGuideCobblemonCompat.getVariantIds(entryId);
-                if (!variants.isEmpty()) {
-                    for (ServerPlayer player : targets) {
-                        PlayerFieldGuideProgress progress = manager.getProgress(player);
-                        if (progress != null) {
-                            for (String def : variants) {
-                                progress.unlock(player, entryId, def, true);
-                            }
-                        }
-                    }
-                    source.sendSuccess(() -> Component.translatable("commands.fieldguide.grant.variant.success", "all", entryId.toString()), true);
-                    return targets.size();
-                }
-            } else {
-                ResourceLocation rawId = EntryResolver.getRawId(entryId);
-                if (BuiltInRegistries.ENTITY_TYPE.containsKey(rawId)) {
-                    EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.get(rawId);
-                    List<VariantDef> variants = FieldGuideVariantManager.getVariants(type, source.getLevel());
-                    if (!variants.isEmpty()) {
-                        for (ServerPlayer player : targets) {
-                            PlayerFieldGuideProgress progress = manager.getProgress(player);
-                            if (progress != null) {
-                                for (VariantDef def : variants) {
-                                    progress.unlock(player, entryId, def.id(), true);
-                                }
-                            }
-                        }
-                        source.sendSuccess(() -> Component.translatable("commands.fieldguide.grant.variant.success", "all", entryId.toString()), true);
-                        return targets.size();
-                    }
+            for (ServerPlayer player : targets) {
+                PlayerFieldGuideProgress progress = manager.getProgress(player);
+                if (progress != null) {
+                    progress.unlock(player, entryId, null, true);
+                    unlockVariants(player, entryId, source.getLevel());
                 }
             }
+            source.sendSuccess(() -> Component.translatable("commands.fieldguide.grant.variant.success", "all", entryId.toString()), true);
+            return targets.size();
         }
 
         for (ServerPlayer player : targets) {
@@ -293,11 +271,19 @@ public class FieldGuideCommand {
             }
         } else {
             ResourceLocation rawId = EntryResolver.getRawId(entryId);
+
             if (BuiltInRegistries.ENTITY_TYPE.containsKey(rawId)) {
                 EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.get(rawId);
                 List<VariantDef> variants = FieldGuideVariantManager.getVariants(type, level);
                 for (VariantDef variant : variants) {
                     progress.unlock(player, entryId, variant.id(), true);
+                }
+            }
+
+            GuideEntry resolved = ServerFieldGuideManager.getInstance().getResolvedEntry(entryId);
+            if (resolved != null && resolved.visualVariants() != null) {
+                for (EntryVariantData vd : resolved.visualVariants()) {
+                    progress.unlock(player, entryId, vd.variantId(), true);
                 }
             }
         }
@@ -313,11 +299,19 @@ public class FieldGuideCommand {
             }
         } else {
             ResourceLocation rawId = EntryResolver.getRawId(entryId);
+
             if (BuiltInRegistries.ENTITY_TYPE.containsKey(rawId)) {
                 EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.get(rawId);
                 List<VariantDef> variants = FieldGuideVariantManager.getVariants(type, level);
                 for (VariantDef variant : variants) {
                     progress.revoke(entryId + "#" + variant.id());
+                }
+            }
+
+            GuideEntry resolved = ServerFieldGuideManager.getInstance().getResolvedEntry(entryId);
+            if (resolved != null && resolved.visualVariants() != null) {
+                for (EntryVariantData vd : resolved.visualVariants()) {
+                    progress.revoke(entryId + "#" + vd.variantId());
                 }
             }
         }
