@@ -20,8 +20,32 @@ Custom icons for you to use in the style of the mod can be found in `assets\fiel
 | --- | --- | --- |
 | `sort_index` | Integer | Determines the tab order (lower numbers are first). |
 | `icon` | String | (Optional) The Resource Location for the category's tab icon. |
+| `target_category` | String | (Optional) If set, entries are appended to this category ID instead of creating a new one. The filename is ignored as a category ID. |
 | `replace` | Boolean | (Optional) If true, clears existing entries in this category before adding new ones. |
 | `contents` | Array | A list of entry objects. |
+
+### Appending to Existing Categories
+
+To add entries to a category you didn't create (e.g. the built-in `monsters` category), use `target_category` in any category file. The filename can be anything, only `target_category` determines where the entries go.
+
+`data/<namespace>/fieldguide/categories/my_additions.json`
+
+```json
+{
+  "target_category": "fieldguide:monsters",
+  "contents": [
+    {
+      "type": "entry",
+      "id": "minecraft:cow",
+      "unlock": {
+        "unlocked_by_default": true
+      }
+    }
+  ]
+}
+```
+
+Entries are appended by default. Set `"replace": true` to clear the category's existing entries first.
 
 ### Removing Default Categories
 
