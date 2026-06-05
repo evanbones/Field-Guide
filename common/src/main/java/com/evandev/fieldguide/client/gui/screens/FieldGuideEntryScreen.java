@@ -59,6 +59,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.BufferedReader;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -798,7 +799,7 @@ public class FieldGuideEntryScreen extends BookScreen {
                 ResourceLocation renderTexture = baseTexture;
 
                 if (resourceManager.getResource(txtFile).isPresent()) {
-                    try (java.io.BufferedReader reader = resourceManager.getResource(txtFile).get().openAsReader()) {
+                    try (BufferedReader reader = resourceManager.getResource(txtFile).get().openAsReader()) {
                         String redirectStr = reader.readLine();
                         if (redirectStr != null && !redirectStr.trim().isEmpty()) {
                             ResourceLocation redirectLoc = ResourceLocation.parse(redirectStr.trim());
@@ -819,7 +820,7 @@ public class FieldGuideEntryScreen extends BookScreen {
                 } else if (resourceManager.getResource(baseTexture).isPresent()) {
                     graphics.blit(baseTexture, x + offset, y + offset, 0, 0, 16, 16, 16, 16);
                 } else {
-                    ResourceLocation plainsTexture = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/immersiveoverlays/plains.png");
+                    ResourceLocation plainsTexture = ResourceLocation.withDefaultNamespace("textures/immersiveoverlays/plains.png");
                     if (resourceManager.getResource(plainsTexture).isPresent()) {
                         graphics.blit(plainsTexture, x + offset, y + offset, 0, 0, 16, 16, 16, 16);
                     }
