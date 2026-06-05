@@ -77,8 +77,32 @@
   "option.fieldguide.enable_spyglass_scanning": "Enable Spyglass Scanning",
   "option.fieldguide.enable_spyglass_scanning.tooltip": "Allows players to scan entries from afar using a Spyglass.",
 
+  "option.fieldguide.enable_spyglass_discovery": "Enable Spyglass Discovery",
+  "option.fieldguide.enable_spyglass_discovery.tooltip": "Reveals undiscovered entries from afar using a Spyglass.",
+
+  "option.fieldguide.enable_lens_discovery": "Enable Lens Discovery",
+  "option.fieldguide.enable_lens_discovery.tooltip": "Reveals nearby undiscovered entries while holding the Lens.",
+
   "option.fieldguide.enable_naked_eye_scanning": "Enable Naked Eye Scanning",
   "option.fieldguide.enable_naked_eye_scanning.tooltip": "Allows players to scan entries just by looking at them without a Spyglass.",
+
+  "option.fieldguide.enable_naked_eye_discovery": "Enable Naked Eye Discovery",
+  "option.fieldguide.enable_naked_eye_discovery.tooltip": "Reveals nearby undiscovered entries.",
+
+  "option.fieldguide.naked_eye_discovery_distance": "Naked Eye Discovery Distance",
+  "option.fieldguide.naked_eye_discovery_distance.tooltip": "The distance within which undiscovered entries are revealed.",
+
+  "option.fieldguide.enable_field_guide_scanning": "Enable Field Guide Scanning",
+  "option.fieldguide.enable_field_guide_scanning.tooltip": "Allows players to scan entries by holding right-click while holding the Field Guide.",
+
+  "option.fieldguide.field_guide_scan_distance": "Field Guide Scan Distance",
+  "option.fieldguide.field_guide_scan_distance.tooltip": "The maximum distance from which you can scan an entry while holding the Field Guide.",
+
+  "option.fieldguide.lens_scan_distance": "Lens Scan Distance",
+  "option.fieldguide.lens_scan_distance.tooltip": "The maximum distance from which you can scan an entry while holding the Lens.",
+
+  "option.fieldguide.lens_discovery_distance": "Lens Discovery Distance",
+  "option.fieldguide.lens_discovery_distance.tooltip": "The distance within which nearby undiscovered entries are revealed while holding the Lens.",
 
   "option.fieldguide.grant_xp_on_scan": "Grant XP on Scan",
   "option.fieldguide.grant_xp_on_scan.tooltip": "If enabled, discovering a new entry via scanning will grant the player experience points.",
@@ -197,6 +221,8 @@
 
   "option.fieldguide.enable_field_guide_item": "Enable Field Guide Item (Requires Restart)",
   "option.fieldguide.enable_field_guide_item.tooltip": "If enabled, a craftable Field Guide item will be available in the game.",
+  "option.fieldguide.enable_lens_item": "Enable Lens Item (Requires Restart)",
+  "option.fieldguide.enable_lens_item.tooltip": "If enabled, a Lens item will be available in the game. Holding it reveals nearby undiscovered entries.",
 
   "option.fieldguide.enable_copying_pages": "Enable Copying Pages",
   "option.fieldguide.enable_copying_pages.tooltip": "If enabled, players can copy pages from their Field Guide to share with others.",
@@ -226,6 +252,8 @@
 
   "item.fieldguide.field_guide": "Field Guide",
   "item.fieldguide.field_guide.tooltip": "Right-click to open your Field Guide",
+  "item.fieldguide.lens": "Lens",
+  "item.fieldguide.lens.tooltip": "Hold to discover nearby Field Guide entries.",
 
   "item.fieldguide.page": "Field Guide Notes",
   "item.fieldguide.page.entry": "Entry: %s",

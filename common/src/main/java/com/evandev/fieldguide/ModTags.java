@@ -21,6 +21,7 @@ public class ModTags {
 
     public static class Items {
         public static final TagKey<Item> SPYGLASSES = tag("spyglasses");
+        public static final TagKey<Item> LENSES = tag("lenses");
         public static final TagKey<Item> BLACKLISTED = tag("blacklisted");
 
         private static TagKey<Item> tag(String name) {

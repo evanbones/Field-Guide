@@ -6,6 +6,7 @@ import com.evandev.fieldguide.api.GuideEntry;
 import com.evandev.fieldguide.client.ClientFieldGuideManager;
 import com.evandev.fieldguide.client.FieldGuideClient;
 import com.evandev.fieldguide.client.progress.ProgressManager;
+import com.evandev.fieldguide.item.ModItems;
 import com.evandev.fieldguide.compat.cobblemon.FieldGuideCobblemonCompat;
 import com.evandev.fieldguide.config.ClientConfig;
 import com.evandev.fieldguide.config.ServerConfig;
@@ -68,8 +69,7 @@ public class FieldGuideScanManager {
 
         FieldGuideScanState state = FieldGuideScanState.getInstance();
 
-        boolean hasSpyglass = isUsingSpyglass(minecraft.player);
-        boolean canScan = (hasSpyglass && ServerConfig.get().enableSpyglassScanning) || ServerConfig.get().enableNakedEyeScanning;
+        boolean canScan = getScanDistance(minecraft) > 0;
         boolean isScanningActive = canScan && !ServerConfig.get().disableScanning;
 
         if (FieldGuideClient.SCAN_KEY != null && !FieldGuideClient.SCAN_KEY.isUnbound()) {
@@ -95,6 +95,53 @@ public class FieldGuideScanManager {
         return player.isScoping() || (player.isUsingItem() && player.getUseItem().is(ModTags.Items.SPYGLASSES));
     }
 
+    private boolean holdsFieldGuide(Player player) {
+        if (ModItems.FIELD_GUIDE == null) return false;
+        return player.getMainHandItem().is(ModItems.FIELD_GUIDE.get()) || player.getOffhandItem().is(ModItems.FIELD_GUIDE.get());
+    }
+
+    private boolean holdsLens(Player player) {
+        return player.getMainHandItem().is(ModTags.Items.LENSES) || player.getOffhandItem().is(ModTags.Items.LENSES);
+    }
+
+    private boolean isRightClickHeld() {
+        return Minecraft.getInstance().options.keyUse.isDown();
+    }
+
+    public double getScanDistance(Minecraft minecraft) {
+        Player player = minecraft.player;
+        if (player == null) return 0;
+        if (isUsingSpyglass(player) && ServerConfig.get().enableSpyglassScanning) {
+            return ServerConfig.get().spyglassScanDistance;
+        }
+        if (holdsLens(player) && isRightClickHeld()) {
+            return ServerConfig.get().lensScanDistance;
+        }
+        if (ServerConfig.get().enableFieldGuideScanning && holdsFieldGuide(player) && isRightClickHeld()) {
+            return ServerConfig.get().fieldGuideScanDistance;
+        }
+        if (ServerConfig.get().enableNakedEyeScanning) {
+            return ServerConfig.get().nakedEyeScanDistance;
+        }
+        return 0;
+    }
+
+    public double getDiscoveryDistance(Minecraft minecraft) {
+        Player player = minecraft.player;
+        if (player == null) return 0;
+        double distance = 0;
+        if (isUsingSpyglass(player) && ServerConfig.get().enableSpyglassDiscovery) {
+            distance = Math.max(distance, ServerConfig.get().spyglassScanDistance);
+        }
+        if (holdsLens(player) && ServerConfig.get().enableLensDiscovery) {
+            distance = Math.max(distance, ServerConfig.get().lensDiscoveryDistance);
+        }
+        if (ServerConfig.get().enableNakedEyeDiscovery) {
+            distance = Math.max(distance, ServerConfig.get().nakedEyeDiscoveryDistance);
+        }
+        return distance;
+    }
+
     public void handleTargetAcquisition(Minecraft minecraft, Object foundTarget, Object resolvedEntry, double hitDistSq, BlockHitResult blockHit) {
         FieldGuideScanState state = FieldGuideScanState.getInstance();
         if (foundTarget == null) {
@@ -110,9 +157,7 @@ public class FieldGuideScanManager {
             return;
         }
 
-        double activeScanDist = (minecraft.player != null && isUsingSpyglass(minecraft.player) && ServerConfig.get().enableSpyglassScanning)
-                ? ServerConfig.get().spyglassScanDistance
-                : (ServerConfig.get().enableNakedEyeScanning ? ServerConfig.get().nakedEyeScanDistance : 0);
+        double activeScanDist = getScanDistance(minecraft);
 
         if (hitDistSq > (activeScanDist * activeScanDist)) {
             state.setOutOfRangeTarget(foundTarget);

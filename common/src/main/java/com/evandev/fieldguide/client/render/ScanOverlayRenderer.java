@@ -44,7 +44,7 @@ import java.util.Queue;
 public class ScanOverlayRenderer {
     private static final float VERTICAL_BUFFER = 1.3f;
 
-    private static final VertexConsumer DUMMY_CONSUMER = new VertexConsumer() {
+    protected static final VertexConsumer DUMMY_CONSUMER = new VertexConsumer() {
         @Override
         public @NotNull VertexConsumer addVertex(float x, float y, float z) {
             return this;
@@ -123,7 +123,7 @@ public class ScanOverlayRenderer {
         }
     }
 
-    private static Entity resolveEntity(Entity entity) {
+    protected static Entity resolveEntity(Entity entity) {
         if (entity == null) return null;
         if (entity instanceof EnderDragonPart dragonPart) {
             return dragonPart.parentMob;
@@ -139,7 +139,7 @@ public class ScanOverlayRenderer {
         return entity;
     }
 
-    private static VertexConsumer createTintedConsumer(VertexConsumer delegate, MultiBufferSource provider, float r, float g, float b, float a) {
+    protected static VertexConsumer createTintedConsumer(VertexConsumer delegate, MultiBufferSource provider, float r, float g, float b, float a) {
         if (Services.PLATFORM.isModLoaded("entity_texture_features")) {
             return EtfCompat.createTintedConsumer(delegate, provider, r, g, b, a);
         }
@@ -413,7 +413,7 @@ public class ScanOverlayRenderer {
         return blocks;
     }
 
-    private static void renderBlockModelAsShell(Minecraft mc, BlockState state, BlockPos pos, PoseStack poseStack, VertexConsumer consumer, Set<BlockPos> blocksToRender) {
+   protected static void renderBlockModelAsShell(Minecraft mc, BlockState state, BlockPos pos, PoseStack poseStack, VertexConsumer consumer, Set<BlockPos> blocksToRender) {
         BakedModel model = mc.getBlockRenderer().getBlockModel(state);
         RandomSource random = RandomSource.create();
         long seed = state.getSeed(pos);
@@ -486,7 +486,7 @@ public class ScanOverlayRenderer {
         poseStack.popPose();
     }
 
-    private static class ScanBufferSourceWrapper implements MultiBufferSource {
+    protected static class ScanBufferSourceWrapper implements MultiBufferSource {
         private final MultiBufferSource.BufferSource delegate;
         private final float r, g, b, a;
         private final boolean isDepth;
