@@ -164,7 +164,7 @@ public class ClothConfigIntegration {
                 .build());
 
         general.addEntry(entryBuilder.startDoubleField(Component.translatable("option.fieldguide.lens_scan_distance"), serverConfig.lensScanDistance)
-                .setDefaultValue(4.0D)
+                .setDefaultValue(6.0D)
                 .setMin(1.0D)
                 .setMax(256.0D)
                 .setTooltip(Component.translatable("option.fieldguide.lens_scan_distance.tooltip"))
@@ -178,7 +178,7 @@ public class ClothConfigIntegration {
                 .build());
 
         general.addEntry(entryBuilder.startDoubleField(Component.translatable("option.fieldguide.lens_discovery_distance"), serverConfig.lensDiscoveryDistance)
-                .setDefaultValue(48.0D)
+                .setDefaultValue(24.0D)
                 .setMin(1.0D)
                 .setMax(256.0D)
                 .setTooltip(Component.translatable("option.fieldguide.lens_discovery_distance.tooltip"))
