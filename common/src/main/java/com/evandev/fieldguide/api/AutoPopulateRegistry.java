@@ -116,6 +116,9 @@ public class AutoPopulateRegistry {
             }
             return Collections.emptyList();
         });
+
+        register("paintings", (params, categoryId) -> getPaintingEntries(id -> true));
+        register("mod_paintings", (modId, categoryId) -> getPaintingEntries(id -> id.getNamespace().equals(modId)));
     }
 
     private static List<Object> getEntityStrategy(String strategy, ResourceLocation categoryId) {
@@ -181,6 +184,27 @@ public class AutoPopulateRegistry {
     public static String getEntryKey(Object obj) {
         ResourceLocation id = getEntryId(obj, true);
         return id != null ? id.toString() : "";
+    }
+
+    public static List<Object> getPaintingEntries(Predicate<ResourceLocation> namespaceFilter) {
+        ResourceLocation paintingEntityId = new ResourceLocation("minecraft", "painting");
+        return BuiltInRegistries.PAINTING_VARIANT.stream()
+                .filter(v -> namespaceFilter.test(BuiltInRegistries.PAINTING_VARIANT.getKey(v)))
+                .sorted(Comparator.comparing(v -> BuiltInRegistries.PAINTING_VARIANT.getKey(v).toString()))
+                .map(v -> (Object) new GuideEntry(
+                        BuiltInRegistries.PAINTING_VARIANT.getKey(v),
+                        paintingEntityId,
+                        null,
+                        EntryKind.NORMAL,
+                        false,
+                        false,
+                        null,
+                        null,
+                        null,
+                        null,
+                        EntryUnlockData.DEFAULT
+                ))
+                .toList();
     }
 
     public static List<Object> getAutoTrees(Predicate<ResourceLocation> namespaceFilter, ResourceLocation categoryId) {

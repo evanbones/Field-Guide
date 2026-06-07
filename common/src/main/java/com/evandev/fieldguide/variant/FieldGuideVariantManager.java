@@ -12,6 +12,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.animal.Fox;
+import net.minecraft.world.entity.animal.Parrot;
 import net.minecraft.world.entity.animal.Sheep;
 import net.minecraft.world.entity.animal.horse.Horse;
 import net.minecraft.world.entity.animal.horse.Llama;
@@ -52,6 +54,43 @@ public class FieldGuideVariantManager {
             @Override
             public VariantDef getCurrent(Sheep entity) {
                 return new VariantDef(entity.getColor().getName(), entity.getColor());
+            }
+        });
+
+        // Fox
+        registerProvider(Fox.class, new VariantProvider<>() {
+            @Override
+            public List<VariantDef> getVariants(Fox entity) {
+                return Arrays.stream(Fox.Type.values()).map(v -> new VariantDef(v.getSerializedName(), v)).toList();
+            }
+
+            @Override
+            public void apply(Fox entity, VariantDef def) {
+                if (def.value() instanceof Fox.Type type) entity.setVariant(type);
+            }
+
+            @Override
+            public VariantDef getCurrent(Fox entity) {
+                return new VariantDef(entity.getVariant().getSerializedName(), entity.getVariant());
+            }
+        });
+
+        // Parrot
+        registerProvider(Parrot.class, new VariantProvider<>() {
+            @Override
+            public List<VariantDef> getVariants(Parrot entity) {
+                return Arrays.stream(Parrot.Variant.values()).map(v -> new VariantDef(v.getSerializedName(), v)).toList();
+            }
+
+            @Override
+            public void apply(Parrot entity, VariantDef def) {
+                if (def.value() instanceof Parrot.Variant type)
+                    entity.setVariant(type);
+            }
+
+            @Override
+            public VariantDef getCurrent(Parrot entity) {
+                return new VariantDef(entity.getVariant().getSerializedName(), entity.getVariant());
             }
         });
 

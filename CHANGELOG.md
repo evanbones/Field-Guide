@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0] - 2026-06-06
+
+### Fixed
+
+- Fixed `alignment_icon` configuration not working.
+- Added an `autopopulate` strategy for paintings.
+- Added Panda variants.
+- Fixed Fox and Parrot variants in 1.20.
+- Backport various fixes from 1.21.
+
 ## [1.7.5] - 2026-05-05
 
 ### Fixed

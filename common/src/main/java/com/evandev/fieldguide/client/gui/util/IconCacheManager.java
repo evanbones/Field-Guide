@@ -72,17 +72,15 @@ public class IconCacheManager {
         PENDING_GENERATIONS.clear();
         MAIN_THREAD_TASKS.clear();
 
-        CompletableFuture.runAsync(() -> {
-            if (Files.exists(CACHE_DIR)) {
-                try (Stream<Path> walk = Files.walk(CACHE_DIR)) {
-                    walk.sorted(Comparator.reverseOrder())
-                            .map(Path::toFile)
-                            .forEach(File::delete);
-                } catch (IOException e) {
-                    Constants.LOG.error("Failed to delete icon cache directory", e);
-                }
+        if (Files.exists(CACHE_DIR)) {
+            try (Stream<Path> walk = Files.walk(CACHE_DIR)) {
+                walk.sorted(Comparator.reverseOrder())
+                        .map(Path::toFile)
+                        .forEach(File::delete);
+            } catch (IOException e) {
+                Constants.LOG.error("Failed to delete icon cache directory", e);
             }
-        }, IO_EXECUTOR);
+        }
     }
 
     public static Optional<ResourceLocation> getOrGenerateIcon(Object baseEntry, Object cacheKey, boolean isPage, Runnable renderAction) {

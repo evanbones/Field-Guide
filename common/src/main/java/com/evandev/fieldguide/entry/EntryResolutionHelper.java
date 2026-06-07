@@ -25,10 +25,16 @@ public class EntryResolutionHelper {
             if (entry == null) continue;
 
             if (entry.isAutoPopulate() && entry.strategy() != null) {
+                EntryUnlockData autoUnlock = entry.unlockData();
+                boolean hasCustomUnlock = autoUnlock != null && !EntryUnlockData.DEFAULT.equals(autoUnlock);
                 for (Object obj : AutoPopulateRegistry.getEntries(entry.strategy(), categoryId)) {
                     String key = AutoPopulateRegistry.getEntryKey(obj);
                     if (!key.isEmpty() && !addedKeys.contains(key)) {
-                        foundEntries.add(obj);
+                        Object toAdd = obj;
+                        if (hasCustomUnlock && obj instanceof GuideEntry ge) {
+                            toAdd = new GuideEntry(ge.id(), ge.displayId(), ge.icon(), ge.kind(), ge.virtual(), ge.autoPopulate(), ge.strategy(), ge.childEntries(), ge.structureData(), ge.virtualData(), autoUnlock);
+                        }
+                        foundEntries.add(toAdd);
                         addedKeys.add(key);
                     }
                 }
@@ -38,8 +44,10 @@ public class EntryResolutionHelper {
             } else {
                 ResourceLocation targetId = entry.displayId() != null ? entry.displayId() : entry.id();
                 resolveSingleEntry(targetId, categoryId, entry.strategy()).ifPresent(e -> {
-                    foundEntries.add(entry.isComposite() || entry.isStructure() ? entry : e);
-                    addedKeys.add(AutoPopulateRegistry.getEntryKey(e));
+                    boolean isIndirect = entry.displayId() != null && !entry.displayId().equals(entry.id());
+                    Object toAdd = (entry.isComposite() || entry.isStructure() || isIndirect) ? entry : e;
+                    foundEntries.add(toAdd);
+                    addedKeys.add(AutoPopulateRegistry.getEntryKey(toAdd));
                 });
             }
         }

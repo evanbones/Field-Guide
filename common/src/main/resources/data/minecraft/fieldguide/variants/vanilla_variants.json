@@ -2,6 +2,39 @@
   "replace": false,
   "entries": [
     {
+      "id": "minecraft:panda",
+      "variants": [
+        {
+          "id": "normal",
+          "nbt": "{MainGene:\"normal\"}"
+        },
+        {
+          "id": "lazy",
+          "nbt": "{MainGene:\"lazy\"}"
+        },
+        {
+          "id": "playful",
+          "nbt": "{MainGene:\"playful\"}"
+        },
+        {
+          "id": "worried",
+          "nbt": "{MainGene:\"worried\"}"
+        },
+        {
+          "id": "aggressive",
+          "nbt": "{MainGene:\"aggressive\"}"
+        },
+        {
+          "id": "weak",
+          "nbt": "{MainGene:\"weak\",HiddenGene:\"weak\"}"
+        },
+        {
+          "id": "brown",
+          "nbt": "{MainGene:\"brown\",HiddenGene:\"brown\"}"
+        }
+      ]
+    },
+    {
       "id": "minecraft:frog",
       "variants": [
         {

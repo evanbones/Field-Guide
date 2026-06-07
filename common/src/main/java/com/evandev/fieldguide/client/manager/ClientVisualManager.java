@@ -64,8 +64,15 @@ public class ClientVisualManager {
             EntryVisual visual = new EntryVisual();
             if (json.has("custom_sound"))
                 visual.customSound = new ResourceLocation(GsonHelper.getAsString(json, "custom_sound"));
-            if (json.has("alignment_icon"))
-                visual.alignmentIcon = new ResourceLocation(GsonHelper.getAsString(json, "alignment_icon"));
+            if (json.has("alignment_icon")) {
+                String iconValue = GsonHelper.getAsString(json, "alignment_icon");
+                visual.alignmentIcon = switch (iconValue) {
+                    case "neutral" -> Constants.NEUTRAL_ICON;
+                    case "hostile" -> Constants.HOSTILE_ICON;
+                    case "passive" -> Constants.PASSIVE_ICON;
+                    default -> new ResourceLocation(iconValue);
+                };
+            }
             if (json.has("scale")) visual.scale = GsonHelper.getAsFloat(json, "scale");
             if (json.has("y_offset")) visual.yOffset = GsonHelper.getAsFloat(json, "y_offset");
             if (json.has("x_offset")) visual.xOffset = GsonHelper.getAsFloat(json, "x_offset");

@@ -3,6 +3,8 @@ package com.evandev.fieldguide.client.attribute;
 import com.evandev.fieldguide.Constants;
 import com.evandev.fieldguide.api.attribute.AttributeProvider;
 import com.evandev.fieldguide.api.attribute.GuideAttribute;
+import com.evandev.fieldguide.client.ClientFieldGuideManager;
+import com.evandev.fieldguide.client.data.EntryVisual;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
@@ -34,6 +36,19 @@ public class DefaultAttributeProvider implements AttributeProvider {
                 icon = Constants.PASSIVE_ICON;
                 typeComponent = Component.translatable("fieldguide.alignment.passive");
             }
+
+            EntryVisual visual = ClientFieldGuideManager.getInstance().getEntryVisual(entry);
+            if (visual != null && visual.alignmentIcon != null) {
+                icon = visual.alignmentIcon;
+                if (icon.equals(Constants.NEUTRAL_ICON)) {
+                    typeComponent = Component.translatable("fieldguide.alignment.neutral");
+                } else if (icon.equals(Constants.HOSTILE_ICON)) {
+                    typeComponent = Component.translatable("fieldguide.alignment.hostile");
+                } else if (icon.equals(Constants.PASSIVE_ICON)) {
+                    typeComponent = Component.translatable("fieldguide.alignment.passive");
+                }
+            }
+
             attributes.add(GuideAttribute.of(icon, 0, 0, 9, 9, 9, 9, null, typeComponent));
 
             // Health

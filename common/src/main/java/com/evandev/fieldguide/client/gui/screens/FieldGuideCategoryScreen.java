@@ -30,6 +30,8 @@ import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.decoration.Painting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -40,6 +42,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
@@ -744,6 +747,11 @@ public class FieldGuideCategoryScreen extends BookScreen {
                         Constants.LOG.error("Failed to create entity for guide: {}", type.getDescription().getString());
                     }
                 }
+                if (entity instanceof Painting painting && entry instanceof GuideEntry ge) {
+                    CompoundTag variantTag = new CompoundTag();
+                    variantTag.putString("variant", ge.id().toString());
+                    Painting.loadVariant(variantTag).ifPresent(painting::setVariant);
+                }
             }
             if (entity != null) entryCache.put(id, entity);
         }
@@ -870,7 +878,13 @@ public class FieldGuideCategoryScreen extends BookScreen {
         } else if (coreEntry instanceof Block block) {
             EntryRenderHelper.renderBlock(guiGraphics, block, x, y, 15.0F, unlocked, false, 1.0F);
         } else if (coreEntry instanceof Item item) {
-            EntryRenderHelper.renderItem(guiGraphics, item, x, y, 20.0F, unlocked, false, 1.0F);
+            if (entry instanceof GuideEntry ge && ge.displayId() != null && item == Items.PAINTING) {
+                ItemStack paintingStack = new ItemStack(Items.PAINTING);
+                paintingStack.getOrCreateTagElement("EntityTag").putString("variant", ge.id().toString());
+                EntryRenderHelper.renderItemStack(guiGraphics, paintingStack, ge, x, y, 20.0F, unlocked, false, 1.0F);
+            } else {
+                EntryRenderHelper.renderItem(guiGraphics, item, x, y, 20.0F, unlocked, false, 1.0F);
+            }
         }
     }
 }

@@ -362,6 +362,25 @@ public class ServerFieldGuideManager extends SimplePreparableReloadListener<Serv
                 return allCompositeComponents.contains(AutoPopulateRegistry.getEntryKey(entry));
             });
         }
+
+        registerResolvedEntryUnlocks();
+    }
+
+    private void registerResolvedEntryUnlocks() {
+        for (List<Object> entries : resolvedCategoryEntries.values()) {
+            for (Object obj : entries) {
+                if (!(obj instanceof GuideEntry ge)) continue;
+                if (EntryUnlockData.DEFAULT.equals(ge.unlockData())) continue;
+                entryUnlockDataMap.putIfAbsent(ge.id(), ge.unlockData());
+            }
+        }
+
+        for (Map.Entry<ResourceLocation, EntryUnlockData> mapEntry : entryUnlockDataMap.entrySet()) {
+            ResourceLocation entryId = mapEntry.getKey();
+            for (ResourceLocation triggerId : mapEntry.getValue().triggerOn()) {
+                triggerOnMap.computeIfAbsent(triggerId, k -> new HashSet<>()).add(entryId);
+            }
+        }
     }
 
     public void onServerStarted(MinecraftServer server) {

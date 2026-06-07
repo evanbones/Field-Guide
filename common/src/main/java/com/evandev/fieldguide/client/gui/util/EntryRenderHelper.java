@@ -75,17 +75,23 @@ public class EntryRenderHelper {
 
         ResourceLocation id = AutoPopulateRegistry.getEntryId(baseEntry);
         if (id != null) {
+            String subDir = "";
+            if (baseEntry instanceof GuideEntry ge && ge.displayId() != null && !ge.displayId().equals(ge.id())) {
+                int colon = entryKey.indexOf(':');
+                if (colon > 0) subDir = entryKey.substring(0, colon) + "/";
+            }
+
             if (cacheKey instanceof String str && str.contains("#")) {
                 String variantId = str.substring(str.indexOf('#') + 1).replace(":", "_").toLowerCase(Locale.ROOT);
-                ResourceLocation specificVariantLoc = new ResourceLocation(id.getNamespace(), "textures/fieldguide/entries/" + id.getPath() + "_" + variantId + (isPage ? "_page.png" : "_grid.png"));
+                ResourceLocation specificVariantLoc = new ResourceLocation(id.getNamespace(), "textures/fieldguide/entries/" + subDir + id.getPath() + "_" + variantId + (isPage ? "_page.png" : "_grid.png"));
                 if (Minecraft.getInstance().getResourceManager().getResource(specificVariantLoc).isPresent()) {
                     OVERRIDE_CACHE.put(key, Optional.of(specificVariantLoc));
                     return Optional.of(specificVariantLoc);
                 }
             }
 
-            ResourceLocation specificLoc = new ResourceLocation(id.getNamespace(), "textures/fieldguide/entries/" + id.getPath() + (isPage ? "_page.png" : "_grid.png"));
-            ResourceLocation defaultLoc = new ResourceLocation(id.getNamespace(), "textures/fieldguide/entries/" + id.getPath() + ".png");
+            ResourceLocation specificLoc = new ResourceLocation(id.getNamespace(), "textures/fieldguide/entries/" + subDir + id.getPath() + (isPage ? "_page.png" : "_grid.png"));
+            ResourceLocation defaultLoc = new ResourceLocation(id.getNamespace(), "textures/fieldguide/entries/" + subDir + id.getPath() + ".png");
 
             var resourceManager = Minecraft.getInstance().getResourceManager();
             if (resourceManager.getResource(specificLoc).isPresent()) {
@@ -385,6 +391,31 @@ public class EntryRenderHelper {
                 Minecraft.getInstance().getItemRenderer().renderStatic(stack, ItemDisplayContext.GUI, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, pose, buffers, Minecraft.getInstance().level, 0);
             } catch (Exception e) {
                 Constants.LOG.error("Failed to render item in Field Guide: {}", BuiltInRegistries.ITEM.getKey(item), e);
+            } finally {
+                buffers.endBatch();
+            }
+        });
+    }
+
+    public static void renderItemStack(GuiGraphics guiGraphics, ItemStack stack, Object entry, int x, int y, float baseScale, boolean unlocked, boolean isPage, float bounceScale) {
+        int scaledSize = (int) (baseScale * 2);
+
+        renderWithCache(entry, entry, guiGraphics, x, y, scaledSize, scaledSize, unlocked, isPage, bounceScale, () -> {
+            Lighting.setupForFlatItems();
+
+            EntryVisual visual = ClientFieldGuideManager.getInstance().getEntryVisual(stack.getItem());
+
+            float clampedScale = 100f * getVisualScale(visual, isPage);
+
+            PoseStack pose = new PoseStack();
+            pose.scale(clampedScale, -clampedScale, 1.0f);
+
+            MultiBufferSource.BufferSource buffers = Minecraft.getInstance().renderBuffers().bufferSource();
+
+            try {
+                Minecraft.getInstance().getItemRenderer().renderStatic(stack, ItemDisplayContext.GUI, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, pose, buffers, Minecraft.getInstance().level, 0);
+            } catch (Exception e) {
+                Constants.LOG.error("Failed to render item stack in Field Guide: {}", BuiltInRegistries.ITEM.getKey(stack.getItem()), e);
             } finally {
                 buffers.endBatch();
             }

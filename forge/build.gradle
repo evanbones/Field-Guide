@@ -92,6 +92,10 @@ dependencies {
     // Scholar
     modImplementation "maven.modrinth:scholar:yxQA51K6"
 
+    // Gallery
+    modRuntimeOnly "maven.modrinth:gallery:1.0.3"
+    modRuntimeOnly "maven.modrinth:blueprint:7.1.4"
+
     compileOnly project(":common")
     annotationProcessor("org.spongepowered:mixin:0.8.5-SNAPSHOT:processor")
 }

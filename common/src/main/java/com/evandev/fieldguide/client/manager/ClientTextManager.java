@@ -7,6 +7,7 @@ import com.evandev.fieldguide.config.ServerConfig;
 import com.evandev.fieldguide.entry.EntryResolver;
 import com.evandev.fieldguide.platform.Services;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
@@ -181,6 +182,11 @@ public class ClientTextManager {
             if (I18n.exists(oldOverrideKey)) return Component.translatable(oldOverrideKey);
         }
 
+        if (entry instanceof GuideEntry && id != null && BuiltInRegistries.PAINTING_VARIANT.containsKey(id)) {
+            String titleKey = "painting." + id.getNamespace() + "." + id.getPath() + ".title";
+            if (I18n.exists(titleKey)) return Component.translatable(titleKey);
+        }
+
         Object coreEntry = EntryResolver.resolveCoreEntry(entry);
 
         if (entry instanceof GuideEntry ge && ge.isStructure() && id != null && id.getPath().endsWith("_tree")) {
@@ -202,8 +208,10 @@ public class ClientTextManager {
     }
 
     public Component getEntryName(Object entry, String variantId) {
-        String custom = ProgressManager.getInstance().getCustomName(entry.toString() + (variantId != null ? "#" + variantId : ""));
-        if (custom != null) return Component.literal(custom);
+        ResourceLocation id = EntryResolver.getEntryId(entry);
+        String key = id != null ? id.toString() : entry.toString();
+        if (variantId != null) key += "#" + variantId;
+        String custom = ProgressManager.getInstance().getCustomName(key);        if (custom != null) return Component.literal(custom);
 
         return getDefaultNameComponent(entry, variantId);
     }

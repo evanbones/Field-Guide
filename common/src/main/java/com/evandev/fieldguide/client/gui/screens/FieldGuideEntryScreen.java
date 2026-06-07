@@ -50,6 +50,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.decoration.Painting;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -320,6 +321,11 @@ public class FieldGuideEntryScreen extends BookScreen {
             try {
                 this.renderedEntity = type.create(this.minecraft.level);
             } catch (Exception ignored) {
+            }
+            if (this.renderedEntity instanceof Painting painting && entry instanceof GuideEntry ge) {
+                CompoundTag variantTag = new CompoundTag();
+                variantTag.putString("variant", ge.id().toString());
+                Painting.loadVariant(variantTag).ifPresent(painting::setVariant);
             }
         }
 
@@ -606,7 +612,13 @@ public class FieldGuideEntryScreen extends BookScreen {
             }
         } else if (renderEntry instanceof Item item) {
             if (!hideEntity) {
-                EntryRenderHelper.renderItem(guiGraphics, item, xPos, yPos, 60.0F, unlocked, true, bounce);
+                if (entry instanceof GuideEntry ge && ge.displayId() != null && item == Items.PAINTING) {
+                    ItemStack paintingStack = new ItemStack(Items.PAINTING);
+                    paintingStack.getOrCreateTagElement("EntityTag").putString("variant", ge.id().toString());
+                    EntryRenderHelper.renderItemStack(guiGraphics, paintingStack, ge, xPos, yPos, 60.0F, unlocked, true, bounce);
+                } else {
+                    EntryRenderHelper.renderItem(guiGraphics, item, xPos, yPos, 60.0F, unlocked, true, bounce);
+                }
             }
         }
 
