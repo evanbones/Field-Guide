@@ -16,6 +16,7 @@ import net.minecraft.world.entity.animal.Fox;
 import net.minecraft.world.entity.animal.MushroomCow;
 import net.minecraft.world.entity.animal.Parrot;
 import net.minecraft.world.entity.animal.Sheep;
+import net.minecraft.world.entity.animal.axolotl.Axolotl;
 import net.minecraft.world.entity.animal.horse.Horse;
 import net.minecraft.world.entity.animal.horse.Llama;
 import net.minecraft.world.entity.animal.horse.Variant;
@@ -55,6 +56,26 @@ public class FieldGuideVariantManager {
             @Override
             public VariantDef getCurrent(Sheep entity) {
                 return new VariantDef(entity.getColor().getName(), entity.getColor());
+            }
+        });
+
+        // Axolotl
+        registerProvider(Axolotl.class, new VariantProvider<>() {
+            @Override
+            public List<VariantDef> getVariants(Axolotl entity) {
+                return Arrays.stream(Axolotl.Variant.values())
+                        .map(v -> new VariantDef(v.getSerializedName(), v))
+                        .toList();
+            }
+
+            @Override
+            public void apply(Axolotl entity, VariantDef def) {
+                if (def.value() instanceof Axolotl.Variant type) entity.setVariant(type);
+            }
+
+            @Override
+            public VariantDef getCurrent(Axolotl entity) {
+                return new VariantDef(entity.getVariant().getSerializedName(), entity.getVariant());
             }
         });
 

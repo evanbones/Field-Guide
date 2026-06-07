@@ -1,3 +1,3 @@
 ### Fixed
 
-- Fixed Mooshroom variants.
+- Fixed Axolotl variants.
