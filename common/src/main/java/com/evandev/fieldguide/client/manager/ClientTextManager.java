@@ -211,7 +211,8 @@ public class ClientTextManager {
         ResourceLocation id = EntryResolver.getEntryId(entry);
         String key = id != null ? id.toString() : entry.toString();
         if (variantId != null) key += "#" + variantId;
-        String custom = ProgressManager.getInstance().getCustomName(key);        if (custom != null) return Component.literal(custom);
+        String custom = ProgressManager.getInstance().getCustomName(key);
+        if (custom != null) return Component.literal(custom);
 
         return getDefaultNameComponent(entry, variantId);
     }

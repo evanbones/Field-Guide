@@ -13,6 +13,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.Fox;
+import net.minecraft.world.entity.animal.MushroomCow;
 import net.minecraft.world.entity.animal.Parrot;
 import net.minecraft.world.entity.animal.Sheep;
 import net.minecraft.world.entity.animal.horse.Horse;
@@ -111,6 +112,26 @@ public class FieldGuideVariantManager {
             @Override
             public VariantDef getCurrent(Horse entity) {
                 return new VariantDef(entity.getVariant().name(), entity.getVariant());
+            }
+        });
+
+        // Mooshroom
+        registerProvider(MushroomCow.class, new VariantProvider<>() {
+            @Override
+            public List<VariantDef> getVariants(MushroomCow entity) {
+                return Arrays.stream(MushroomCow.MushroomType.values())
+                        .map(v -> new VariantDef(v.getSerializedName(), v))
+                        .toList();
+            }
+
+            @Override
+            public void apply(MushroomCow entity, VariantDef def) {
+                if (def.value() instanceof MushroomCow.MushroomType type) entity.setVariant(type);
+            }
+
+            @Override
+            public VariantDef getCurrent(MushroomCow entity) {
+                return new VariantDef(entity.getVariant().getSerializedName(), entity.getVariant());
             }
         });
 
@@ -315,68 +336,68 @@ public class FieldGuideVariantManager {
         };
     }
 
-    private static VariantProvider<Mob> getReflectionProvider(Mob mob) {  
-        Class<?> clazz = mob.getClass();  
-        while (clazz != null && clazz != Mob.class && clazz != Object.class) {  
-            Method[] methods;  
-            try {  
-                methods = clazz.getDeclaredMethods();  
-            } catch (NoClassDefFoundError | RuntimeException e) {  
-                clazz = clazz.getSuperclass();  
-                continue;  
-            }  
-  
-            for (Method m : methods) {  
-                String name = m.getName();  
-                if (m.getParameterCount() == 0 && (name.startsWith("get") || name.startsWith("is")) &&  
-                        (name.contains("Variant") || name.contains("Variation") || name.contains("Type") || name.contains("Color")) &&  
-                        !name.equals("getCollarColor") && !name.contains("Order") && !name.contains("Mode") && !name.contains("Status") &&  
-                        !name.contains("Behaviour") && !name.contains("Accessibility") && !name.contains("State") &&  
-                        !name.contains("SpawnType")) {  
-  
-                    if (!m.getReturnType().isEnum() || m.getReturnType().getSimpleName().equals("DyeColor")) {  
-                        continue;  
-                    }  
-  
-                    String suffix = name.startsWith("get") ? name.substring(3) : name.substring(2);  
-                    try {  
-                        Method potentialSetter = mob.getClass().getMethod("set" + suffix, m.getReturnType());  
-  
-                        final Method finalGetter = m;  
-                        final Method finalSetter = potentialSetter;  
-  
-                        return new VariantProvider<>() {  
-                            @Override  
-                            public List<VariantDef> getVariants(Mob entity) {  
-                                return Arrays.stream(finalGetter.getReturnType().getEnumConstants())  
-                                        .map(e -> new VariantDef(((Enum<?>) e).name(), e))  
-                                        .toList();  
-                            }  
-  
-                            @Override  
-                            public void apply(Mob entity, VariantDef def) {  
-                                try {  
-                                    finalSetter.invoke(entity, def.value());  
-                                } catch (Exception ignored) {  
-                                }  
-                            }  
-  
-                            @Override  
-                            public VariantDef getCurrent(Mob entity) {  
-                                try {  
-                                    Object val = finalGetter.invoke(entity);  
-                                    if (val instanceof Enum<?> e) return new VariantDef(e.name(), e);  
-                                } catch (Exception ignored) {  
-                                }  
-                                return new VariantDef("default", null);  
-                            }  
-                        };  
-                    } catch (NoSuchMethodException | NoClassDefFoundError | RuntimeException ignored) {  
-                    }  
-                }  
-            }  
-            clazz = clazz.getSuperclass();  
-        }  
-        return null;  
+    private static VariantProvider<Mob> getReflectionProvider(Mob mob) {
+        Class<?> clazz = mob.getClass();
+        while (clazz != null && clazz != Mob.class && clazz != Object.class) {
+            Method[] methods;
+            try {
+                methods = clazz.getDeclaredMethods();
+            } catch (NoClassDefFoundError | RuntimeException e) {
+                clazz = clazz.getSuperclass();
+                continue;
+            }
+
+            for (Method m : methods) {
+                String name = m.getName();
+                if (m.getParameterCount() == 0 && (name.startsWith("get") || name.startsWith("is")) &&
+                        (name.contains("Variant") || name.contains("Variation") || name.contains("Type") || name.contains("Color")) &&
+                        !name.equals("getCollarColor") && !name.contains("Order") && !name.contains("Mode") && !name.contains("Status") &&
+                        !name.contains("Behaviour") && !name.contains("Accessibility") && !name.contains("State") &&
+                        !name.contains("SpawnType")) {
+
+                    if (!m.getReturnType().isEnum() || m.getReturnType().getSimpleName().equals("DyeColor")) {
+                        continue;
+                    }
+
+                    String suffix = name.startsWith("get") ? name.substring(3) : name.substring(2);
+                    try {
+                        Method potentialSetter = mob.getClass().getMethod("set" + suffix, m.getReturnType());
+
+                        final Method finalGetter = m;
+                        final Method finalSetter = potentialSetter;
+
+                        return new VariantProvider<>() {
+                            @Override
+                            public List<VariantDef> getVariants(Mob entity) {
+                                return Arrays.stream(finalGetter.getReturnType().getEnumConstants())
+                                        .map(e -> new VariantDef(((Enum<?>) e).name(), e))
+                                        .toList();
+                            }
+
+                            @Override
+                            public void apply(Mob entity, VariantDef def) {
+                                try {
+                                    finalSetter.invoke(entity, def.value());
+                                } catch (Exception ignored) {
+                                }
+                            }
+
+                            @Override
+                            public VariantDef getCurrent(Mob entity) {
+                                try {
+                                    Object val = finalGetter.invoke(entity);
+                                    if (val instanceof Enum<?> e) return new VariantDef(e.name(), e);
+                                } catch (Exception ignored) {
+                                }
+                                return new VariantDef("default", null);
+                            }
+                        };
+                    } catch (NoSuchMethodException | NoClassDefFoundError | RuntimeException ignored) {
+                    }
+                }
+            }
+            clazz = clazz.getSuperclass();
+        }
+        return null;
     }
 }
