@@ -30,6 +30,7 @@ public class ServerConfig {
     public boolean keepSilhouetteWhenUnlocked = false;
     public boolean unlockAllVariants = false;
     public boolean enableFieldGuideItem = false;
+    public boolean enableLensItem = false;
     public boolean requireItemToOpen = false;
     public boolean enableCopyingPages = true;
 
@@ -37,9 +38,20 @@ public class ServerConfig {
 
     public boolean enableSpyglassScanning = true;
     public double spyglassScanDistance = 64.0D;
+    public boolean enableSpyglassDiscovery = true;
 
     public boolean enableNakedEyeScanning = false;
     public double nakedEyeScanDistance = 10.0D;
+
+    public boolean enableNakedEyeDiscovery = false;
+    public double nakedEyeDiscoveryDistance = 8.0D;
+
+    public boolean enableFieldGuideScanning = false;
+    public double fieldGuideScanDistance = 4.0D;
+
+    public double lensScanDistance = 6.0D;
+    public boolean enableLensDiscovery = true;
+    public double lensDiscoveryDistance = 24.0D;
 
     public boolean showUndiscoveredNames = false;
     public boolean hideUndiscoveredFromSearch = false;

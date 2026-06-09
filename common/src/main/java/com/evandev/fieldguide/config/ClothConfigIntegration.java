@@ -45,6 +45,12 @@ public class ClothConfigIntegration {
                 .setSaveConsumer(newValue -> serverConfig.enableFieldGuideItem = newValue)
                 .build());
 
+        general.addEntry(entryBuilder.startBooleanToggle(Component.translatable("option.fieldguide.enable_lens_item"), serverConfig.enableLensItem)
+                .setDefaultValue(false)
+                .setTooltip(Component.translatable("option.fieldguide.enable_lens_item.tooltip"))
+                .setSaveConsumer(newValue -> serverConfig.enableLensItem = newValue)
+                .build());
+
         general.addEntry(entryBuilder.startBooleanToggle(Component.translatable("option.fieldguide.require_item_to_open"), serverConfig.requireItemToOpen)
                 .setDefaultValue(false)
                 .setTooltip(Component.translatable("option.fieldguide.require_item_to_open.tooltip"))
@@ -115,12 +121,68 @@ public class ClothConfigIntegration {
                 .setSaveConsumer(newValue -> serverConfig.spyglassScanDistance = newValue)
                 .build());
 
+        general.addEntry(entryBuilder.startBooleanToggle(Component.translatable("option.fieldguide.enable_spyglass_discovery"), serverConfig.enableSpyglassDiscovery)
+                .setDefaultValue(true)
+                .setTooltip(Component.translatable("option.fieldguide.enable_spyglass_discovery.tooltip"))
+                .setSaveConsumer(newValue -> serverConfig.enableSpyglassDiscovery = newValue)
+                .build());
+
         general.addEntry(entryBuilder.startDoubleField(Component.translatable("option.fieldguide.naked_eye_scan_distance"), serverConfig.nakedEyeScanDistance)
                 .setDefaultValue(10.0D)
                 .setMin(1.0D)
                 .setMax(256.0D)
                 .setTooltip(Component.translatable("option.fieldguide.naked_eye_scan_distance.tooltip"))
                 .setSaveConsumer(newValue -> serverConfig.nakedEyeScanDistance = newValue)
+                .build());
+
+        general.addEntry(entryBuilder.startBooleanToggle(Component.translatable("option.fieldguide.enable_naked_eye_discovery"), serverConfig.enableNakedEyeDiscovery)
+                .setDefaultValue(false)
+                .setTooltip(Component.translatable("option.fieldguide.enable_naked_eye_discovery.tooltip"))
+                .setSaveConsumer(newValue -> serverConfig.enableNakedEyeDiscovery = newValue)
+                .build());
+
+        general.addEntry(entryBuilder.startDoubleField(Component.translatable("option.fieldguide.naked_eye_discovery_distance"), serverConfig.nakedEyeDiscoveryDistance)
+                .setDefaultValue(8.0D)
+                .setMin(1.0D)
+                .setMax(256.0D)
+                .setTooltip(Component.translatable("option.fieldguide.naked_eye_discovery_distance.tooltip"))
+                .setSaveConsumer(newValue -> serverConfig.nakedEyeDiscoveryDistance = newValue)
+                .build());
+
+        general.addEntry(entryBuilder.startBooleanToggle(Component.translatable("option.fieldguide.enable_field_guide_scanning"), serverConfig.enableFieldGuideScanning)
+                .setDefaultValue(false)
+                .setTooltip(Component.translatable("option.fieldguide.enable_field_guide_scanning.tooltip"))
+                .setSaveConsumer(newValue -> serverConfig.enableFieldGuideScanning = newValue)
+                .build());
+
+        general.addEntry(entryBuilder.startDoubleField(Component.translatable("option.fieldguide.field_guide_scan_distance"), serverConfig.fieldGuideScanDistance)
+                .setDefaultValue(4.0D)
+                .setMin(1.0D)
+                .setMax(256.0D)
+                .setTooltip(Component.translatable("option.fieldguide.field_guide_scan_distance.tooltip"))
+                .setSaveConsumer(newValue -> serverConfig.fieldGuideScanDistance = newValue)
+                .build());
+
+        general.addEntry(entryBuilder.startDoubleField(Component.translatable("option.fieldguide.lens_scan_distance"), serverConfig.lensScanDistance)
+                .setDefaultValue(6.0D)
+                .setMin(1.0D)
+                .setMax(256.0D)
+                .setTooltip(Component.translatable("option.fieldguide.lens_scan_distance.tooltip"))
+                .setSaveConsumer(newValue -> serverConfig.lensScanDistance = newValue)
+                .build());
+
+        general.addEntry(entryBuilder.startBooleanToggle(Component.translatable("option.fieldguide.enable_lens_discovery"), serverConfig.enableLensDiscovery)
+                .setDefaultValue(true)
+                .setTooltip(Component.translatable("option.fieldguide.enable_lens_discovery.tooltip"))
+                .setSaveConsumer(newValue -> serverConfig.enableLensDiscovery = newValue)
+                .build());
+
+        general.addEntry(entryBuilder.startDoubleField(Component.translatable("option.fieldguide.lens_discovery_distance"), serverConfig.lensDiscoveryDistance)
+                .setDefaultValue(24.0D)
+                .setMin(1.0D)
+                .setMax(256.0D)
+                .setTooltip(Component.translatable("option.fieldguide.lens_discovery_distance.tooltip"))
+                .setSaveConsumer(newValue -> serverConfig.lensDiscoveryDistance = newValue)
                 .build());
 
         general.addEntry(entryBuilder.startBooleanToggle(Component.translatable("option.fieldguide.grant_xp_on_scan"), serverConfig.grantXpOnScan)
