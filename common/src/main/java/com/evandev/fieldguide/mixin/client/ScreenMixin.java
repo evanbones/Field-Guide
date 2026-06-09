@@ -24,7 +24,7 @@ public class ScreenMixin {
             return;
         }
 
-        if (FieldGuideClient.OPEN_GUIDE_KEY.matches(keyCode, scanCode)) {
+        if (FieldGuideClient.OPEN_GUIDE_KEY != null && FieldGuideClient.OPEN_GUIDE_KEY.matches(keyCode, scanCode)) {
             if (Services.PLATFORM.isModLoaded("emi")) {
                 ItemStack hoveredStack = EmiCompat.getHoveredItem();
 

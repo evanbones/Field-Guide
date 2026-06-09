@@ -108,7 +108,9 @@ public class ScholarWidgetHelper {
             int scrollPixelOffset = scrollable ? scrollOffset * font.lineHeight : 0;
 
             if (isHovered && button == InputConstants.MOUSE_BUTTON_RIGHT) {
-                int indexAtMousePos = Math.max(0, getDisplayCache().getCharIndexAtPosition(font, (int) (mouseX - getX()), (int) (mouseY + scrollPixelOffset - getY())));
+                int indexAtMousePos = getDisplayCache().getCharIndexAtPosition(font, (int) (mouseX - getX()), (int) (mouseY + scrollPixelOffset - getY()));
+                if (indexAtMousePos < 0) indexAtMousePos = getEditor().getString().length();
+
                 getEditor().selectWord(indexAtMousePos);
                 refreshDisplayCache();
                 return true;
@@ -121,7 +123,8 @@ public class ScholarWidgetHelper {
                     this.canDrag = false;
                 } else {
                     long currentTime = System.currentTimeMillis();
-                    int indexAtMousePos = Math.max(0, getDisplayCache().getCharIndexAtPosition(this.font, (int) (mouseX - getX()), (int) (mouseY + scrollPixelOffset - getY())));
+                    int indexAtMousePos = getDisplayCache().getCharIndexAtPosition(this.font, (int) (mouseX - getX()), (int) (mouseY + scrollPixelOffset - getY()));
+                    if (indexAtMousePos < 0) indexAtMousePos = getEditor().getString().length();
 
                     if (Math.abs(this.lastClickPos.x - (int) mouseX) < 4 && Math.abs(this.lastClickPos.y - (int) mouseY) < 4 && currentTime - this.lastActionTime < 250L) {
                         if (!this.getEditor().isSelecting()) {
@@ -152,7 +155,9 @@ public class ScholarWidgetHelper {
             }
             if (button == 0 && this.canDrag) {
                 int scrollPixelOffset = scrollable ? scrollOffset * font.lineHeight : 0;
-                int indexAtMousePos = Math.max(0, getDisplayCache().getCharIndexAtPosition(this.font, (int) (mouseX - getX()), (int) (mouseY + scrollPixelOffset - getY())));
+                int indexAtMousePos = getDisplayCache().getCharIndexAtPosition(this.font, (int) (mouseX - getX()), (int) (mouseY + scrollPixelOffset - getY()));
+                if (indexAtMousePos < 0) indexAtMousePos = getEditor().getString().length();
+
                 this.getEditor().setCursorPos(indexAtMousePos, true);
                 this.refreshDisplayCache();
                 return true;
@@ -171,7 +176,12 @@ public class ScholarWidgetHelper {
 
         @Override
         public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-            boolean result = super.keyPressed(keyCode, scanCode, modifiers);
+            boolean result = false;
+            try {
+                result = super.keyPressed(keyCode, scanCode, modifiers);
+            } catch (IndexOutOfBoundsException e) {
+                result = true;
+            }
             scrollToCursor();
             return result;
         }
