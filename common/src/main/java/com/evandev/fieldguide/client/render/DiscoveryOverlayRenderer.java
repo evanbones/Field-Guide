@@ -358,32 +358,13 @@ public final class DiscoveryOverlayRenderer {
     }
 
     private static boolean sightClear(Level level, Player player, Vec3 from, Vec3 to, BlockPos targetPos) {
-        Vec3 dir = to.subtract(from);
-        if (dir.lengthSqr() < 1.0E-6) {
+        BlockHitResult hit = level.clip(new ClipContext(from, to, ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, player));
+
+        if (hit.getType() == HitResult.Type.MISS) {
             return true;
         }
-        Vec3 step = dir.normalize().scale(0.05);
-        double toDistSq = from.distanceToSqr(to);
-        Vec3 start = from;
-        for (int i = 0; i < 80; i++) {
-            BlockHitResult hit = level.clip(new ClipContext(start, to, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player));
-            if (hit.getType() == HitResult.Type.MISS) {
-                return true;
-            }
-            BlockPos hp = hit.getBlockPos();
-            if (targetPos != null && hp.equals(targetPos)) {
-                return true;
-            }
-            if (level.getBlockState(hp).canOcclude()) {
-                return false;
-            }
-            Vec3 next = hit.getLocation().add(step);
-            if (from.distanceToSqr(next) >= toDistSq) {
-                return true;
-            }
-            start = next;
-        }
-        return true;
+
+        return hit.getBlockPos().equals(targetPos);
     }
 
     private static int classifyBlock(Block block) {

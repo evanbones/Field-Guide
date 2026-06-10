@@ -98,7 +98,11 @@ public class VariantOverviewWidget extends AbstractWidget {
         VariantProvider<Mob> provider = (originalRenderedEntity instanceof Mob mob) ? FieldGuideVariantManager.getProvider(mob) : null;
 
         CompoundTag originalTag = new CompoundTag();
-        originalRenderedEntity.saveWithoutId(originalTag);
+        try {
+            originalRenderedEntity.saveWithoutId(originalTag);
+        } catch (Exception e) {
+            Constants.LOG.warn("Failed to save original entity data for variant display ({}): {}", originalRenderedEntity.getType().getDescriptionId(), e.getMessage());
+        }
 
         for (VariantDef variant : variants) {
             if (Services.PLATFORM.isModLoaded("cobblemon") && FieldGuideCobblemonCompat.isPokemon(originalRenderedEntity)) {

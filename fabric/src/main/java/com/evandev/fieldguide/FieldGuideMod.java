@@ -4,6 +4,7 @@ import com.evandev.fieldguide.api.EntryUnlockData;
 import com.evandev.fieldguide.api.variant.VariantDef;
 import com.evandev.fieldguide.api.variant.VariantProvider;
 import com.evandev.fieldguide.compat.exposure.ExposureFabricEventHandler;
+import com.evandev.fieldguide.entry.EntryResolver;
 import com.evandev.fieldguide.network.*;
 import com.evandev.fieldguide.platform.Services;
 import com.evandev.fieldguide.server.ServerFieldGuideManager;
@@ -14,7 +15,7 @@ import com.evandev.fieldguide.server.progress.PlayerFieldGuideProgress;
 import com.evandev.fieldguide.variant.FieldGuideVariantManager;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.fabricmc.fabric.api.entity.event.v1.ServerEntityCombatEvents;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
@@ -22,7 +23,6 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
@@ -31,7 +31,6 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.Mob;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
@@ -127,23 +126,23 @@ public class FieldGuideMod implements ModInitializer {
             context.server().execute(() -> packet.handleServer(context.player()));
         });
 
-        ServerEntityCombatEvents.AFTER_KILLED_OTHER_ENTITY.register((world, entity, killedEntity) -> {
-            if (entity instanceof ServerPlayer player) {
+        ServerLivingEntityEvents.AFTER_DEATH.register((killedEntity, damageSource) -> {
+            if (damageSource.getEntity() instanceof ServerPlayer player) {
                 FieldGuideProgressManager manager = FieldGuideProgressManager.getInstance();
+
                 if (manager.wasRecentlyScanned(player, killedEntity.getId())) {
                     FieldGuideTriggers.SCAN_AND_KILL.get().trigger(player, killedEntity);
                 }
 
-                ResourceLocation entityId = BuiltInRegistries.ENTITY_TYPE.getKey(killedEntity.getType());
+                ResourceLocation entityId = EntryResolver.getEntryId(killedEntity.getType());
                 PlayerFieldGuideProgress progress = manager.getProgress(player);
 
                 if (progress != null) {
-                    String variantId = "";
-                    List<VariantDef> variants = FieldGuideVariantManager.getVariants(killedEntity);
-                    if (!variants.isEmpty()) {
-                        VariantProvider<Mob> provider = FieldGuideVariantManager.getProvider(killedEntity);
+                    String variantId = null;
+                    if (killedEntity instanceof Mob mob) {
+                        VariantProvider<Mob> provider = FieldGuideVariantManager.getProvider(mob);
                         if (provider != null) {
-                            VariantDef current = provider.getCurrent((Mob) killedEntity);
+                            VariantDef current = provider.getCurrent(mob);
                             if (current != null) variantId = current.id();
                         }
                     }
