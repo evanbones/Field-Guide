@@ -122,7 +122,7 @@ public class ClothConfigIntegration {
                 .build());
 
         general.addEntry(entryBuilder.startBooleanToggle(Component.translatable("option.fieldguide.enable_spyglass_discovery"), serverConfig.enableSpyglassDiscovery)
-                .setDefaultValue(true)
+                .setDefaultValue(false)
                 .setTooltip(Component.translatable("option.fieldguide.enable_spyglass_discovery.tooltip"))
                 .setSaveConsumer(newValue -> serverConfig.enableSpyglassDiscovery = newValue)
                 .build());

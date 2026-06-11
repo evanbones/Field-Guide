@@ -38,7 +38,7 @@ public class ServerConfig {
 
     public boolean enableSpyglassScanning = true;
     public double spyglassScanDistance = 64.0D;
-    public boolean enableSpyglassDiscovery = true;
+    public boolean enableSpyglassDiscovery = false;
 
     public boolean enableNakedEyeScanning = false;
     public double nakedEyeScanDistance = 10.0D;
