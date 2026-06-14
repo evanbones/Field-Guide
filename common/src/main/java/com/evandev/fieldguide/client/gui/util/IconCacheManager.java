@@ -16,15 +16,12 @@ import com.mojang.blaze3d.systems.CommandEncoder;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.SubmitNodeStorage;
+import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.feature.FeatureRenderDispatcher;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 import net.minecraft.world.entity.EntityType;
-import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
@@ -190,15 +187,10 @@ public class IconCacheManager {
 
         RenderSystem.backupProjectionMatrix();
 
-        Matrix4f ortho = new Matrix4f().setOrtho(0.0F, RENDER_SIZE, RENDER_SIZE, 0.0F, -1000.0F, 1000.0F);
-        GpuBuffer projBuffer = RenderSystem.getDevice().createBuffer(() -> "Icon Proj", 136, RenderSystem.PROJECTION_MATRIX_UBO_SIZE);
-
-        try (MemoryStack stack = MemoryStack.stackPush()) {
-            ByteBuffer buffer = stack.malloc(RenderSystem.PROJECTION_MATRIX_UBO_SIZE);
-            ortho.get(buffer);
-            encoder.writeToBuffer(projBuffer.slice(), buffer);
-        }
-        RenderSystem.setProjectionMatrix(projBuffer.slice(), ProjectionType.ORTHOGRAPHIC);
+        Projection projection = new Projection();
+        projection.setupOrtho(-1000.0F, 1000.0F, RENDER_SIZE, RENDER_SIZE, true);
+        ProjectionMatrixBuffer projBuffer = new ProjectionMatrixBuffer("field_guide_icons");
+        RenderSystem.setProjectionMatrix(projBuffer.getBuffer(projection), ProjectionType.ORTHOGRAPHIC);
 
         PoseStack poseStack = new PoseStack();
         poseStack.translate(RENDER_SIZE / 2.0f, RENDER_SIZE / 2.0f, 0.0f);
