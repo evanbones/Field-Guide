@@ -1,3 +1,3 @@
 ### Fixed
 
-- Fixed rendering layer sorting with certain entries.
+- Fixed issues with Longview (@EnnuiL).
