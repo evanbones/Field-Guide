@@ -1,7 +1,3 @@
-### Added
+### Changed
 
-- Added Spider icon (@bucketBrian).
-
-### Fixed
-
-- Fixed crash with recent Mixed Litter update.
+- Spyglass Discovery is now disabled by default due to issues with lag.
