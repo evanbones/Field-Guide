@@ -163,10 +163,13 @@ public class EntryRenderHelper {
         }
         Object cacheKey = finalVariantId.isEmpty() ? baseId : baseId.toString() + "#" + finalVariantId;
 
+        boolean isCobblemon = Services.PLATFORM.isModLoaded("cobblemon") && FieldGuideCobblemonCompat.isPokemon(entity);
+        Object renderBase = isCobblemon ? baseId : entity.getType();
+
         final VariantProvider<Mob> finalProvider = provider;
         final VariantDef finalVariant = currentVariant;
 
-        renderWithCache(baseId, cacheKey, guiGraphics, x, y, maxWidth, maxHeight, unlocked, isPage, bounceScale, () -> {
+        renderWithCache(renderBase, cacheKey, guiGraphics, x, y, maxWidth, maxHeight, unlocked, isPage, bounceScale, () -> {
 
             VariantDef tempOriginal = null;
             if (finalProvider != null && entity instanceof Mob mob) {
