@@ -5,6 +5,7 @@ import com.evandev.fieldguide.client.ClientFieldGuideManager;
 import com.evandev.fieldguide.client.FieldGuideClient;
 import com.evandev.fieldguide.client.gui.util.Bounds;
 import com.evandev.fieldguide.client.gui.widget.TabButton;
+import com.evandev.fieldguide.compat.nomansland.NoMansLandCompat;
 import com.evandev.fieldguide.config.ServerConfig;
 import com.evandev.fieldguide.api.Category;
 import net.minecraft.client.Minecraft;
@@ -55,6 +56,24 @@ public abstract class BookScreen extends Screen {
         this.rightPageBounds = new Bounds(this.leftPageBounds.right() + 1, leftPageBounds.top(), PAGE_WIDTH, PAGE_HEIGHT);
 
         initCategories();
+    }
+
+    @Override
+    public void removed() {
+        super.removed();
+        if (this.minecraft != null) {
+            Minecraft minecraft = this.minecraft;
+            minecraft.tell(() -> {
+                Screen current = minecraft.screen;
+                if (current == null || !current.getClass().getName().startsWith("com.evandev.fieldguide."))
+                    NoMansLandCompat.stopReplay();
+            });
+        }
+    }
+
+    @Override
+    public boolean isPauseScreen() {
+        return !NoMansLandCompat.isAvailable();
     }
 
     private void initCategories() {

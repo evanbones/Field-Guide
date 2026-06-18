@@ -38,6 +38,14 @@ public class ClientExposureCompat {
     private static final WidgetSprites ADD_PHOTO_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "widget/exposure/add_photo"), ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "widget/exposure/add_photo_highlighted"));
     private static final ResourceLocation MISSING_PHOTOGRAPH_BACKGROUND = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/exposure/missing_photograph.png");
 
+    public static boolean willRenderAddPhotoButton(Object entry, String variantId) {
+        if (!ClientFieldGuideManager.isUnlocked(entry)) return false;
+        if (variantId != null && !variantId.isEmpty() && !ServerConfig.get().unlockAllVariants
+                && !ClientFieldGuideManager.isVariantUnlocked(entry, variantId)) return false;
+        if (!ClientConfig.get().exposureAddPhotographButton) return false;
+        return ProgressManager.getInstance().getPhotograph(entry, variantId).isEmpty();
+    }
+
     public static void setupExposureWidgets(FieldGuideEntryScreen screen, Object entry, String variantId) {
         if (!ClientFieldGuideManager.isUnlocked(entry)) return;
 

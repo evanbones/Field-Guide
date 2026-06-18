@@ -19,6 +19,7 @@ import com.evandev.fieldguide.client.data.EntryVisual;
 import com.evandev.fieldguide.client.gui.util.Bounds;
 import com.evandev.fieldguide.client.gui.util.EntryRenderHelper;
 import com.evandev.fieldguide.client.gui.widget.FieldGuideSearchBox;
+import com.evandev.fieldguide.client.gui.widget.FriendMoonWidget;
 import com.evandev.fieldguide.client.gui.widget.PageTurnButton;
 import com.evandev.fieldguide.client.gui.widget.PaginatedGridWidget;
 import com.evandev.fieldguide.client.gui.widget.VariantOverviewWidget;
@@ -26,6 +27,7 @@ import com.evandev.fieldguide.client.manager.ClientTextManager;
 import com.evandev.fieldguide.client.progress.ProgressManager;
 import com.evandev.fieldguide.compat.cobblemon.ClientFieldGuideCobblemonCompat;
 import com.evandev.fieldguide.compat.exposure.ClientExposureCompat;
+import com.evandev.fieldguide.compat.nomansland.NoMansLandCompat;
 import com.evandev.fieldguide.compat.scholar.ScholarCompat;
 import com.evandev.fieldguide.config.ClientConfig;
 import com.evandev.fieldguide.config.ServerConfig;
@@ -82,6 +84,9 @@ public class FieldGuideEntryScreen extends BookScreen {
     private PageTurnButton prevVariantButton;
     private PageTurnButton nextVariantButton;
     private VariantOverviewWidget variantOverviewWidget;
+    private FriendMoonWidget friendMoonWidget;
+    private int descX, descY, descW;
+    private boolean replayResetForScreen = false;
 
     private float hoverScale = 1.0f;
     private long lastRenderTime = 0;
@@ -172,6 +177,10 @@ public class FieldGuideEntryScreen extends BookScreen {
             widget.visible = !overviewVisible;
         }
 
+        if (this.friendMoonWidget != null) {
+            this.friendMoonWidget.visible = !overviewVisible;
+        }
+
         if (this.prevVariantButton != null) {
             this.prevVariantButton.visible = !overviewVisible;
             this.prevVariantButton.active = currentVariantIndex > 0;
@@ -227,6 +236,7 @@ public class FieldGuideEntryScreen extends BookScreen {
 
         setupNavigationButtons();
         refreshExposureWidgets();
+        setupFriendMoonWidget(unlocked);
 
         if (unlocked && ServerConfig.get().enableCopyingPages) {
             boolean hasPaper = this.minecraft != null && this.minecraft.player != null && (this.minecraft.player.isCreative() || this.minecraft.player.getInventory().contains(Items.PAPER.getDefaultInstance()));
@@ -260,6 +270,34 @@ public class FieldGuideEntryScreen extends BookScreen {
             this.addRenderableWidget(this.variantOverviewWidget);
             updateWidgetVisibility();
         }
+    }
+
+    private void setupFriendMoonWidget(boolean unlocked) {
+        this.friendMoonWidget = null;
+        if (!replayResetForScreen) {
+            NoMansLandCompat.stopReplay();
+            replayResetForScreen = true;
+        }
+        if (!unlocked || !NoMansLandCompat.isAvailable() || !NoMansLandCompat.isIntegrationUnlocked()) return;
+
+        List<ResourceLocation> dialogues = NoMansLandCompat.getDialoguesForEntry(EntryResolver.resolveCoreEntry(entry));
+        if (dialogues.isEmpty()) return;
+
+        int iconSize = 16;
+        int iconX = this.leftPageBounds.left() + this.leftPageBounds.width() - iconSize - 12;
+        int iconY = this.leftPageBounds.top() + 12;
+
+        if (Services.PLATFORM.isModLoaded("exposure")) {
+            String variantId = (!entityVariants.isEmpty() && currentVariantIndex < entityVariants.size())
+                    ? entityVariants.get(currentVariantIndex).id() : null;
+            if (!ClientExposureCompat.willRenderAddPhotoButton(entry, variantId)) return;
+            iconY += iconSize + 2;
+        }
+
+        this.friendMoonWidget = new FriendMoonWidget(iconX, iconY, iconSize, dialogues,
+                () -> ClientFieldGuideManager.getEntryDescription(entry, this.initialVariant));
+        this.addRenderableWidget(this.friendMoonWidget);
+        updateWidgetVisibility();
     }
 
     private void setupTextWidgets(boolean unlocked) {
@@ -307,6 +345,10 @@ public class FieldGuideEntryScreen extends BookScreen {
             int textY = currentY;
             int textAreaHeight = this.rightPageBounds.bottom() - 29 - textY;
             int maxLines = textAreaHeight / LINE_HEIGHT;
+
+            this.descX = textX;
+            this.descY = textY;
+            this.descW = textAreaWidth;
 
             String initialDesc = ClientFieldGuideManager.getEntryDescription(entry, this.initialVariant);
             if (!ServerConfig.get().disableEditingDescriptions) {
@@ -413,6 +455,9 @@ public class FieldGuideEntryScreen extends BookScreen {
         if (this.variantOverviewWidget != null && this.variantOverviewWidget.isVisible()) {
             if (this.variantOverviewWidget.mouseClicked(mouseX, mouseY, button)) return true;
         }
+
+        if (this.friendMoonWidget != null && this.friendMoonWidget.visible
+                && this.friendMoonWidget.mouseClicked(mouseX, mouseY, button)) return true;
 
         if (super.mouseClicked(mouseX, mouseY, button)) return true;
 
@@ -593,7 +638,12 @@ public class FieldGuideEntryScreen extends BookScreen {
                 } else {
                     textY += LINE_HEIGHT; // Buffer
                 }
-                guiGraphics.drawWordWrap(font, Component.literal(ClientFieldGuideManager.getEntryDescription(entry)), titleX, textY, textAreaWidth, ClientConfig.get().getTextColorInt());
+                this.descX = titleX;
+                this.descY = textY;
+                this.descW = textAreaWidth;
+                if (!NoMansLandCompat.isReplayActive()) {
+                    guiGraphics.drawWordWrap(font, Component.literal(ClientFieldGuideManager.getEntryDescription(entry)), titleX, textY, textAreaWidth, ClientConfig.get().getTextColorInt());
+                }
             }
         }
 
@@ -691,7 +741,13 @@ public class FieldGuideEntryScreen extends BookScreen {
         }
 
         guiGraphics.pose().popPose();
+
+        boolean replaying = ClientFieldGuideManager.isUnlocked(entry) && NoMansLandCompat.isReplayActive();
+        if (this.descriptionWidget != null) this.descriptionWidget.visible = !replaying;
         super.render(guiGraphics, mouseX, mouseY, partialTick);
+        if (replaying) {
+            NoMansLandCompat.renderDescriptionRewrite(guiGraphics, this.font, descX, descY, descW, ClientConfig.get().getTextColorInt());
+        }
     }
 
     private void renderSeasons(GuiGraphics guiGraphics, int x, int y, int mouseX, int mouseY) {
