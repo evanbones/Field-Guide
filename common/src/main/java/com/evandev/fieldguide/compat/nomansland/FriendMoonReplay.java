@@ -22,7 +22,8 @@ public final class FriendMoonReplay {
     private static final ResourceLocation SPEAK_SOUND = ResourceLocation.fromNamespaceAndPath("nomansland", "entity.friend_moon.speak_bgr");
     public static final float INTRO_TICKS = 16f;
     public static final float PLACED_FADE_TICKS = 20f;
-    public static final float FADE_BACK_TICKS = 200f;
+    public static final float HOLD_TICKS = 200f;
+    public static final float FADE_BACK_TICKS = 20f;
     public static final float PULSE_AMPLITUDE = 0.5f;
     public static final float PULSE_SPEED = 0.12f;
     public static final int SPEAK_INTERVAL_TICKS = 2;
@@ -73,7 +74,7 @@ public final class FriendMoonReplay {
     }
 
     public static boolean isTyping() {
-        return isActive() && !state.doneTalking;
+        return isActive() && elapsedTicks >= INTRO_TICKS && !state.doneTalking;
     }
 
     public static void render(GuiGraphics guiGraphics, Font font, int x, int y, int width, int normalColor) {
@@ -105,15 +106,17 @@ public final class FriendMoonReplay {
         }
 
         if (doneTick < 0f) doneTick = elapsedTicks;
-        float back = Mth.clamp((elapsedTicks - doneTick) / FADE_BACK_TICKS, 0f, 1f);
-        if (back >= 1f) {
+        float sinceDone = elapsedTicks - doneTick;
+        if (sinceDone < HOLD_TICKS) {
+            drawText(guiGraphics, font, x, y, width, newFull, 0, Integer.MAX_VALUE, opaqueNormal, true, 1f);
             RenderSystem.disableBlend();
-            reset();
             return;
         }
+        float back = Mth.clamp((sinceDone - HOLD_TICKS) / FADE_BACK_TICKS, 0f, 1f);
         drawText(guiGraphics, font, x, y, width, oldText, 0, Integer.MAX_VALUE, opaqueNormal, false, back);
         drawText(guiGraphics, font, x, y, width, newFull, 0, Integer.MAX_VALUE, opaqueNormal, true, 1f - back);
         RenderSystem.disableBlend();
+        if (back >= 1f) reset();
     }
 
     private static void drawText(GuiGraphics guiGraphics, Font font, int x, int y, int width,

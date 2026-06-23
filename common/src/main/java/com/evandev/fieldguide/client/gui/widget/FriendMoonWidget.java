@@ -41,16 +41,22 @@ public class FriendMoonWidget extends AbstractWidget {
     @Override
     protected void renderWidget(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         boolean heard = !NoMansLandCompat.getHeardDialogues(dialogues).isEmpty();
-        this.active = heard;
+        boolean replayActive = NoMansLandCompat.isReplayActive();
+        this.active = heard && !replayActive;
 
         ResourceLocation texture;
-        if (!heard) {
+        if (replayActive) {
+            if (NoMansLandCompat.isReplayTyping()) {
+                float delta = Minecraft.getInstance().getTimer().getGameTimeDeltaTicks();
+                talkProgress = (talkProgress + (delta * TALK_FRAME_SPEED)) % 2f;
+                texture = (((int) talkProgress) == 1) ? TALKING : HOVER;
+            } else {
+                talkProgress = 0f;
+                texture = HOVER;
+            }
+        } else if (!heard) {
             talkProgress = 0f;
             texture = UNHEARD;
-        } else if (NoMansLandCompat.isReplayTyping()) {
-            float delta = Minecraft.getInstance().getTimer().getGameTimeDeltaTicks();
-            talkProgress = (talkProgress + (delta * TALK_FRAME_SPEED)) % 2f;
-            texture = (((int) talkProgress) == 1) ? TALKING : HOVER;
         } else {
             talkProgress = 0f;
             texture = this.isHovered() ? HOVER : IDLE;
@@ -63,6 +69,7 @@ public class FriendMoonWidget extends AbstractWidget {
 
     @Override
     public void onClick(double mouseX, double mouseY) {
+        if (NoMansLandCompat.isReplayActive()) return;
         List<ResourceLocation> heard = NoMansLandCompat.getHeardDialogues(dialogues);
         if (heard.isEmpty() || Minecraft.getInstance().player == null) return;
         ResourceLocation pick = heard.get(Minecraft.getInstance().player.getRandom().nextInt(heard.size()));
