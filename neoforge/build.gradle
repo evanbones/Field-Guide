@@ -68,7 +68,7 @@ dependencies {
     compileOnly "maven.modrinth:mixed-litter:${mixed_litter_version}"
 
     // No Man's Land
-    implementation "maven.modrinth:no-mans-land:1.5.8"
+    compileOnly "maven.modrinth:no-mans-land:${no_mans_land_version}"
 
     // Spawn
     compileOnly "maven.modrinth:spawn-mod:${spawn_version}"

@@ -39,6 +39,9 @@ dependencies {
     modImplementation "maven.modrinth:exposure:${exposure_fabric_version}"
     modImplementation "maven.modrinth:forge-config-api-port:${fcapi_version}-Fabric"
 
+    // No Man's Land
+    compileOnly "maven.modrinth:no-mans-land:${no_mans_land_version}"
+
     // Cobblemon
     modCompileOnly "com.cobblemon:fabric:${cobblemon_version}"
 

@@ -264,6 +264,7 @@
   "gui.fieldguide.copy.requires_paper": "Requires Paper",
   "gui.fieldguide.back": "Back",
   "gui.fieldguide.loading": "Loading...",
+  "gui.fieldguide.friend_moon": "Friend Moon",
 
   "key.fieldguide.open": "Open Field Guide",
   "key.fieldguide.scan": "Start Scanning",

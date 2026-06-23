@@ -1,0 +1,8 @@
+{
+    "condition": {
+        "type": "nomansland:item_conditional",
+        "items": "fieldguide:field_guide"
+    },
+    "weight": 2,
+    "text": "Ooh!// A little book of discoveries./\nEvery leaf and creature,/ lovingly documented./\nAn honor it would be/ to lend my voice to its pages, wisdom printed for inquisitive eyes..."
+}
