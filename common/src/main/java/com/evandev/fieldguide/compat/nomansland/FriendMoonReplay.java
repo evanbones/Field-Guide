@@ -8,6 +8,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.FastColor;
@@ -87,7 +88,7 @@ public final class FriendMoonReplay {
         RenderSystem.enableBlend();
         if (elapsedTicks < INTRO_TICKS) {
             float alpha = Mth.clamp(1f - (elapsedTicks / INTRO_TICKS), 0f, 1f);
-            drawText(guiGraphics, font, x, y, width, oldText, 0, Integer.MAX_VALUE, FRIEND_MOON_GREEN, false, alpha);
+            drawOld(guiGraphics, font, x, y, width, FRIEND_MOON_GREEN, alpha);
             RenderSystem.disableBlend();
             return;
         }
@@ -99,7 +100,7 @@ public final class FriendMoonReplay {
         revealedCount = visible;
 
         if (!state.doneTalking) {
-            drawText(guiGraphics, font, x, y, width, newFull, 0, visible, opaqueNormal, true, 1f);
+            drawText(guiGraphics, font, x, y, width, newFull, 0, visible, opaqueNormal, 1f, 1f);
             RenderSystem.disableBlend();
             tickSound();
             return;
@@ -108,20 +109,29 @@ public final class FriendMoonReplay {
         if (doneTick < 0f) doneTick = elapsedTicks;
         float sinceDone = elapsedTicks - doneTick;
         if (sinceDone < HOLD_TICKS) {
-            drawText(guiGraphics, font, x, y, width, newFull, 0, Integer.MAX_VALUE, opaqueNormal, true, 1f);
+            drawText(guiGraphics, font, x, y, width, newFull, 0, Integer.MAX_VALUE, opaqueNormal, 1f, 1f);
             RenderSystem.disableBlend();
             return;
         }
         float back = Mth.clamp((sinceDone - HOLD_TICKS) / FADE_BACK_TICKS, 0f, 1f);
-        drawText(guiGraphics, font, x, y, width, oldText, 0, Integer.MAX_VALUE, opaqueNormal, false, back);
-        drawText(guiGraphics, font, x, y, width, newFull, 0, Integer.MAX_VALUE, opaqueNormal, true, 1f - back);
+        drawText(guiGraphics, font, x, y, width, newFull, 0, Integer.MAX_VALUE, opaqueNormal, 1f - back, 1f - back);
+        drawOld(guiGraphics, font, x, y, width, opaqueNormal, back);
         RenderSystem.disableBlend();
         if (back >= 1f) reset();
     }
 
+    private static boolean tooFaint(float alpha) {
+        return (int) (255f * Mth.clamp(alpha, 0f, 1f)) < 4;
+    }
+
+    private static void drawOld(GuiGraphics guiGraphics, Font font, int x, int y, int width, int baseColor, float alpha) {
+        if (tooFaint(alpha)) return;
+        guiGraphics.drawWordWrap(font, Component.literal(oldText), x, y, width, scaleAlpha(baseColor, alpha));
+    }
+
     private static void drawText(GuiGraphics guiGraphics, Font font, int x, int y, int width,
-                                 String full, int drawFrom, int drawTo, int baseColor, boolean typed, float alpha) {
-        if (alpha <= 0.01f) return;
+                                 String full, int drawFrom, int drawTo, int baseColor, float alpha, float greenScale) {
+        if (tooFaint(alpha)) return;
         int idx = 0, cx = x, cy = y, i = 0, n = full.length();
         while (i < n) {
             if (full.charAt(i) == '\n') {
@@ -138,7 +148,7 @@ public final class FriendMoonReplay {
             }
             for (; i < wordEnd; i++) {
                 if (idx >= drawFrom && idx < drawTo) {
-                    int color = scaleAlpha(typed ? newColor(idx, baseColor) : baseColor, alpha);
+                    int color = scaleAlpha(newColor(idx, baseColor, greenScale), alpha);
                     guiGraphics.drawString(font, String.valueOf(full.charAt(i)), cx, cy, color, false);
                 }
                 cx += font.width(String.valueOf(full.charAt(i)));
@@ -152,11 +162,11 @@ public final class FriendMoonReplay {
         }
     }
 
-    private static int newColor(int idx, int normalColor) {
+    private static int newColor(int idx, int normalColor, float greenScale) {
         float placement = revealTick.length == 0 ? 0f
             : 1f - Mth.clamp((elapsedTicks - revealTick[Math.min(idx, revealTick.length - 1)]) / PLACED_FADE_TICKS, 0f, 1f);
         float pulse = PULSE_AMPLITUDE * (0.5f + 0.5f * (float) Math.sin(elapsedTicks * PULSE_SPEED));
-        float green = Math.max(placement, pulse);
+        float green = Math.max(placement, pulse) * Mth.clamp(greenScale, 0f, 1f);
         return lerpColor(normalColor, FRIEND_MOON_GREEN, green);
     }
 

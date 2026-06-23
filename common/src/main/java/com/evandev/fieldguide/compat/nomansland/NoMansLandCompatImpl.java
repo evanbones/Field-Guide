@@ -25,7 +25,7 @@ public class NoMansLandCompatImpl {
 
     public static boolean isIntegrationUnlocked() {
         if (ServerConfig.get().enableFieldGuideItem) {
-            return ClientDialogueTracker.hasHeardOfferingDialogue(FIELD_GUIDE_OFFERING_DIALOGUE);
+            return ClientDialogueTracker.hasHeardDialogue(NMLRegistries.OFFERING_DIALOGUE_KEY.location(), FIELD_GUIDE_OFFERING_DIALOGUE);
         }
         return ClientDialogueTracker.hasHeardAnyDialogue();
     }
@@ -50,8 +50,9 @@ public class NoMansLandCompatImpl {
 
     public static List<ResourceLocation> getHeardDialogues(List<ResourceLocation> dialogues) {
         List<ResourceLocation> heard = new ArrayList<>();
+        ResourceLocation offering = NMLRegistries.OFFERING_DIALOGUE_KEY.location();
         for (ResourceLocation dialogue : dialogues) {
-            if (ClientDialogueTracker.hasHeardOfferingDialogue(dialogue)) {
+            if (ClientDialogueTracker.hasHeardDialogue(offering, dialogue)) {
                 heard.add(dialogue);
             }
         }
