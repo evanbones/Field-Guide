@@ -82,6 +82,9 @@ dependencies {
     // KubeJS
     compileOnly "maven.modrinth:kubejs:${kubejs_version}"
 
+    // Sodium
+    runtimeOnly "maven.modrinth:sodium:mc1.21.1-0.8.12-beta.1-neoforge"
+
     // Serene Seasons
     compileOnly "maven.modrinth:serene-seasons:${serene_seasons_neoforge_version}"
     //runtimeOnly "maven.modrinth:serene-seasons:${serene_seasons_neoforge_version}"
