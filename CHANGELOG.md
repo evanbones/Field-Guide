@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.12.0] - 2026-06-24
+
+### Added
+
+- Added new No Man's Land Friend Moon integration (@tazer).
+    - To get started, offer the Field Guide item to the moon (if it's enabled) and
+      the Field Guide will have a new button to replay dialogue for entries.
+
 ## [1.11.2] - 2026-06-11
 
 ### Added
