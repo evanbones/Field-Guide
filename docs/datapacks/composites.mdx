@@ -1,32 +1,7 @@
 ---
-title: Advanced Datapack Features
+title: Composite Entries
 hide_meta: true
 ---
-
-## Discovery Redirects
-
-Sometimes you may want scanning one entity to unlock the entry for a different one.
-This is useful for entities that have multiple variations or distinct parts (like multi-part bosses) where scanning any part should unlock the main entry.
-
-The redirected block/entity will automatically be removed from categories and will no longer appear as its own entry.
-
-You can define these redirects by creating a JSON file at:
-`data/<namespace>/fieldguide/redirects/<filename>.json`
-
-```json
-{
-  "entries": [
-    {
-      "source": "farmersdelight:budding_tomatoes",
-      "target": "farmersdelight:tomatoes"
-    }
-  ]
-}
-```
-
----
-
-## Composite Entries
 
 A **Composite Entry** is a powerful feature that allows you to group multiple entities or blocks into a single book page, or render custom scenes using NBT structures.
 
@@ -35,7 +10,8 @@ The individual components will automatically be removed from all categories.
 You can define composites by creating a JSON file at:
 `data/<namespace>/fieldguide/composites/<filename>.json`
 
-### Standard Composites
+## Standard Composites
+
 For a single static scene, use `structure_nbt` or `render`:
 
 ```json
@@ -53,10 +29,9 @@ For a single static scene, use `structure_nbt` or `render`:
         }
     ]
 }
-
 ```
 
-### Visual Variants (Multi-Image Composites)
+## Visual Variants (Multi-Image Composites)
 
 If you want a single entry to feature multiple cycleable images or structures (e.g., grouping multiple mods' trees into one page), you can define an array of `visual_variants`:
 
@@ -86,7 +61,6 @@ If you want a single entry to feature multiple cycleable images or structures (e
         }
     ]
 }
-
 ```
 
 * `id`: The unique identifier for this custom entry.
@@ -120,37 +94,3 @@ When a variant uses `entity`/`block`/`item`, its **name, description, and loot a
     ]
 }
 ```
-
----
-
-## Variants
-
-You can manually define variants for entities using NBT.
-
-This is useful for mobs that use custom variant systems that Field Guide can't automatically detect, or for overriding auto-generation.
-
-Field Guide automatically detects variants for many vanilla mobs, including Sheep, Horse, Llama, Fox, Parrot, Rabbit, Axolotl, Mooshroom, and Panda.
-
-`data/<namespace>/fieldguide/variants/<filename>.json`
-
-```json
-{
-  "entries": [
-    {
-      "id": "minecraft:wolf",
-      "replace": false,
-      "variants": [
-        {
-          "id": "pale",
-          "nbt": "{variant: \"minecraft:pale\"}"
-        }
-      ]
-    }
-  ]
-}
-
-```
-
-* `id`: The target entity registry name.
-* `replace`: If set to `true`, the Field Guide will **completely ignore** any automatically detected variants and only use the variants provided in this list.
-* `variants`: A list of variant definitions. If `replace` is true and this list is empty, the entity will be treated as a standard, non-variant entry (hiding all variant UI and subtitles).

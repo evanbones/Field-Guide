@@ -7,7 +7,11 @@ import com.evandev.fieldguide.client.progress.ProgressManager;
 import com.evandev.fieldguide.client.search.SearchManager;
 import com.evandev.fieldguide.entry.EntryResolutionHelper;
 import com.evandev.fieldguide.entry.EntryResolver;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Mob;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -27,6 +31,7 @@ public class ClientCategoryManager {
     private final List<String> lootRemovals = new ArrayList<>();
     private final Map<String, List<ResourceLocation>> indexedLootAdditions = new HashMap<>();
     private final Map<String, List<ResourceLocation>> indexedLootRemovals = new HashMap<>();
+    private Map<ResourceLocation, List<GuideEntry>> nbtEntriesByEntityType = null;
     private boolean needsResolution = false;
 
     private ClientCategoryManager() {
@@ -41,6 +46,7 @@ public class ClientCategoryManager {
             this.redirects.clear();
             this.syncedCategories.clear();
             this.syncedEntries.clear();
+            this.nbtEntriesByEntityType = null;
         }
 
         this.redirects.putAll(redirects);
@@ -48,6 +54,7 @@ public class ClientCategoryManager {
         for (GuideEntry entry : entries) {
             this.syncedEntries.put(entry.id(), entry);
         }
+        if (!entries.isEmpty()) this.nbtEntriesByEntityType = null;
 
         for (Category cat : categories) {
             if (this.syncedCategories.containsKey(cat.getId())) {
@@ -203,14 +210,20 @@ public class ClientCategoryManager {
         return lootAdditions;
     }
 
+    public List<String> getLootRemovals() {
+        return lootRemovals;
+    }
+
     public List<ResourceLocation> getBiomeAdditions(Object entry, String variantId) {
         String key = AutoPopulateRegistry.getEntryKey(entry);
         String baseId = Objects.requireNonNull(AutoPopulateRegistry.getEntryId(entry, false)).toString();
         List<ResourceLocation> additions = new ArrayList<>();
 
         if (variantId != null && !variantId.isEmpty()) {
-            if (indexedBiomeAdditions.containsKey(key + "#" + variantId)) additions.addAll(indexedBiomeAdditions.get(key + "#" + variantId));
-            if (indexedBiomeAdditions.containsKey(baseId + "#" + variantId)) additions.addAll(indexedBiomeAdditions.get(baseId + "#" + variantId));
+            if (indexedBiomeAdditions.containsKey(key + "#" + variantId))
+                additions.addAll(indexedBiomeAdditions.get(key + "#" + variantId));
+            if (indexedBiomeAdditions.containsKey(baseId + "#" + variantId))
+                additions.addAll(indexedBiomeAdditions.get(baseId + "#" + variantId));
         }
 
         if (indexedBiomeAdditions.containsKey(key)) additions.addAll(indexedBiomeAdditions.get(key));
@@ -225,18 +238,16 @@ public class ClientCategoryManager {
         List<ResourceLocation> removals = new ArrayList<>();
 
         if (variantId != null && !variantId.isEmpty()) {
-            if (indexedBiomeRemovals.containsKey(key + "#" + variantId)) removals.addAll(indexedBiomeRemovals.get(key + "#" + variantId));
-            if (indexedBiomeRemovals.containsKey(baseId + "#" + variantId)) removals.addAll(indexedBiomeRemovals.get(baseId + "#" + variantId));
+            if (indexedBiomeRemovals.containsKey(key + "#" + variantId))
+                removals.addAll(indexedBiomeRemovals.get(key + "#" + variantId));
+            if (indexedBiomeRemovals.containsKey(baseId + "#" + variantId))
+                removals.addAll(indexedBiomeRemovals.get(baseId + "#" + variantId));
         }
 
         if (indexedBiomeRemovals.containsKey(key)) removals.addAll(indexedBiomeRemovals.get(key));
         if (indexedBiomeRemovals.containsKey(baseId)) removals.addAll(indexedBiomeRemovals.get(baseId));
 
         return removals;
-    }
-
-    public List<String> getLootRemovals() {
-        return lootRemovals;
     }
 
     public List<ResourceLocation> getLootAdditions(Object entry) {
@@ -255,6 +266,28 @@ public class ClientCategoryManager {
         if (indexedLootRemovals.containsKey(key)) removals.addAll(indexedLootRemovals.get(key));
         if (indexedLootRemovals.containsKey(baseId)) removals.addAll(indexedLootRemovals.get(baseId));
         return removals;
+    }
+
+    public GuideEntry findMatchingNbtEntry(Mob mob) {
+        if (nbtEntriesByEntityType == null) {
+            nbtEntriesByEntityType = new HashMap<>();
+            for (GuideEntry entry : syncedEntries.values()) {
+                if (entry.targetEntityType() != null && entry.nbtPredicate() != null) {
+                    nbtEntriesByEntityType.computeIfAbsent(entry.targetEntityType(), k -> new ArrayList<>()).add(entry);
+                }
+            }
+        }
+        ResourceLocation entityTypeId = BuiltInRegistries.ENTITY_TYPE.getKey(mob.getType());
+        List<GuideEntry> candidates = nbtEntriesByEntityType.get(entityTypeId);
+        if (candidates == null) return null;
+        CompoundTag entityNbt = new CompoundTag();
+        mob.saveWithoutId(entityNbt);
+        for (GuideEntry candidate : candidates) {
+            if (NbtUtils.compareNbt(candidate.nbtPredicate(), entityNbt, true)) {
+                return candidate;
+            }
+        }
+        return null;
     }
 
 }

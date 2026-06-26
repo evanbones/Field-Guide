@@ -1,0 +1,35 @@
+---
+title: Variants
+hide_meta: true
+---
+
+You can manually define variants for entities using NBT.
+
+This is useful for mobs that use custom variant systems that Field Guide can't automatically detect, or for overriding auto-generation.
+
+Field Guide automatically detects variants for many vanilla mobs, including Sheep, Horse, Llama, Fox, Parrot, Rabbit, Axolotl, Mooshroom, and Panda.
+
+`data/<namespace>/fieldguide/variants/<filename>.json`
+
+```json
+{
+  "entries": [
+    {
+      "id": "minecraft:wolf",
+      "replace": false,
+      "variants": [
+        {
+          "id": "pale",
+          "nbt": "{variant: \"minecraft:pale\"}"
+        }
+      ]
+    }
+  ]
+}
+```
+
+* `id`: The target entity registry name.
+* `replace`: If set to `true`, the Field Guide will **completely ignore** any automatically detected variants and only use the variants provided in this list.
+* `variants`: A list of variant definitions. If `replace` is true and this list is empty, the entity will be treated as a standard, non-variant entry (hiding all variant UI and subtitles).
+
+If you need a custom NBT-based mob to appear as its **own separate entry** rather than as a variant of an existing one, use the [`nbt_entry` content type](/datapacks/overview#content-types) instead.

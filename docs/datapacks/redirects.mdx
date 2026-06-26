@@ -1,0 +1,23 @@
+---
+title: Discovery Redirects
+hide_meta: true
+---
+
+Sometimes you may want scanning one entity to unlock the entry for a different one.
+This is useful for entities that have multiple variations or distinct parts (like multi-part bosses) where scanning any part should unlock the main entry.
+
+The redirected block/entity will automatically be removed from categories and will no longer appear as its own entry.
+
+You can define these redirects by creating a JSON file at:
+`data/<namespace>/fieldguide/redirects/<filename>.json`
+
+```json
+{
+  "entries": [
+    {
+      "source": "farmersdelight:budding_tomatoes",
+      "target": "farmersdelight:tomatoes"
+    }
+  ]
+}
+```

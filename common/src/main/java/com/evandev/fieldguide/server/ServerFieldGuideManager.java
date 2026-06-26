@@ -262,7 +262,7 @@ public class ServerFieldGuideManager extends SimplePreparableReloadListener<Serv
                     } else {
                         EntryUnlockData unlockData = getUnlockData(id);
 
-                        GuideEntry synthesized = new GuideEntry(id, id, null, EntryKind.NORMAL, false, false, null, null, null, null, null, unlockData);
+                        GuideEntry synthesized = new GuideEntry(id, id, null, EntryKind.NORMAL, false, false, null, null, null, null, null, unlockData, null, null);
                         chunkCat.addEntryId(id);
                         if (!flattenedEntries.contains(synthesized)) flattenedEntries.add(synthesized);
                     }
@@ -489,7 +489,7 @@ public class ServerFieldGuideManager extends SimplePreparableReloadListener<Serv
                             switch (typeStr) {
                                 case "entry" -> {
                                     ResourceLocation id = ResourceLocation.parse(GsonHelper.getAsString(obj, "id"));
-                                    GuideEntry ge = new GuideEntry(id, id, null, EntryKind.NORMAL, false, false, null, null, null, null, null, unlockData);
+                                    GuideEntry ge = new GuideEntry(id, id, null, EntryKind.NORMAL, false, false, null, null, null, null, null, unlockData, null, null);
                                     data.allEntries.put(id, ge);
                                     category.addEntryId(id);
                                     data.entryUnlockData.put(id, unlockData);
@@ -498,7 +498,7 @@ public class ServerFieldGuideManager extends SimplePreparableReloadListener<Serv
                                     ResourceLocation id = ResourceLocation.parse(GsonHelper.getAsString(obj, "id"));
                                     String virtualType = GsonHelper.getAsString(obj, "virtual_type");
                                     ResourceLocation icon = obj.has("icon") ? ResourceLocation.parse(GsonHelper.getAsString(obj, "icon")) : null;
-                                    GuideEntry ge = new GuideEntry(id, null, icon, EntryKind.NORMAL, true, false, null, null, null, null, new VirtualData(virtualType), unlockData);
+                                    GuideEntry ge = new GuideEntry(id, null, icon, EntryKind.NORMAL, true, false, null, null, null, null, new VirtualData(virtualType), unlockData, null, null);
                                     data.allEntries.put(id, ge);
                                     category.addEntryId(id);
                                     data.entryUnlockData.put(id, unlockData);
@@ -507,9 +507,19 @@ public class ServerFieldGuideManager extends SimplePreparableReloadListener<Serv
                                     String strategy = GsonHelper.getAsString(obj, "strategy");
                                     String safeStrategyName = strategy.replace(":", "_");
                                     ResourceLocation id = ResourceLocation.fromNamespaceAndPath(categoryId.getNamespace(), categoryId.getPath() + "_auto_" + safeStrategyName);
-                                    GuideEntry ge = new GuideEntry(id, null, null, EntryKind.NORMAL, false, true, strategy, null, null, null, null, unlockData);
+                                    GuideEntry ge = new GuideEntry(id, null, null, EntryKind.NORMAL, false, true, strategy, null, null, null, null, unlockData, null, null);
                                     data.allEntries.put(id, ge);
                                     category.addEntryId(id);
+                                }
+                                case "nbt_entry" -> {
+                                    ResourceLocation id = ResourceLocation.parse(GsonHelper.getAsString(obj, "id"));
+                                    ResourceLocation entityType = ResourceLocation.parse(GsonHelper.getAsString(obj, "entity_type"));
+                                    CompoundTag nbt = TagParser.parseTag(GsonHelper.getAsString(obj, "nbt"));
+                                    ResourceLocation displayId = obj.has("display") ? ResourceLocation.parse(GsonHelper.getAsString(obj, "display")) : entityType;
+                                    GuideEntry ge = new GuideEntry(id, displayId, null, EntryKind.NORMAL, false, false, null, null, null, null, null, unlockData, entityType, nbt);
+                                    data.allEntries.put(id, ge);
+                                    category.addEntryId(id);
+                                    data.entryUnlockData.put(id, unlockData);
                                 }
                             }
                         }

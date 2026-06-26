@@ -1,5 +1,6 @@
 package com.evandev.fieldguide.api;
 
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -21,7 +22,9 @@ public record GuideEntry(
         @Nullable StructureData structureData,
         @Nullable List<EntryVariantData> visualVariants,
         @Nullable VirtualData virtualData,
-        EntryUnlockData unlockData
+        EntryUnlockData unlockData,
+        @Nullable ResourceLocation targetEntityType,
+        @Nullable CompoundTag nbtPredicate
 ) {
     public static final StreamCodec<RegistryFriendlyByteBuf, GuideEntry> STREAM_CODEC = StreamCodec.of(
             (buf, entry) -> {
@@ -48,6 +51,8 @@ public record GuideEntry(
                 });
                 EntryUnlockData safeUnlockData = entry.unlockData() != null ? entry.unlockData() : EntryUnlockData.DEFAULT;
                 EntryUnlockData.STREAM_CODEC.encode(buf, safeUnlockData);
+                buf.writeNullable(entry.targetEntityType(), FriendlyByteBuf::writeResourceLocation);
+                buf.writeNullable(entry.nbtPredicate(), (b, tag) -> b.writeNbt(tag));
             },
             buf -> new GuideEntry(
                     buf.readResourceLocation(),
@@ -64,7 +69,9 @@ public record GuideEntry(
                     )),
                     buf.readNullable(nb -> nb.readList(b -> EntryVariantData.STREAM_CODEC.decode((RegistryFriendlyByteBuf) b))),
                     buf.readNullable(nb -> new VirtualData(nb.readUtf())),
-                    EntryUnlockData.STREAM_CODEC.decode(buf)
+                    EntryUnlockData.STREAM_CODEC.decode(buf),
+                    buf.readNullable(FriendlyByteBuf::readResourceLocation),
+                    buf.readNullable(b -> b.readNbt())
             )
     );
 

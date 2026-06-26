@@ -38,7 +38,7 @@ public class EntryResolutionHelper {
             } else {
                 ResourceLocation targetId = entry.displayId() != null ? entry.displayId() : entry.id();
                 resolveSingleEntry(targetId, categoryId, entry.strategy()).ifPresent(e -> {
-                    foundEntries.add(entry.isComposite() || entry.isStructure() ? entry : e);
+                    foundEntries.add(entry.isComposite() || entry.isStructure() || entry.targetEntityType() != null ? entry : e);
                     addedKeys.add(AutoPopulateRegistry.getEntryKey(e));
                 });
             }
@@ -137,13 +137,13 @@ public class EntryResolutionHelper {
             boolean hasVisualVariants = def.visualVariants() != null && !def.visualVariants().isEmpty();
             EntryKind kind = (hasStructure || hasVisualVariants) ? EntryKind.STRUCTURE : EntryKind.NORMAL;
 
-            return new GuideEntry(def.id(), displayLoc, null, kind, false, false, null, components, structureData, def.visualVariants(), null, EntryUnlockData.DEFAULT);
+            return new GuideEntry(def.id(), displayLoc, null, kind, false, false, null, components, structureData, def.visualVariants(), null, EntryUnlockData.DEFAULT, null, null);
         });
     }
 
     public static Optional<Object> resolveSingleEntry(ResourceLocation id, ResourceLocation categoryId, String strategyHint) {
         if (Services.PLATFORM.isModLoaded("cobblemon") && id.getNamespace().equals(Constants.MOD_ID) && id.getPath().startsWith("cobblemon/")) {
-            return Optional.of(new GuideEntry(id, null, null, EntryKind.NORMAL, true, false, null, null, null, null, new VirtualData("cobblemon"), EntryUnlockData.DEFAULT));
+            return Optional.of(new GuideEntry(id, null, null, EntryKind.NORMAL, true, false, null, null, null, null, new VirtualData("cobblemon"), EntryUnlockData.DEFAULT, null, null));
         }
 
         ResourceLocation finalId = EntryResolver.getRawId(id);

@@ -251,7 +251,9 @@ public class AutoPopulateRegistry {
                         new StructureData(null, treeStructure),
                         null,
                         null,
-                        EntryUnlockData.DEFAULT
+                        EntryUnlockData.DEFAULT,
+                        null,
+                        null
                 ));
             }
         }

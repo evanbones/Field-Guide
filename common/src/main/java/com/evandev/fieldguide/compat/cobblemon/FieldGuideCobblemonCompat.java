@@ -226,7 +226,9 @@ public final class FieldGuideCobblemonCompat {
                                         null,
                                         null,
                                         new VirtualData("cobblemon"),
-                                        EntryUnlockData.DEFAULT),
+                                        EntryUnlockData.DEFAULT,
+                                        null,
+                                        null),
                                 pokedexNumber
                         ));
                     }

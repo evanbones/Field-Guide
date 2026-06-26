@@ -5,6 +5,7 @@ import com.evandev.fieldguide.api.AutoPopulateRegistry;
 import com.evandev.fieldguide.api.Category;
 import com.evandev.fieldguide.api.GuideEntry;
 import com.evandev.fieldguide.client.ClientFieldGuideManager;
+import com.evandev.fieldguide.client.manager.ClientCategoryManager;
 import com.evandev.fieldguide.client.progress.ProgressManager;
 import com.evandev.fieldguide.compat.cobblemon.FieldGuideCobblemonCompat;
 import com.evandev.fieldguide.config.ServerConfig;
@@ -111,6 +112,11 @@ public class FieldGuideRaytracer {
                             break;
                         }
                     }
+                }
+
+                if (hitEntity instanceof Mob mob) {
+                    GuideEntry nbtMatch = ClientCategoryManager.getInstance().findMatchingNbtEntry(mob);
+                    if (nbtMatch != null) entryForTarget = nbtMatch;
                 }
             }
 

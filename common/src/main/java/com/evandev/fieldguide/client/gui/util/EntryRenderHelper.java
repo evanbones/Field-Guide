@@ -435,7 +435,7 @@ public class EntryRenderHelper {
             case STRUCTURE -> {
                 if (vd.structureData() != null) {
                     ResourceLocation dummyId = ResourceLocation.fromNamespaceAndPath(baseEntry.id().getNamespace(), baseEntry.id().getPath() + "_" + vd.variantId().replace(":", "_"));
-                    GuideEntry dummy = new GuideEntry(dummyId, baseEntry.displayId(), vd.icon(), baseEntry.kind(), baseEntry.virtual(), baseEntry.autoPopulate(), baseEntry.strategy(), baseEntry.childEntries(), vd.structureData(), null, baseEntry.virtualData(), baseEntry.unlockData());
+                    GuideEntry dummy = new GuideEntry(dummyId, baseEntry.displayId(), vd.icon(), baseEntry.kind(), baseEntry.virtual(), baseEntry.autoPopulate(), baseEntry.strategy(), baseEntry.childEntries(), vd.structureData(), null, baseEntry.virtualData(), baseEntry.unlockData(), null, null);
                     renderStructure(guiGraphics, dummy, centerX, centerY, isPage ? size : size - 4, unlocked, isPage, bounceScale);
                 }
             }

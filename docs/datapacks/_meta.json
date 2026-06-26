@@ -4,5 +4,7 @@
   "blacklisting.mdx": "Blacklisting Entries",
   "biome_loot_modifiers.mdx": "Biome & Loot Modifiers",
   "advancements.mdx": "Advancements",
-  "advanced.mdx": "Advanced Features"
+  "redirects.mdx": "Discovery Redirects",
+  "composites.mdx": "Composite Entries",
+  "variants.mdx": "Variants"
 }

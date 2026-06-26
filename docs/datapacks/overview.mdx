@@ -113,6 +113,27 @@ The Field Guide automatically hides empty categories.
 }
 ```
 
+4. **NBT Entry:** Adds an entry that unlocks when a specific entity is scanned and its NBT matches a predicate. Useful for mods like CEM or Mob Properties Randomness that define custom mob variants via NBT.
+
+```json
+{
+  "type": "nbt_entry",
+  "id": "my_mod:green_zombie",
+  "entity_type": "minecraft:zombie",
+  "nbt": "{SomeCustomTag: 1b}",
+  "display": "minecraft:zombie"
+}
+```
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `id` | String | Unique ID for this entry. |
+| `entity_type` | String | The base entity type to match against (e.g. `minecraft:zombie`). |
+| `nbt` | String | SNBT string. The entity must contain **all** of these tags for the entry to trigger (partial match). |
+| `display` | String | (Optional) Entity ID to render in the guide. Defaults to `entity_type`. |
+
+When the player scans a matching entity, this entry is unlocked instead of the base entity's entry. Supports the standard `"unlock"` block.
+
 ### Content Grouping
 
 By default entries in the list appear in the order they were defined in `content: []`. However, if you want similar entries to be grouped together, a list of ['search queries'](/field-guide/searching) can be provided in `group_by`.
