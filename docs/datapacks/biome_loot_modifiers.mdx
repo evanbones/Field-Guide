@@ -9,13 +9,28 @@ You can target base entities, or specific variants by appending `#variant_id` to
 * **Biome Modifiers:** `data/<namespace>/fieldguide/biome_modifiers/<filename>.json`
 * **Loot Modifiers:** `data/<namespace>/fieldguide/loot_modifiers/<filename>.json`
 
-**Example: Targeting a Base Entity**
+**Example: Targeting a Base Entry**
 ```json
 {
   "additions": [
     {
       "entry": "minecraft:cow",
       "value": "minecraft:milk_bucket"
+    }
+  ]
+}
+```
+
+**Example: Disambiguating Entry Type**
+
+If a mod registers both a block and an entity with the same ID, you can use a type prefix (`entity:`, `block:`, or `item:`) to target one specifically.
+
+```json
+{
+  "additions": [
+    {
+      "entry": "entity:minecraft:zombie",
+      "value": "minecraft:rotten_flesh"
     }
   ]
 }

@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.12.1] - 2026-06-25
+
+### Added
+
+- Fixed automatic variant support for Axolotl, Mooshroom, and Pandas.
+- Loot/biome modifier entries now support `entity:`, `block:`, and `item:` prefixes to disambiguate targets with the
+  same registry name.
+
+### Fixed
+
+- Fixed `alignment_icon` configuration not applying to the entry attribute display.
+- Fixed items that correspond to blocks incorrectly showing block loot tables.
+- Fixed loot modifier `entry` matching failing in edge cases where the entry ID could not be resolved.
+
 ## [1.12.0] - 2026-06-24
 
 ### Added

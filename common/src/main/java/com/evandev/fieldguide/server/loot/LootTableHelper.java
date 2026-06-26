@@ -18,7 +18,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.storage.loot.LootTable;
 
 import java.util.*;
@@ -58,8 +57,6 @@ public class LootTableHelper {
                 tableId = type.getDefaultLootTable();
             } else if (entry instanceof Block block) {
                 tableId = block.getLootTable();
-            } else if (entry instanceof Item item && Block.byItem(item) != Blocks.AIR) {
-                tableId = Block.byItem(item).getLootTable();
             }
 
             processEntry(level, entry, tableId, lootMap);
@@ -125,9 +122,7 @@ public class LootTableHelper {
 
     private static boolean matchesTarget(Object entry, String targetStr) {
         Object coreEntry = EntryResolver.resolveCoreEntry(entry);
-        ResourceLocation entryId = EntryResolver.getRawId(EntryResolver.getEntryId(coreEntry));
 
-        if (entryId == null) return false;
         if (targetStr.startsWith("#")) {
             try {
                 ResourceLocation tagId = ResourceLocation.parse(targetStr.substring(1));
@@ -143,8 +138,18 @@ public class LootTableHelper {
             return false;
         }
 
-        ResourceLocation targetId = EntryResolver.getRawId(ResourceLocation.parse(targetStr));
-        return entryId.equals(targetId);
+        ResourceLocation targetRl = ResourceLocation.parse(targetStr);
+        String targetNs = targetRl.getNamespace();
+
+        if (targetNs.equals("entity") || targetNs.equals("item") || targetNs.equals("block")) {
+            ResourceLocation prefixedEntryId = EntryResolver.getEntryId(coreEntry, true);
+            return targetRl.equals(prefixedEntryId);
+        }
+
+        ResourceLocation rawEntryId = EntryResolver.getRawId(EntryResolver.getEntryId(coreEntry));
+        if (rawEntryId == null) return false;
+        ResourceLocation rawTargetId = EntryResolver.getRawId(targetRl);
+        return rawEntryId.equals(rawTargetId);
     }
 
     public static void applyConfigModifications(Object entry, List<ItemStack> distinctDrops) {
