@@ -2,10 +2,13 @@ package com.evandev.fieldguide.client.progress;
 
 import com.evandev.fieldguide.Constants;
 import com.evandev.fieldguide.FieldGuideLimits;
+import com.evandev.fieldguide.api.EntryVariantData;
+import com.evandev.fieldguide.api.GuideEntry;
 import com.evandev.fieldguide.client.ClientFieldGuideManager;
 import com.evandev.fieldguide.client.data.JournalPage;
 import com.evandev.fieldguide.client.gui.toasts.FieldGuideToast;
 import com.evandev.fieldguide.client.gui.util.IconCacheManager;
+import com.evandev.fieldguide.client.manager.ClientTextManager;
 import com.evandev.fieldguide.config.ClientConfig;
 import com.evandev.fieldguide.entry.EntryResolver;
 import com.evandev.fieldguide.network.MarkSeenPacket;
@@ -465,8 +468,11 @@ public class ProgressManager {
 
     private @NotNull JsonObject getLangJson(String type) {
         JsonObject langJson = new JsonObject();
+        Map<String, String> sortedEntries = new TreeMap<>();
+
         boolean exportNames = type.equals("names") || type.equals("all");
         boolean exportDesc = type.equals("descriptions") || type.equals("all");
+        boolean exportMissing = type.equals("missing");
 
         if (exportNames) {
             for (Map.Entry<String, String> entry : customNames.entrySet()) {
@@ -478,9 +484,9 @@ public class ProgressManager {
 
                 if (parts.length > 1) { // variant
                     String variantSuffix = parts[1].toLowerCase(Locale.ROOT);
-                    langJson.addProperty("fieldguide.name." + entryType + "." + path + "." + variantSuffix, entry.getValue());
+                    sortedEntries.put("fieldguide.name." + entryType + "." + path + "." + variantSuffix, entry.getValue());
                 } else { // base entity
-                    langJson.addProperty("fieldguide.name." + entryType + "." + path, entry.getValue());
+                    sortedEntries.put("fieldguide.name." + entryType + "." + path, entry.getValue());
                 }
             }
         }
@@ -493,9 +499,57 @@ public class ProgressManager {
                 String path = prefixedId.getPath().replace('/', '.');
 
                 String variantSuffix = parts.length > 1 ? "." + parts[1].toLowerCase(Locale.ROOT) : "";
-                langJson.addProperty("fieldguide." + entryType + "." + path + variantSuffix + ".description", entry.getValue());
+                sortedEntries.put("fieldguide." + entryType + "." + path + variantSuffix + ".description", entry.getValue());
             }
         }
+        if (exportMissing) {
+            String missingDesc = I18n.get("fieldguide.description.missing");
+            String missingName = I18n.get("fieldguide.unknown");
+
+            for (Object entry : ClientFieldGuideManager.getValidEntries()) {
+                ResourceLocation id = ClientFieldGuideManager.getEntryId(entry);
+                if (id == null) continue;
+
+                ResourceLocation prefixedId = EntryResolver.getEntryId(entry, true);
+                if (prefixedId == null) prefixedId = id;
+
+                String entryType = prefixedId.getNamespace();
+                String path = prefixedId.getPath().replace('/', '.');
+
+                String nameKey = "fieldguide.name." + entryType + "." + path;
+                String descKey = "fieldguide." + entryType + "." + path + ".description";
+
+                if (ClientTextManager.getInstance().getDefaultNameComponent(entry).getString().equals(missingName)) {
+                    sortedEntries.put(nameKey, "");
+                }
+
+                if (ClientTextManager.getInstance().getEntryDescription(entry).equals(missingDesc)) {
+                    sortedEntries.put(descKey, "");
+                }
+
+                if (entry instanceof GuideEntry ge && ge.hasVisualVariants()) {
+                    for (EntryVariantData variant : ge.visualVariants()) {
+                        String varId = variant.variantId();
+                        String varStr = varId.toLowerCase(Locale.ROOT);
+
+                        String varNameKey = "fieldguide.name." + entryType + "." + path + "." + varStr;
+                        String varDescKey = "fieldguide." + entryType + "." + path + "." + varStr + ".description";
+
+                        if (ClientTextManager.getInstance().getDefaultNameComponent(entry, varId).getString().equals(missingName)) {
+                            sortedEntries.put(varNameKey, "");
+                        }
+                        if (ClientTextManager.getInstance().getEntryDescription(entry, varId).equals(missingDesc)) {
+                            sortedEntries.put(varDescKey, "");
+                        }
+                    }
+                }
+            }
+        }
+
+        for (Map.Entry<String, String> mapEntry : sortedEntries.entrySet()) {
+            langJson.addProperty(mapEntry.getKey(), mapEntry.getValue());
+        }
+
         return langJson;
     }
 }

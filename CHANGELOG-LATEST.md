@@ -1,3 +1,3 @@
 ### Added
 
-- Added support for NBT-based entries.
+- Added `/fieldguide export missing` to export missing descriptions as lang entries.

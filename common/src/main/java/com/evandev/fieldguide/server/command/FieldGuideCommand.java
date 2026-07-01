@@ -53,6 +53,7 @@ public class FieldGuideCommand {
                         .then(Commands.literal("names").executes(ctx -> export(ctx.getSource(), "names")))
                         .then(Commands.literal("descriptions").executes(ctx -> export(ctx.getSource(), "descriptions")))
                         .then(Commands.literal("all").executes(ctx -> export(ctx.getSource(), "all")))
+                        .then(Commands.literal("missing").executes(ctx -> export(ctx.getSource(), "missing")))
                         .then(Commands.literal("feature")
                                 .then(Commands.argument("feature", ResourceLocationArgument.id())
                                         .suggests((ctx, builder) -> SharedSuggestionProvider.suggestResource(
