@@ -44,6 +44,8 @@ publishMods {
         projectId = "1470590"
         minecraftVersions.add("${minecraft_version}")
 
+        client = true
+        server = true
         requires("item-descriptions")
         optional("cloth-config")
         requires("immersive-overlays")
