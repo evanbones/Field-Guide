@@ -71,9 +71,6 @@ dependencies {
     implementation "maven.modrinth:no-mans-land:${no_mans_land_version}"
     runtimeOnly "maven.modrinth:biolith:xaeaSA9Q"
 
-    // Spawn
-    compileOnly "maven.modrinth:spawn-mod:${spawn_version}"
-
     // Primal
     compileOnly "maven.modrinth:mod-primal:${primal_version}"
 
@@ -82,9 +79,6 @@ dependencies {
 
     // KubeJS
     compileOnly "maven.modrinth:kubejs:${kubejs_version}"
-
-    // Sodium
-    runtimeOnly "maven.modrinth:sodium:mc1.21.1-0.8.12-beta.1-neoforge"
 
     // Serene Seasons
     compileOnly "maven.modrinth:serene-seasons:${serene_seasons_neoforge_version}"
@@ -95,7 +89,8 @@ dependencies {
     //runtimeOnly "maven.modrinth:ecliptic-seasons:${ecliptic_seasons_version}"
 
     // Scholar
-    implementation "maven.modrinth:scholar:t5aJhKGV"
+    compileOnly "maven.modrinth:scholar:t5aJhKGV"
+    runtimeOnly "maven.modrinth:scholar:t5aJhKGV"
 }
 
 publishMods {

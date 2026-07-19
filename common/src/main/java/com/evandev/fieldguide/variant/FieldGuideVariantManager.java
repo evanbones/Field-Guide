@@ -14,11 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.animal.Fox;
-import net.minecraft.world.entity.animal.MushroomCow;
-import net.minecraft.world.entity.animal.Parrot;
-import net.minecraft.world.entity.animal.Rabbit;
-import net.minecraft.world.entity.animal.Sheep;
+import net.minecraft.world.entity.animal.*;
 import net.minecraft.world.entity.animal.axolotl.Axolotl;
 import net.minecraft.world.entity.animal.horse.Horse;
 import net.minecraft.world.entity.animal.horse.Llama;
@@ -285,29 +281,19 @@ public class FieldGuideVariantManager {
         Class<?> clazz = entityClass;
 
         while (clazz != null && clazz != Object.class) {
-            if (PROVIDERS.containsKey(clazz)) {
-                VariantProvider<T> p = (VariantProvider<T>) PROVIDERS.get(clazz);
-                if (p instanceof CompositeVariantProvider<T> comp) {
-                    for (VariantProvider<T> inner : comp.providers) {
-                        if (matching.stream().noneMatch(m -> m.getClass().equals(inner.getClass()))) {
-                            matching.add(inner);
-                        }
-                    }
-                } else {
-                    if (matching.stream().noneMatch(m -> m.getClass().equals(p.getClass()))) {
-                        matching.add(p);
-                    }
-                }
-            }
+            addMatching(matching, (VariantProvider<T>) PROVIDERS.get(clazz));
             if (clazz == Mob.class) break;
             clazz = clazz.getSuperclass();
         }
 
-        if (VillagerDataHolder.class.isAssignableFrom(entityClass)) {
-            VariantProvider<T> vp = (VariantProvider<T>) getVillagerProvider();
-            if (matching.stream().noneMatch(m -> m.getClass().equals(vp.getClass()))) {
-                matching.add(vp);
+        for (Map.Entry<Class<?>, VariantProvider<?>> entry : PROVIDERS.entrySet()) {
+            if (entry.getKey().isInterface() && entityClass != null && entry.getKey().isAssignableFrom(entityClass) ) {
+                addMatching(matching, (VariantProvider<T>) entry.getValue());
             }
+        }
+
+        if (entityClass != null && VillagerDataHolder.class.isAssignableFrom(entityClass)) {
+            addMatching(matching, (VariantProvider<T>) getVillagerProvider());
         }
 
         if (matching.isEmpty()) {
@@ -321,6 +307,19 @@ public class FieldGuideVariantManager {
             composite.addProvider(matching.get(i));
         }
         return composite;
+    }
+
+    private static <T extends Mob> void addMatching(List<VariantProvider<T>> matching, VariantProvider<T> provider) {
+        if (provider == null) return;
+        if (provider instanceof CompositeVariantProvider<T> comp) {
+            for (VariantProvider<T> inner : comp.providers) {
+                if (matching.stream().noneMatch(m -> m.getClass().equals(inner.getClass()))) {
+                    matching.add(inner);
+                }
+            }
+        } else if (matching.stream().noneMatch(m -> m.getClass().equals(provider.getClass()))) {
+            matching.add(provider);
+        }
     }
 
     public static List<VariantDef> getVariants(Entity entity) {

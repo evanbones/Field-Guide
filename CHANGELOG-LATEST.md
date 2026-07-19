@@ -1,3 +1,3 @@
-### Added
+### Changed
 
-- Added `/fieldguide export missing` to export missing descriptions as lang entries.
+- Updated API.
