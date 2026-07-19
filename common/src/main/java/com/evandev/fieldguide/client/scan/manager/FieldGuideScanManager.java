@@ -6,11 +6,11 @@ import com.evandev.fieldguide.api.GuideEntry;
 import com.evandev.fieldguide.client.ClientFieldGuideManager;
 import com.evandev.fieldguide.client.FieldGuideClient;
 import com.evandev.fieldguide.client.progress.ProgressManager;
-import com.evandev.fieldguide.item.ModItems;
 import com.evandev.fieldguide.compat.cobblemon.FieldGuideCobblemonCompat;
 import com.evandev.fieldguide.config.ClientConfig;
 import com.evandev.fieldguide.config.ServerConfig;
 import com.evandev.fieldguide.entry.EntryResolver;
+import com.evandev.fieldguide.item.ModItems;
 import com.evandev.fieldguide.network.ScanUnlockPacket;
 import com.evandev.fieldguide.platform.Services;
 import com.evandev.fieldguide.variant.FieldGuideVariantManager;
@@ -20,6 +20,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -104,6 +105,18 @@ public class FieldGuideScanManager {
         return player.getMainHandItem().is(ModTags.Items.LENSES) || player.getOffhandItem().is(ModTags.Items.LENSES);
     }
 
+    private boolean wearsLens(Player player) {
+        for (EquipmentSlot slot : EquipmentSlot.values()) {
+            if (!slot.isArmor()) continue;
+            if (player.getItemBySlot(slot).is(ModTags.Items.LENSES)) return true;
+        }
+        return false;
+    }
+
+    private boolean hasLensEquipped(Player player) {
+        return holdsLens(player) || wearsLens(player);
+    }
+
     private boolean isRightClickHeld() {
         return Minecraft.getInstance().options.keyUse.isDown();
     }
@@ -115,6 +128,9 @@ public class FieldGuideScanManager {
             return ServerConfig.get().spyglassScanDistance;
         }
         if (holdsLens(player) && isRightClickHeld()) {
+            return ServerConfig.get().lensScanDistance;
+        }
+        if (wearsLens(player)) {
             return ServerConfig.get().lensScanDistance;
         }
         if (ServerConfig.get().enableFieldGuideScanning && holdsFieldGuide(player) && isRightClickHeld()) {
@@ -133,7 +149,7 @@ public class FieldGuideScanManager {
         if (isUsingSpyglass(player) && ServerConfig.get().enableSpyglassDiscovery) {
             distance = Math.max(distance, ServerConfig.get().spyglassScanDistance);
         }
-        if (holdsLens(player) && ServerConfig.get().enableLensDiscovery) {
+        if (hasLensEquipped(player) && ServerConfig.get().enableLensDiscovery) {
             distance = Math.max(distance, ServerConfig.get().lensDiscoveryDistance);
         }
         if (ServerConfig.get().enableNakedEyeDiscovery) {

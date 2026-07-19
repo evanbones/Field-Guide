@@ -19,7 +19,6 @@ import com.evandev.fieldguide.mixin.accessor.EntityAccessor;
 import com.evandev.fieldguide.platform.Services;
 import com.evandev.fieldguide.server.structure.StructureUtils;
 import com.evandev.fieldguide.variant.FieldGuideVariantManager;
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -245,7 +244,7 @@ public class EntryRenderHelper {
         }
 
         PoseStack pose = new PoseStack();
-        pose.scale(clampedScale, -clampedScale, clampedScale);
+        pose.scale(clampedScale, clampedScale, clampedScale);
         pose.mulPose(Axis.XP.rotationDegrees(30.0F));
         pose.mulPose(Axis.YP.rotationDegrees(yRotation));
         pose.translate((xOff / clampedScale), (entityHeight / -2.0F) + (yOff / clampedScale), 0);
@@ -323,7 +322,7 @@ public class EntryRenderHelper {
             float clampedScale = 100f * getVisualScale(visual, isPage);
 
             PoseStack pose = new PoseStack();
-            pose.scale(clampedScale, -clampedScale, clampedScale);
+            pose.scale(clampedScale, clampedScale, clampedScale);
             pose.mulPose(Axis.XP.rotationDegrees(30.0F));
             pose.mulPose(Axis.YP.rotationDegrees(210.0F));
             pose.translate(-0.5, -0.5, -0.5);
@@ -384,14 +383,14 @@ public class EntryRenderHelper {
 
         renderWithCache(item, item, guiGraphics, x, y, scaledSize, scaledSize, unlocked, isPage, bounceScale, () -> {
             ItemStack stack = new ItemStack(item);
-            Lighting.setupForFlatItems();
+            setupFieldGuideItemLighting();
 
             EntryVisual visual = ClientFieldGuideManager.getInstance().getEntryVisual(item);
 
             float clampedScale = 100f * getVisualScale(visual, isPage);
 
             PoseStack pose = new PoseStack();
-            pose.scale(clampedScale, -clampedScale, 1.0f);
+            pose.scale(clampedScale, clampedScale, 1.0f);
 
             MultiBufferSource.BufferSource buffers = Minecraft.getInstance().renderBuffers().bufferSource();
 
@@ -476,7 +475,7 @@ public class EntryRenderHelper {
             float yOff = getYOffset(visual, isPage);
 
             float scale = 35.0f * (5.0f / maxDim) * visualScale;
-            pose.scale(scale, -scale, scale);
+            pose.scale(scale, scale, scale);
 
             pose.mulPose(Axis.XP.rotationDegrees(30.0F));
             pose.mulPose(Axis.YP.rotationDegrees(210.0F));
@@ -549,14 +548,21 @@ public class EntryRenderHelper {
     }
 
     private static void setupFieldGuideEntityLighting() {
-        Vector3f light0 = new Vector3f(-1.0F, -1.0F, 1.0F).normalize();
-        Vector3f light1 = new Vector3f(1.0F, -1.0F, 1.0F).normalize();
+        Vector3f light0 = new Vector3f(-1.0F, 1.0F, 1.0F).normalize();
+        Vector3f light1 = new Vector3f(1.0F, 1.0F, 1.0F).normalize();
         RenderSystem.setShaderLights(light0, light1);
     }
 
     private static void setupFieldGuideBlockLighting() {
-        Vector3f light0 = new Vector3f(-0.2F, -1.0F, -0.7F).normalize();
+        Vector3f light0 = new Vector3f(-0.2F, 1.0F, -0.7F).normalize();
         Vector3f light1 = new Vector3f(0.2F, 0.0F, 0.7F).normalize();
+        RenderSystem.setShaderLights(light0, light1);
+    }
+
+    private static void setupFieldGuideItemLighting() {
+        Matrix4f guiFlat = new Matrix4f().rotationY((float) (-Math.PI / 8)).rotateX((float) (Math.PI * 3.0 / 4.0));
+        Vector3f light0 = guiFlat.transformDirection(new Vector3f(0.2F, 1.0F, -0.7F).normalize(), new Vector3f()).mul(1.0F, -1.0F, 1.0F);
+        Vector3f light1 = guiFlat.transformDirection(new Vector3f(-0.2F, 1.0F, 0.7F).normalize(), new Vector3f()).mul(1.0F, -1.0F, 1.0F);
         RenderSystem.setShaderLights(light0, light1);
     }
 

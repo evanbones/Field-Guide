@@ -28,16 +28,16 @@ import java.util.stream.Stream;
 public class IconCacheManager {
     private static final Path CACHE_DIR = Services.PLATFORM.getConfigDirectory().resolve("../fieldguide_cache");
     private static final int RENDER_SIZE = 256;
-
+    private static final int CACHE_FORMAT = 3;
     private static final Map<String, ResourceLocation> TEXTURE_CACHE = new ConcurrentHashMap<>();
     private static final Set<String> PENDING_GENERATIONS = ConcurrentHashMap.newKeySet();
     private static final Deque<Runnable> MAIN_THREAD_TASKS = new ConcurrentLinkedDeque<>();
-
     private static final ExecutorService IO_EXECUTOR = Executors.newFixedThreadPool(Math.min(4, Runtime.getRuntime().availableProcessors()), r -> {
         Thread t = new Thread(r, "FieldGuide-IconCache-IO");
         t.setDaemon(true);
         return t;
     });
+    private static volatile boolean formatChecked = false;
 
     public static void tick() {
         long startTime = System.currentTimeMillis();
@@ -80,7 +80,30 @@ public class IconCacheManager {
         }, IO_EXECUTOR);
     }
 
+    private static synchronized void ensureCacheFormat() {
+        if (formatChecked) return;
+        formatChecked = true;
+        try {
+            Files.createDirectories(CACHE_DIR);
+            Path versionFile = CACHE_DIR.resolve("cache_format");
+            String existing = Files.exists(versionFile) ? Files.readString(versionFile).trim() : "";
+            if (!existing.equals(String.valueOf(CACHE_FORMAT))) {
+                try (Stream<Path> walk = Files.walk(CACHE_DIR)) {
+                    walk.sorted(Comparator.reverseOrder())
+                            .filter(p -> !p.equals(CACHE_DIR))
+                            .map(Path::toFile)
+                            .forEach(File::delete);
+                }
+                Files.createDirectories(CACHE_DIR);
+                Files.writeString(versionFile, String.valueOf(CACHE_FORMAT));
+            }
+        } catch (IOException e) {
+            Constants.LOG.error("Failed to verify icon cache format", e);
+        }
+    }
+
     public static Optional<ResourceLocation> getOrGenerateIcon(Object baseEntry, Object cacheKey, boolean isPage, Runnable renderAction) {
+        ensureCacheFormat();
         String entryKey = AutoPopulateRegistry.getEntryKey(baseEntry);
         if (entryKey.isEmpty()) return Optional.empty();
 
@@ -151,14 +174,19 @@ public class IconCacheManager {
         RenderSystem.enableDepthTest();
         RenderSystem.depthMask(true);
 
-        Matrix4f projectionMatrix = new Matrix4f().setOrtho(0.0F, RENDER_SIZE, RENDER_SIZE, 0.0F, -1000.0F, 1000.0F);
+        Matrix4f projectionMatrix = new Matrix4f().setOrtho(0.0F, RENDER_SIZE, 0.0F, RENDER_SIZE, 1000.0F, 21000.0F);
         RenderSystem.setProjectionMatrix(projectionMatrix, VertexSorting.ORTHOGRAPHIC_Z);
 
         Matrix4fStack poseStack = RenderSystem.getModelViewStack();
         poseStack.pushMatrix();
         poseStack.identity();
-        poseStack.translate(RENDER_SIZE / 2.0f, RENDER_SIZE / 2.0f, 0.0f);
+        poseStack.translate(RENDER_SIZE / 2.0f, RENDER_SIZE / 2.0f, -11000.0f);
         RenderSystem.applyModelViewMatrix();
+
+        float oldFogStart = RenderSystem.getShaderFogStart();
+        float oldFogEnd = RenderSystem.getShaderFogEnd();
+        RenderSystem.setShaderFogStart(Float.MAX_VALUE);
+        RenderSystem.setShaderFogEnd(Float.MAX_VALUE);
 
         if (Services.PLATFORM.isModLoaded("entity_model_features")) {
             EmfCompat.setInGui(true);
@@ -169,6 +197,9 @@ public class IconCacheManager {
         if (Services.PLATFORM.isModLoaded("entity_model_features")) {
             EmfCompat.setInGui(false);
         }
+
+        RenderSystem.setShaderFogStart(oldFogStart);
+        RenderSystem.setShaderFogEnd(oldFogEnd);
 
         poseStack.popMatrix();
         RenderSystem.applyModelViewMatrix();
