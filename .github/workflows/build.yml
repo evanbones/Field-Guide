@@ -5,6 +5,7 @@ on:
     branches: [ "1.20.1", "1.21.1" ]
   pull_request:
     branches: [ "1.20.1", "1.21.1" ]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -32,11 +33,15 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build
 
+      - name: Sanitize branch name
+        id: sanitize-branch
+        run: echo "SAFE_REF_NAME=$(echo '${{ github.ref_name }}' | tr '/' '-')" >> $GITHUB_OUTPUT
+
       - name: Capture Build Artifacts
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: FieldGuide-${{ github.ref_name }}
+          name: FieldGuide-${{ steps.sanitize-branch.outputs.SAFE_REF_NAME }}
           path: |
             **/build/libs/*.jar
             !**/build/libs/*-sources.jar
