@@ -20,7 +20,8 @@ neoForge {
 dependencies {
     compileOnly "maven.modrinth:no-mans-land:${no_mans_land_version}"
     compileOnly "me.shedaniel.cloth:cloth-config-neoforge:${cloth_config_version}"
-    compileOnly "dev.emi:emi-xplat-mojmap:${emi_version}"
+    compileOnly "dev.emi:emi-xplat-mojmap:${emi_version}:api"
+    
     compileOnly "maven.modrinth:entitytexturefeatures:${etf_version}-neoforge-1.21"
     compileOnly "maven.modrinth:entity-model-features:${emf_version}-neoforge-1.21"
     compileOnly "maven.modrinth:reliable-remover:${reliable_remover_version}-neoforge-1.21.1"

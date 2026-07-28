@@ -42,7 +42,7 @@ dependencies {
     implementation "maven.modrinth:item-descriptions:${item_descriptions_version}-neoforge"
 
     // EMI
-    implementation "dev.emi:emi-neoforge:${emi_version}"
+    implementation "dev.emi:emi-neoforge:${emi_version}:api"
 
     // Cloth Config
     implementation "me.shedaniel.cloth:cloth-config-neoforge:${cloth_config_version}"
