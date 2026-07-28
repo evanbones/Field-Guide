@@ -1,0 +1,389 @@
+{
+  "title.fieldguide.config": "Настройки Полевого дневника",
+  "title.fieldguide.field_guide": "Полевой дневник",
+
+  "gui.fieldguide.open": "Открыть Полевой дневник",
+  "gui.fieldguide.main.default": "Недавние открытия",
+  "gui.fieldguide.search": "Поиск...",
+  "gui.fieldguide.no_results": "Нет результатов.",
+  "gui.fieldguide.drops": "Выпадает: %s",
+  "gui.fieldguide.add_photograph": "Добавить фотографию",
+  "gui.fieldguide.select_photograph": "Выбрать фотографию",
+  "gui.fieldguide.variants": "Варианты",
+
+  "gui.fieldguide.searching_name": "Поиск по имени",
+  "gui.fieldguide.searching_drops": "Поиск по добыче",
+  "gui.fieldguide.searching_biomes": "Поиск по биому",
+  "gui.fieldguide.searching_seasons": "Поиск по сезону",
+  "gui.fieldguide.grows_in": "Растёт в %s",
+  "gui.fieldguide.searching_tags": "Поиск по тегам",
+  "gui.fieldguide.searching_mod": "Поиск по моду",
+
+  "category.fieldguide.main": "Полевой дневник",
+  "category.fieldguide.general": "Общие настройки",
+  "category.fieldguide.interface": "Интерфейс",
+  "category.fieldguide.commands": "Команды",
+
+  "option.fieldguide.show_inventory_button": "Show Inventory Button",
+  "option.fieldguide.show_inventory_button.tooltip": "If enabled, a button to open the Field Guide will appear in the player inventory.",
+  "option.fieldguide.inventory_button_x": "Inventory Button X Offset",
+  "option.fieldguide.inventory_button_x.tooltip": "Horizontal position offset for the inventory button.",
+  "option.fieldguide.inventory_button_y": "Inventory Button Y Offset",
+  "option.fieldguide.inventory_button_y.tooltip": "Vertical position offset for the inventory button.",
+
+  "option.fieldguide.show_pause_button": "Show Pause Menu Button",
+  "option.fieldguide.show_pause_button.tooltip": "If enabled, a button to open the Field Guide will appear in the pause menu.",
+  "option.fieldguide.pause_button_x": "Pause Button X Offset",
+  "option.fieldguide.pause_button_x.tooltip": "Horizontal position offset for the pause menu button.",
+  "option.fieldguide.pause_button_y": "Pause Button Y Offset",
+  "option.fieldguide.pause_button_y.tooltip": "Vertical position offset for the pause menu button.",
+
+  "option.fieldguide.show_undiscovered_names": "Show Undiscovered Names",
+  "option.fieldguide.show_undiscovered_names.tooltip": "If enabled, names of undiscovered entries will be visible.",
+
+  "option.fieldguide.hide_undiscovered_from_search": "Hide Undiscovered From Search",
+  "option.fieldguide.hide_undiscovered_from_search.tooltip": "If enabled, undiscovered entries will be hidden from search results.",
+
+  "option.fieldguide.disable_scanning": "Disable Scanning",
+  "option.fieldguide.disable_scanning.tooltip": "If enabled, you will no longer be able to scan entries with spyglasses.",
+
+  "option.fieldguide.scan_speed": "Scanning Speed",
+  "option.fieldguide.scan_speed.tooltip": "The time in seconds it takes to scan an entry.",
+
+  "option.fieldguide.show_out_of_range_overlay": "Show Out of Range Overlay",
+  "option.fieldguide.show_out_of_range_overlay.tooltip": "Displays a red pulsing outline when aiming at targets that are too far away to scan.",
+
+  "option.fieldguide.scan_overlay_color": "Scan Overlay Color",
+  "option.fieldguide.scan_overlay_color.tooltip": "The hex color code for the scanning overlay (e.g. #FFFFFF).",
+
+  "option.fieldguide.scan_overlay_alpha": "Scan Overlay Opacity",
+  "option.fieldguide.scan_overlay_alpha.tooltip": "The opacity of the scanning overlay (0.0 - 1.0).",
+
+  "option.fieldguide.scan_icon_y_offset": "Scanning Icon Y Offset",
+  "option.fieldguide.scan_icon_y_offset.tooltip": "Adjusts the vertical position of the scanning crosshair. Positive moves it up, negative moves it down.",
+
+  "option.fieldguide.scan_icon_x_offset": "Scanning Icon X Offset",
+  "option.fieldguide.scan_icon_x_offset.tooltip": "Adjusts the horizontal position of the scanning crosshair. Positive moves it right, negative moves it left.",
+
+  "option.fieldguide.show_scan_icon": "Show Scanning Icon",
+  "option.fieldguide.show_scan_icon.tooltip": "Toggles the visibility of the scanning icon near the crosshair.",
+
+  "option.fieldguide.spyglass_scan_distance": "Spyglass Scan Distance",
+  "option.fieldguide.spyglass_scan_distance.tooltip": "The maximum distance from which you can scan an entry while using a Spyglass.",
+
+  "option.fieldguide.naked_eye_scan_distance": "Naked Eye Scan Distance",
+  "option.fieldguide.naked_eye_scan_distance.tooltip": "The maximum distance from which you can scan an entry with your naked eye (without a Spyglass).",
+
+  "option.fieldguide.enable_spyglass_scanning": "Enable Spyglass Scanning",
+  "option.fieldguide.enable_spyglass_scanning.tooltip": "Allows players to scan entries from afar using a Spyglass.",
+
+  "option.fieldguide.enable_spyglass_discovery": "Enable Spyglass Discovery",
+  "option.fieldguide.enable_spyglass_discovery.tooltip": "Reveals undiscovered entries from afar using a Spyglass.",
+
+  "option.fieldguide.enable_lens_discovery": "Enable Lens Discovery",
+  "option.fieldguide.enable_lens_discovery.tooltip": "Reveals nearby undiscovered entries while holding the Lens.",
+
+  "option.fieldguide.enable_naked_eye_scanning": "Enable Naked Eye Scanning",
+  "option.fieldguide.enable_naked_eye_scanning.tooltip": "Allows players to scan entries just by looking at them without a Spyglass.",
+
+  "option.fieldguide.enable_naked_eye_discovery": "Enable Naked Eye Discovery",
+  "option.fieldguide.enable_naked_eye_discovery.tooltip": "Reveals nearby undiscovered entries.",
+
+  "option.fieldguide.naked_eye_discovery_distance": "Naked Eye Discovery Distance",
+  "option.fieldguide.naked_eye_discovery_distance.tooltip": "The distance within which undiscovered entries are revealed.",
+
+  "option.fieldguide.enable_field_guide_scanning": "Enable Field Guide Scanning",
+  "option.fieldguide.enable_field_guide_scanning.tooltip": "Allows players to scan entries by holding right-click while holding the Field Guide.",
+
+  "option.fieldguide.field_guide_scan_distance": "Field Guide Scan Distance",
+  "option.fieldguide.field_guide_scan_distance.tooltip": "The maximum distance from which you can scan an entry while holding the Field Guide.",
+
+  "option.fieldguide.lens_scan_distance": "Lens Scan Distance",
+  "option.fieldguide.lens_scan_distance.tooltip": "The maximum distance from which you can scan an entry while holding the Lens.",
+
+  "option.fieldguide.lens_discovery_distance": "Lens Discovery Distance",
+  "option.fieldguide.lens_discovery_distance.tooltip": "The distance within which nearby undiscovered entries are revealed while holding the Lens.",
+
+  "option.fieldguide.grant_xp_on_scan": "Grant XP on Scan",
+  "option.fieldguide.grant_xp_on_scan.tooltip": "If enabled, discovering a new entry via scanning will grant the player experience points.",
+
+  "option.fieldguide.xp_amount_on_scan": "XP Amount on Scan",
+  "option.fieldguide.xp_amount_on_scan.tooltip": "The amount of experience points granted when an entry is successfully scanned for the first time.",
+
+  "option.fieldguide.enable_reliable_remover": "Reliable Remover Integration",
+  "option.fieldguide.enable_reliable_remover.tooltip": "Whether or not blacklisted items should be removed from Field Guide entries and loot displays.",
+
+  "option.fieldguide.text_color": "Text Color",
+  "option.fieldguide.text_color.tooltip": "The hex color code used for standard text in the field guide.",
+
+  "option.fieldguide.text_title_color": "Text Title Color",
+  "option.fieldguide.text_title_color.tooltip": "The hex color code used for titles in the field guide.",
+
+  "option.fieldguide.text_muted_color": "Muted Text Color",
+  "option.fieldguide.text_muted_color.tooltip": "The hex color code used for muted/secondary text.",
+
+  "option.fieldguide.text_cursor_color": "Text Cursor Color",
+  "option.fieldguide.text_cursor_color.tooltip": "Hex color code for the text cursor.",
+
+  "option.fieldguide.page_number_color": "Page Number Color",
+  "option.fieldguide.page_number_color.tooltip": "The hex color code used for the page numbers.",
+
+  "option.fieldguide.list_silhouette_color": "List Silhouette Color",
+  "option.fieldguide.list_silhouette_color.tooltip": "The hex color code for undiscovered entry silhouettes within the list pages.",
+
+  "option.fieldguide.list_silhouette_alpha": "List Silhouette Opacity",
+  "option.fieldguide.list_silhouette_alpha.tooltip": "The opacity of the undiscovered entry silhouettes within the list pages (0.0 - 1.0).",
+
+  "option.fieldguide.list_unlocked_silhouette_color": "List Discovered Silhouette Color",
+  "option.fieldguide.list_unlocked_silhouette_color.tooltip": "The hex color code for discovered entry silhouettes within the list pages.",
+
+  "option.fieldguide.list_unlocked_silhouette_alpha": "List Discovered Silhouette Opacity",
+  "option.fieldguide.list_unlocked_silhouette_alpha.tooltip": "The opacity of the discovered entry silhouettes within the list pages (0.0 - 1.0).",
+
+  "option.fieldguide.details_silhouette_color": "Details Silhouette Color",
+  "option.fieldguide.details_silhouette_color.tooltip": "The hex color code for undiscovered entry silhouettes on details pages.",
+
+  "option.fieldguide.details_silhouette_alpha": "Details Silhouette Opacity",
+  "option.fieldguide.details_silhouette_alpha.tooltip": "The opacity of the undiscovered entry silhouettes within the details pages (0.0 - 1.0).",
+
+  "option.fieldguide.details_unlocked_silhouette_color": "Details Discovered Silhouette Color",
+  "option.fieldguide.details_unlocked_silhouette_color.tooltip": "The hex color code for discovered entry silhouettes within the details pages.",
+
+  "option.fieldguide.details_unlocked_silhouette_alpha": "Details Discovered Silhouette Opacity",
+  "option.fieldguide.details_unlocked_silhouette_alpha.tooltip": "The opacity of the discovered entry silhouettes within the details pages (0.0 - 1.0).",
+
+  "option.fieldguide.show_unlock_date": "Show Unlock Date Icon",
+  "option.fieldguide.show_unlock_date.tooltip": "If enabled, a small quill icon will appear in the top right of discovered entries. Hovering over it will display the date and time the entry was unlocked.",
+
+  "option.fieldguide.use_real_world_date": "Use Real-World Date",
+  "option.fieldguide.use_real_world_date.tooltip": "If true, discovery dates are shown using the real-world date instead of the in-game day.",
+
+  "option.fieldguide.play_scanning_sound": "Play Scanning Sound",
+  "option.fieldguide.play_scanning_sound.tooltip": "If false, the scribbling noise played when scanning entries will be disabled.",
+
+  "option.fieldguide.play_unlock_sound": "Play Unlock Sound",
+  "option.fieldguide.play_unlock_sound.tooltip": "If false, the ding sound when unlocking a new entry will be disabled.",
+
+  "option.fieldguide.disable_loot_display": "Disable Loot Display",
+  "option.fieldguide.disable_loot_display.tooltip": "Hides the drops grid in Field Guide entries.",
+
+  "option.fieldguide.disable_biome_display": "Disable Biome Display",
+  "option.fieldguide.disable_biome_display.tooltip": "Hides the spawn biomes grid in Field Guide entries.",
+
+  "option.fieldguide.disable_editing_descriptions": "Disable Editing Descriptions",
+  "option.fieldguide.disable_editing_descriptions.tooltip": "Prevents players from modifying the description of discovered entries.",
+
+  "option.fieldguide.disable_editing_names": "Disable Editing Names",
+  "option.fieldguide.disable_editing_names.tooltip": "Prevents players from modifying the name of discovered entries.",
+
+  "option.fieldguide.default_screen": "Default Open Screen",
+  "option.fieldguide.default_screen.tooltip": "The screen shown when first opening the guide. Options: 'last_opened_screen', 'last_opened_category', 'current_biome', or a category ID (e.g., 'fieldguide:monsters').",
+
+  "option.fieldguide.hide_tabs_until_unlocked": "Hide Locked Tabs",
+  "option.fieldguide.hide_tabs_until_unlocked.tooltip": "If true, category tabs will not appear in the sidebar until you have unlocked at least one entry within that category.",
+
+  "option.fieldguide.global_scan_commands": "Global Scan Commands",
+  "option.fieldguide.global_scan_commands.tooltip": "A list of commands to run whenever any entry is successfully scanned. Use @p for the player name.",
+
+  "option.fieldguide.category_scan_commands": "Category Scan Commands",
+  "option.fieldguide.category_scan_commands.tooltip": "Commands to execute when a specific category is fully scanned. Format: category_id=/command1;/command2",
+
+  "option.fieldguide.entry_scan_commands": "Entry Scan Commands",
+  "option.fieldguide.entry_scan_commands.tooltip": "Commands to execute when a specific entry is scanned. Format: entry_id=/command1;/command2",
+
+  "option.fieldguide.show_toasts": "Show Toasts",
+  "option.fieldguide.show_toasts.tooltip": "Whether to show a toast notification when a new entry is discovered.",
+
+  "option.fieldguide.keep_silhouette": "Keep Silhouette When Unlocked",
+  "option.fieldguide.keep_silhouette.tooltip": "If enabled, entries will still be displayed as silhouettes even after they've been discovered.",
+
+  "option.fieldguide.unlock_variants": "Unlock All Variants",
+  "option.fieldguide.unlock_variants.tooltip": "If enabled, all variants of an entry will be unlocked after they've been discovered.",
+
+  "category.fieldguide.exposure": "Exposure Integration",
+
+  "category.fieldguide.seasons": "Seasons Integration",
+  "option.fieldguide.show_season_icons": "Show Season Icons",
+  "option.fieldguide.show_season_icons.tooltip": "If enabled, icons will appear on crop entries indicating which seasons they grow in.",
+  "fieldguide.season.spring": "Spring",
+  "fieldguide.season.summer": "Summer",
+  "fieldguide.season.autumn": "Autumn",
+  "fieldguide.season.winter": "Winter",
+
+  "option.fieldguide.exposure.add_photograph_button": "Enable 'Add Photograph' Button",
+  "option.fieldguide.exposure.add_photograph_button.tooltip": "If enabled, a button will appear in the entry screen allowing you to attach an existing photograph from your inventory.",
+
+  "option.fieldguide.exposure.unlock_via_photograph": "Unlock Entries via Photos",
+  "option.fieldguide.exposure.unlock_via_photograph.tooltip": "If enabled, taking or developing a photo of entries will automatically unlock its entry in the Field Guide.",
+
+  "option.fieldguide.exposure.show_photographs_in_grid": "Show Photos in Category Grid",
+  "option.fieldguide.exposure.show_photographs_in_grid.tooltip": "If enabled, the category grid will display a photograph instead of the standard model.",
+
+  "option.fieldguide.enable_field_guide_item": "Enable Field Guide Item (Requires Restart)",
+  "option.fieldguide.enable_field_guide_item.tooltip": "If enabled, a craftable Field Guide item will be available in the game.",
+  "option.fieldguide.enable_lens_item": "Enable Lens Item (Requires Restart)",
+  "option.fieldguide.enable_lens_item.tooltip": "If enabled, a Lens item will be available in the game. Holding it reveals nearby undiscovered entries.",
+
+  "option.fieldguide.enable_copying_pages": "Enable Copying Pages",
+  "option.fieldguide.enable_copying_pages.tooltip": "If enabled, players can copy pages from their Field Guide to share with others.",
+
+  "option.fieldguide.require_item_to_open": "Require Item to Open",
+  "option.fieldguide.require_item_to_open.tooltip": "If enabled, players must have the physical item to open their Field Guide.",
+
+  "option.fieldguide.disable_variants": "Disable Variants",
+  "option.fieldguide.disable_variants.tooltip": "If enabled, completely disables the display and tracking of mob variants in the Field Guide.",
+
+  "fieldguide.alignment.passive": "Пассивный",
+  "fieldguide.alignment.neutral": "Нейтральный",
+  "fieldguide.alignment.hostile": "Враждебный",
+  "fieldguide.attribute.health": "Здоровье",
+  "fieldguide.attribute.armor": "Броня",
+
+  "fieldguide.date.in_game": "День %s, %s",
+  "fieldguide.time.day": "утро",
+  "fieldguide.time.noon": "полдень",
+  "fieldguide.time.night": "вечер",
+  "fieldguide.time.midnight": "ночь",
+
+  "fieldguide.tooltip.variants": "Варианты: %s/%s",
+  "gui.fieldguide.variant_selector.tooltip": "Выбрать вариант",
+
+  "tag.item.fieldguide.spyglasses": "Подзорные трубы",
+
+  "item.fieldguide.field_guide": "Полевой дневник",
+  "item.fieldguide.field_guide.tooltip": "ПКМ чтобы открыть Полевой дневник",
+  "item.fieldguide.lens": "Линза",
+  "item.fieldguide.lens.tooltip": "Зажмите, чтобы записать открытие в Полевой дневник",
+
+  "item.fieldguide.page": "Запись из Полевого дневника",
+  "item.fieldguide.page.entry": "Открытие: %s",
+  "item.fieldguide.page.author": "Автор: %s",
+  "item.fieldguide.page.tooltip": "ПКМ чтобы записать это открытие в свой Полевой дневник",
+
+  "gui.fieldguide.copy.tooltip": "Скопировать страницу",
+  "gui.fieldguide.copy.requires_paper": "Требуется бумага",
+  "gui.fieldguide.back": "Назад",
+  "gui.fieldguide.loading": "Загрузка...",
+  "gui.fieldguide.friend_moon": "Friend Moon",
+
+  "key.fieldguide.open": "Открыть Полевой дневник",
+  "key.fieldguide.scan": "Изучить",
+
+  "fieldguide.unknown": "???",
+  "fieldguide.undiscovered": "???",
+  "fieldguide.description.missing": "Наблюдения...",
+
+  "fieldguide.hint.default": "Рассмотри это с помощью подзорной трубы, чтобы узнать детали.",
+  "fieldguide.hint.kill": "Победи это существо, чтобы узнать детали.",
+  "fieldguide.hint.eat": "Съешь этот предмет, чтобы узнать детали.",
+  "fieldguide.hint.obtain": "Получи это, чтобы узнать детали.",
+  "fieldguide.hint.no_spyglass": "Рассмотри это поближе, чтобы узнать детали.",
+
+  "fieldguide.toast.discovered": "Эврика!",
+  "fieldguide.toast.added": "Совершено открытие: %s!",
+  "fieldguide.toast.view_hint": "Нажмите %s чтобы посмотреть",
+
+  "commands.fieldguide.grant.everything.success": "Granted all Field Guide entries to %s players",
+  "commands.fieldguide.grant.category.success": "Granted category %s to %s players",
+  "commands.fieldguide.grant.entry.success": "Granted entry %s to targets",
+  "commands.fieldguide.grant.variant.success": "Granted variant %s of %s to players",
+
+  "commands.fieldguide.revoke.everything.success": "Revoked all Field Guide entries from targets",
+  "commands.fieldguide.revoke.category.success": "Revoked category %s from %s players",
+  "commands.fieldguide.revoke.entry.success": "Revoked entry %s from targets",
+  "commands.fieldguide.revoke.variant.success": "Revoked variant %s of %s from players",
+
+  "commands.fieldguide.category.not_found": "Category %s not found",
+  "commands.fieldguide.entry.not_found": "Entry %s not found",
+  "commands.fieldguide.reload.started": "Reloading Field Guide data...",
+  "commands.fieldguide.reload.success": "Field Guide reloaded and synced to online players.",
+
+  "category.fieldguide.fieldguide.monsters": "Монстры",
+  "category.fieldguide.fieldguide.animals": "Животные",
+  "category.fieldguide.fieldguide.plants": "Растения",
+  "category.fieldguide.fieldguide.bosses": "Боссы",
+  "category.fieldguide.fieldguide.cobblemon": "Cobblemon",
+
+  "fieldguide.name.minecraft.oak_sapling": "Дуб",
+  "fieldguide.name.minecraft.spruce_sapling": "Ель",
+  "fieldguide.name.minecraft.birch_sapling": "Берёза",
+  "fieldguide.name.minecraft.jungle_sapling": "Тропическое дерево",
+  "fieldguide.name.minecraft.acacia_sapling": "Акация",
+  "fieldguide.name.minecraft.dark_oak_sapling": "Тёмный дуб",
+  "fieldguide.name.minecraft.pale_oak_sapling": "Бледный дуб",
+
+  "fieldguide.name.minecraft.mangrove_propagule": "Мангровое дерево",
+  "fieldguide.name.minecraft.cherry_sapling": "Вишня",
+  "fieldguide.name.minecraft.azalea_leaves": "Азалия",
+  "fieldguide.name.fieldguide.huge_brown_mushroom": "Огромный коричневый гриб",
+  "fieldguide.name.fieldguide.huge_red_mushroom": "Огромный мухомор",
+  "fieldguide.name.fieldguide.huge_crimson_fungus": "Огромный багровый гриб",
+  "fieldguide.name.fieldguide.huge_warped_fungus": "Огромный искажённый гриб",
+
+  "fieldguide.minecraft.oak_sapling.description": "Самое обыкновенное древо — встречается повсюду, от лугов до лесных чащ. Подрастает порой до внушительных размеров, а если поблизости цветут цветы, на ветвях может появиться пчелиное гнездо.",
+  "fieldguide.minecraft.dark_oak_sapling.description": "В чащах тёмного леса стоят эти мощные гиганты. Их сросшиеся стволы и сплетённые ветви плетут густой шатёр, такой плотный, что под ним царит сумрак — достаточный для того, чтобы враждебные твари бродили даже при дневном свете.",
+  "fieldguide.minecraft.spruce_sapling.description": "Родина ели — тайга, но встречается она и в иных холодных краях. Способна вымахать до величия мега-ели. Кора её по рисунку напоминает дубовую, но окрашена в более тёмный, почти смоляной оттенок.",
+  "fieldguide.minecraft.birch_sapling.description": "По устройству — близкая родственница дуба, но внешне совсем иная. Берёзы растут преимущественно в берёзовых рощах: обычно невысокие, но в старых лесах встречаются и стройные великаны. Любят цветочные поляны — тогда на ветвях часто повисает пчелиное гнездо.",
+  "fieldguide.minecraft.jungle_sapling.description": "Влажные джунгли — их родина. Здесь они тянутся к небу, достигая мега-размеров, а их стволы усыпаны какао-бобами, вокруг которых плетутся лианы.",
+  "fieldguide.minecraft.acacia_sapling.description": "Саванна — их дом. Акации высятся, изгибая стволы в диагональ, словно застывшие в танце. У некоторых крон не одна, а несколько — словно раскрытые зонтики на одном древке.",
+  "fieldguide.minecraft.azalea_leaves.description": "Иногда на поверхности проступают знаки подземного мира: деревце азалии с корнями из укоренённой земли, что уходят вниз, к пышным пещерам. Вырастает из обычного или цветущего куста.",
+  "fieldguide.minecraft.mangrove_propagule.description": "Мангровые заросли стоят в тёплой мути болот. Растут прямо в воде и на суше, размножаясь пропагулами — длинными ростками, свисающими с ветвей, словно зелёные свечи.",
+  "fieldguide.minecraft.cherry_sapling.description": "Вишнёвые рощи залиты розовым светом. Деревья эти узнаваемы сразу: нежная листва и горизонтальные ветви. У некоторых несколько крон. Если рядом цветут цветы — на ветвях может появиться пчелиное гнездо.",
+  "fieldguide.minecraft.pale_oak_sapling.description": "В бледном саду стоят эти тихие стражи. Толстые стволы, сплетённые ветви, крона, укрытая свисающим мхом... А в сердцевине некоторых скрывается сердце скрипуна.",
+  "fieldguide.fieldguide.huge_warped_fungus.description": "В искажённом лесу Нижнего мира высятся эти гиганты — переросшие грибы, светящиеся бирюзой. От мала до велика: иногда под их шляпками загораются грибосветы. Приживаются только на искажённом нилии, если подкормить костной мукой.",
+  "fieldguide.fieldguide.huge_crimson_fungus.description": "Багровый лес пылает этими грибами-великанами. От небольших до исполинских, иногда с грибосветами под шляпкой. Растут исключительно на багровом нилии при щедрой подкормке костной мукой.",
+  "fieldguide.fieldguide.huge_brown_mushroom.description": "Гигантские коричневые грибы — жители тёмных лесов и грибных полей. Шляпки у них плоские и широкие, словно лесные поляны в миниатюре. Вырастить можно, только посыпав обычный гриб костной мукой.",
+  "fieldguide.fieldguide.huge_red_mushroom.description": "Красные грибы-исполины с колоколообразными шляпками раскинулись в тёмных лесах и на грибных полях. Рождаются лишь из обычного красного гриба, если щедро подкормить его костной мукой.",
+  "fieldguide.block.minecraft/chorus_plant.description": "На внешних островах Энда, среди высокогорий, растут хорусы — коралловые создания, вьющиеся ввысь причудливыми узорами. Их стебли венчают хрупкие цветки, а в разломанных — плоды, что уносят проглотившего в неизвестном направлении.",
+
+  "fieldguide.atmospheric.aspen_sapling.description": "Home to the aspen parkland, these golden towering trees seems to watch from all sides. Don't worry though, they're harmless since the watchful logs are no different from regular logs. I think...",
+  "fieldguide.atmospheric.green_aspen_sapling.description": "Home to the aspen parkland, these lime green towering trees seems to watch from all sides. Don't worry though, they're harmless since the watchful logs are no different from regular logs. I think...",
+  "fieldguide.atmospheric.currant_seedling.description": "A thin and low hanging tree, found in the kousa jungle. Currants grow off the leaves and can be picked, but the only way to plant this tree is to have currants fall from the leaves onto the ground.",
+  "fieldguide.atmospheric.laurel_sapling.description": "Found in laurel forests, these short branching trees are rarely found with oranges. The saplings can be planted on sand, alongside grass, and grown as a thicker variant with four saplings.",
+  "fieldguide.atmospheric.dry_laurel_sapling.description": "Found in laurel forests or arid biomes, these short branching trees are rarely found with oranges. The saplings can be planted on sand, alongside grass, and grown as a thicker variant with four saplings.",
+  "fieldguide.atmospheric.morado_sapling.description": "A short, flowering tree primarily found in the rainforest. If grown by saplings, then the tree will be able to expand further outward. Bees may use the flowering leaves to pollinate.",
+  "fieldguide.atmospheric.kousa_sapling.description": "Home to the cold kousa jungle, these trees feature blue tone leaves and wood. Kousa tress are a decent size and branch out towards the top.",
+  "fieldguide.atmospheric.rosewood_sapling.description": "Rosewood's large size is due to the way it segments into other large branches, resulting in multiple tree top layers. This tree type is capable of enabling passion vines to grow passion fruit.",
+  "fieldguide.atmospheric.yucca_sapling.description": "A tree that thrives in dry biomes, these feature branching tops with an occasional small hanging branch bearing fruit, as well as unique flowers on the leaves. Yucca saplings can be planted on sand alongside grass.",
+  "fieldguide.atmospheric.grimwood_sapling.description": "A rare tree only found as a treasure sapling in the dunes. They only grow as a four sapling setup and feature a tall twisty trunk.",
+
+  "fieldguide.environmental.pine_sapling.description": "These trees are found in colder biomes. They are very tall, thin, and sometimes have knots. May rarely grow with a pinecone block.",
+  "fieldguide.environmental.willow_sapling.description": "In swamp biomes, willow trees are found. Vines hang off the leaves and are sometimes naturally seen growing in shallow water. Can grow into a larger variant.",
+  "fieldguide.environmental.cheerful_plum_sapling.description": "Cheerful plum trees are found in blossom biomes, and have very similar variants with two other plum trees. They are large and branch out diagonally with bulky canopies.",
+  "fieldguide.environmental.plum_sapling.description": "Plum trees are found in blossom biomes, and have very similar variants with two other plum trees. They are large and branch out diagonally with bulky canopies.",
+  "fieldguide.environmental.moody_plum_sapling.description": "Moody plum trees are found in blossom biomes, and have very similar variants with two other plum trees. They are large and branch out diagonally with bulky canopies.",
+  "fieldguide.environmental.pink_wisteria_sapling.description": "Found in the rare flower forest, pink wisterias are normally woody vines that grow up and branch out into three branch segments. Those segments hold colorful droopy leaves.",
+  "fieldguide.environmental.purple_wisteria_sapling.description": "Found in the rare flower forest, purple wisterias are normally woody vines that grow up and branch out into three branch segments. Those segments hold colorful droopy leaves.",
+  "fieldguide.environmental.blue_wisteria_sapling.description": "Found in the rare flower forest, blue wisterias are normally woody vines that grow up and branch out into three branch segments. Those segments hold colorful droopy leaves.",
+  "fieldguide.environmental.white_wisteria_sapling.description": "Found in the rare flower forest, white wisterias are normally woody vines that grow up and branch out into three branch segments. Those segments hold colorful droopy leaves.",
+
+  "fieldguide.autumnity.maple_sapling.description": "A green variant of the maple tree found in forests or maple biomes. Sap can be uncovered from stripping logs, which can be collected using bottles. When near flowers, they may grow with a bee nest.",
+  "fieldguide.autumnity.orange_maple_sapling.description": "An orange variant of the maple tree found in forests or maple biomes. Sap can be uncovered from stripping logs, which can be collected using bottles. When near flowers, they may grow with a bee nest.",
+  "fieldguide.autumnity.red_maple_sapling.description": "A red variant of the maple tree found in forests or maple biomes. Sap can be uncovered from stripping logs, which can be collected using bottles. When near flowers, they may grow with a bee nest.",
+  "fieldguide.autumnity.yellow_maple_sapling.description": "A yellow variant of the maple tree found in forests or maple biomes. Sap can be uncovered from stripping logs, which can be collected using bottles. When near flowers, they may grow with a bee nest.",
+
+  "advancements.fieldguide.root.title": "Полевой дневник",
+  "advancements.fieldguide.root.description": "Заполучи подзорную трубу — пусть мир откроется тебе",
+  "advancements.fieldguide.first_discovery.title": "Эврика!",
+  "advancements.fieldguide.first_discovery.description": "Соверши своё первое открытие",
+  "advancements.fieldguide.mushroom_collector.title": "Споры о совершенстве",
+  "advancements.fieldguide.mushroom_collector.description": "Изучи все четыре разновидности гигантских грибов",
+  "advancements.fieldguide.animal_expert.title": "Фантастические твари",
+  "advancements.fieldguide.animal_expert.description": "Заполни раздел «Животные» в Полевом дневнике от корки до корки",
+  "advancements.fieldguide.monster_hunter.title": "Ведьмак",
+  "advancements.fieldguide.monster_hunter.description": "Заполни раздел «Монстры» в Полевом дневнике целиком",
+  "advancements.fieldguide.tree_hugger.title": "Зов природы",
+  "advancements.fieldguide.tree_hugger.description": "Заполни раздел «Растения» в Полевом дневнике до последней страницы",
+  "advancements.fieldguide.enderman_scan.title": "Не моргай!",
+  "advancements.fieldguide.enderman_scan.description": "Изучи эндермена. Главное — не моргай",
+  "advancements.fieldguide.invisible_scan.title": "Ты меня не видишь",
+  "advancements.fieldguide.invisible_scan.description": "Изучи существо, что скрыто от глаз",
+  "advancements.fieldguide.gem_alert.title": "Мой глазик увидел алмазик",
+  "advancements.fieldguide.gem_alert.description": "Изучи существо, подойдя к нему вплотную",
+  "advancements.fieldguide.let_him_cook.title": "Дайте ему приготовить!",
+  "advancements.fieldguide.let_him_cook.description": "Изучи существо, пока оно горит. Дай ему как следует прожариться",
+  "advancements.fieldguide.quick_review.title": "Я больше не хочу с тобой играть",
+  "advancements.fieldguide.quick_review.description": "Изучи существо, а затем тут же отправь его в мир иной",
+
+  "fieldguide.journal.default": ""
+}
