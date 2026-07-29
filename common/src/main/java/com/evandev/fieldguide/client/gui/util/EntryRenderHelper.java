@@ -71,26 +71,33 @@ public class EntryRenderHelper {
     private static Optional<ResourceLocation> getResourcePackOverride(Object baseEntry, Object cacheKey, boolean isPage) {
         String entryKey = AutoPopulateRegistry.getEntryKey(baseEntry);
         String key = entryKey + (cacheKey instanceof String str && str.contains("#") ? str.substring(str.indexOf("#")) : "") + (isPage ? "_page" : "_grid");
-
         if (OVERRIDE_CACHE.containsKey(key)) {
             return OVERRIDE_CACHE.get(key);
         }
-
         ResourceLocation id = AutoPopulateRegistry.getEntryId(baseEntry);
-        if (id != null) {
+        if (id != null && !entryKey.isEmpty()) {
+            var resourceManager = Minecraft.getInstance().getResourceManager();
+            String prefix = entryKey.replace(":", "_").replace("/", "_");
+
             if (cacheKey instanceof String str && str.contains("#")) {
                 String variantId = str.substring(str.indexOf('#') + 1).replace(":", "_").toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9._\\-]", "_");
-                ResourceLocation specificVariantLoc = ResourceLocation.fromNamespaceAndPath(id.getNamespace(), "textures/fieldguide/entries/" + id.getPath() + "_" + variantId + (isPage ? "_page.png" : "_grid.png"));
-                if (Minecraft.getInstance().getResourceManager().getResource(specificVariantLoc).isPresent()) {
+
+                ResourceLocation specificVariantLoc = ResourceLocation.fromNamespaceAndPath(id.getNamespace(), "textures/fieldguide/entries/" + prefix + "_" + variantId + (isPage ? "_page.png" : "_grid.png"));
+                if (resourceManager.getResource(specificVariantLoc).isPresent()) {
                     OVERRIDE_CACHE.put(key, Optional.of(specificVariantLoc));
                     return Optional.of(specificVariantLoc);
                 }
+
+                ResourceLocation genericVariantLoc = ResourceLocation.fromNamespaceAndPath(id.getNamespace(), "textures/fieldguide/entries/" + prefix + "_" + variantId + ".png");
+                if (resourceManager.getResource(genericVariantLoc).isPresent()) {
+                    OVERRIDE_CACHE.put(key, Optional.of(genericVariantLoc));
+                    return Optional.of(genericVariantLoc);
+                }
             }
 
-            ResourceLocation specificLoc = ResourceLocation.fromNamespaceAndPath(id.getNamespace(), "textures/fieldguide/entries/" + id.getPath() + (isPage ? "_page.png" : "_grid.png"));
-            ResourceLocation defaultLoc = ResourceLocation.fromNamespaceAndPath(id.getNamespace(), "textures/fieldguide/entries/" + id.getPath() + ".png");
+            ResourceLocation specificLoc = ResourceLocation.fromNamespaceAndPath(id.getNamespace(), "textures/fieldguide/entries/" + prefix + (isPage ? "_page.png" : "_grid.png"));
+            ResourceLocation defaultLoc = ResourceLocation.fromNamespaceAndPath(id.getNamespace(), "textures/fieldguide/entries/" + prefix + ".png");
 
-            var resourceManager = Minecraft.getInstance().getResourceManager();
             if (resourceManager.getResource(specificLoc).isPresent()) {
                 OVERRIDE_CACHE.put(key, Optional.of(specificLoc));
                 return Optional.of(specificLoc);
@@ -99,7 +106,6 @@ public class EntryRenderHelper {
                 return Optional.of(defaultLoc);
             }
         }
-
         OVERRIDE_CACHE.put(key, Optional.empty());
         return Optional.empty();
     }
