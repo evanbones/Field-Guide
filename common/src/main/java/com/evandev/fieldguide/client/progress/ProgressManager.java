@@ -56,7 +56,7 @@ public class ProgressManager {
     private final List<JournalPage> journalPages = new ArrayList<>();
     private String lastUnlockedVariant = null;
 
-    private String journalTitle = "My Field Guide";
+    private String journalTitle = null;
 
     private long lastUnlockTime = 0;
     private Object lastUnlockedEntry = null;
@@ -172,7 +172,13 @@ public class ProgressManager {
             entryTriggers.putAll(packet.getEntryTriggers());
         }
 
-        packet.getJournalTitle().ifPresent(title -> journalTitle = title);
+        packet.getJournalTitle().ifPresent(title -> {
+            if (title != null && !title.isEmpty()) {
+                journalTitle = title;
+            } else {
+                journalTitle = null;
+            }
+        });
         packet.getJournalPages().ifPresent(pages -> {
             journalPages.clear();
             for (PlayerFieldGuideProgress.JournalPageData page : pages) {
@@ -371,11 +377,18 @@ public class ProgressManager {
     }
 
     public String getJournalTitle() {
-        return journalTitle;
+        if (journalTitle != null && !journalTitle.isEmpty()) {
+            return journalTitle;
+        }
+        return I18n.get("fieldguide.journal.default.title");
     }
 
     public void setJournalTitle(String title) {
-        this.journalTitle = title;
+        if (title == null || title.trim().isEmpty()) {
+            this.journalTitle = null;
+        } else {
+            this.journalTitle = title;
+        }
         sendJournalUpdate();
     }
 
@@ -398,7 +411,7 @@ public class ProgressManager {
             JournalPage page = journalPages.get(i);
             pageData.add(new PlayerFieldGuideProgress.JournalPageData(page.title, page.content, page.timestamp));
         }
-        Services.NETWORK.sendToServer(new UpdateJournalPacket(journalTitle, pageData));
+        Services.NETWORK.sendToServer(new UpdateJournalPacket(journalTitle != null ? journalTitle : "", pageData));
     }
 
     public void onWorldLoad() {
@@ -412,7 +425,7 @@ public class ProgressManager {
         selectedVariants.clear();
         entryTriggers.clear();
         journalPages.clear();
-        journalTitle = "My Field Guide";
+        journalTitle = null;
         lastUnlockTime = 0;
         lastUnlockedEntry = null;
         lastUnlockedVariant = null;
@@ -429,7 +442,7 @@ public class ProgressManager {
         selectedVariants.clear();
         entryTriggers.clear();
         journalPages.clear();
-        journalTitle = "My Field Guide";
+        journalTitle = null;
         lastUnlockTime = 0;
         lastUnlockedEntry = null;
         lastUnlockedVariant = null;

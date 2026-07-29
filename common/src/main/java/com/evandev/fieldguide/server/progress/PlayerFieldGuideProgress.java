@@ -41,7 +41,7 @@ public class PlayerFieldGuideProgress {
     private final Set<String> pendingEntryResync = new LinkedHashSet<>();
     private boolean pendingFullSync = false;
 
-    private String journalTitle = "My Field Guide";
+    private String journalTitle = null;
     private boolean dirty = false;
 
     public PlayerFieldGuideProgress(UUID playerUUID, Path progressDir) {
@@ -297,7 +297,11 @@ public class PlayerFieldGuideProgress {
     }
 
     public void setJournalTitle(String title) {
-        this.journalTitle = title != null ? title : "My Field Guide";
+        if (title == null || title.trim().isEmpty()) {
+            this.journalTitle = null;
+        } else {
+            this.journalTitle = title;
+        }
         dirty = true;
     }
 
@@ -410,13 +414,12 @@ public class PlayerFieldGuideProgress {
         }
 
         Services.NETWORK.sendToPlayer(
-                new ProgressUpdatePacket.Builder()
-                        .silent(true)
-                        .journalTitle(journalTitle)
-                        .journalPages(new ArrayList<>(journalPages))
-                        .build(),
-                player
-        );
+            new ProgressUpdatePacket.Builder()
+                .silent(true)
+                .journalTitle(journalTitle != null ? journalTitle : "")
+                .journalPages(new ArrayList<>(journalPages))
+                .build(),
+            player);
     }
 
     private void sendDelta(ServerPlayer player) {
@@ -514,7 +517,13 @@ public class PlayerFieldGuideProgress {
                 );
             }
             if (json.has("journalTitle")) {
-                journalTitle = json.get("journalTitle").getAsString();
+                String loaded = json.get("journalTitle").getAsString();
+                // Migrate old default title to null if it's still present in the save file
+                if (!loaded.isEmpty() && !loaded.equals("My Field Guide")) {
+                    journalTitle = loaded;
+                } else {
+                    journalTitle = null;
+                }
             }
             if (json.has("journalPages")) {
                 journalPages.clear();
@@ -573,7 +582,9 @@ public class PlayerFieldGuideProgress {
             selectedVariants.forEach(variantsObj::addProperty);
             json.add("selectedVariants", variantsObj);
 
-            json.addProperty("journalTitle", journalTitle);
+            if (journalTitle != null) {
+                json.addProperty("journalTitle", journalTitle);
+            }
 
             JsonArray jpArr = new JsonArray();
             for (JournalPageData jp : journalPages) {
