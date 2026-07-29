@@ -7,19 +7,21 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.OrderedSubmitNodeCollector;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.block.MovingBlockRenderState;
-import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.client.renderer.gizmos.DrawableGizmoPrimitives;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.state.level.QuadParticleRenderState;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.joml.Quaternionf;
 import org.jspecify.annotations.NonNull;
 
@@ -42,8 +44,8 @@ public record FullbrightNodeCollector(SubmitNodeCollector delegate) implements S
     }
 
     @Override
-    public void submitModelPart(@NonNull ModelPart modelPart, @NonNull PoseStack poseStack, @NonNull RenderType renderType, int lightCoords, int overlayCoords, TextureAtlasSprite sprite, boolean sheeted, boolean hasFoil, int tintedColor, ModelFeatureRenderer.CrumblingOverlay crumblingOverlay, int outlineColor) {
-        delegate.submitModelPart(modelPart, poseStack, renderType, 15728880, overlayCoords, sprite, sheeted, hasFoil, tintedColor, crumblingOverlay, outlineColor);
+    public void submitModelPart(@NonNull ModelPart modelPart, @NonNull PoseStack poseStack, @NonNull RenderType renderType, int lightCoords, int overlayCoords, TextureAtlasSprite sprite, int tintedColor, ModelFeatureRenderer.CrumblingOverlay crumblingOverlay, int outlineColor) {
+        delegate.submitModelPart(modelPart, poseStack, renderType, 15728880, overlayCoords, sprite, tintedColor, crumblingOverlay, outlineColor);
     }
 
     @Override
@@ -52,8 +54,8 @@ public record FullbrightNodeCollector(SubmitNodeCollector delegate) implements S
     }
 
     @Override
-    public void submitNameTag(@NonNull PoseStack poseStack, Vec3 nameTagAttachment, int offset, @NonNull Component name, boolean seeThrough, int lightCoords, double distanceToCameraSq, @NonNull CameraRenderState camera) {
-        delegate.submitNameTag(poseStack, nameTagAttachment, offset, name, seeThrough, 15728880, distanceToCameraSq, camera);
+    public void submitNameTag(@NonNull PoseStack poseStack, Vec3 nameTagAttachment, int offset, @NonNull Component name, boolean seeThrough, int lightCoords, @NonNull CameraRenderState camera) {
+        delegate.submitNameTag(poseStack, nameTagAttachment, offset, name, seeThrough, 15728880, camera);
     }
 
     @Override
@@ -72,13 +74,18 @@ public record FullbrightNodeCollector(SubmitNodeCollector delegate) implements S
     }
 
     @Override
-    public void submitMovingBlock(@NonNull PoseStack poseStack, @NonNull MovingBlockRenderState movingBlockRenderState) {
-        delegate.submitMovingBlock(poseStack, movingBlockRenderState);
+    public void submitMovingBlock(@NonNull PoseStack poseStack, @NonNull MovingBlockRenderState movingBlockRenderState, int outlineColor) {
+        delegate.submitMovingBlock(poseStack, movingBlockRenderState, outlineColor);
     }
 
     @Override
-    public void submitBreakingBlockModel(@NonNull PoseStack poseStack, @NonNull BlockStateModel model, long seed, int progress) {
-        delegate.submitBreakingBlockModel(poseStack, model, seed, progress);
+    public void submitBreakingBlockModel(@NonNull PoseStack poseStack, @NonNull List<BlockStateModelPart> parts, int progress) {
+        delegate.submitBreakingBlockModel(poseStack, parts, progress);
+    }
+
+    @Override
+    public void submitShapeOutline(@NonNull PoseStack poseStack, @NonNull VoxelShape shape, @NonNull RenderType renderType, int color, float width, boolean afterTerrain) {
+        delegate.submitShapeOutline(poseStack, shape, renderType, color, width, afterTerrain);
     }
 
     @Override
@@ -87,8 +94,13 @@ public record FullbrightNodeCollector(SubmitNodeCollector delegate) implements S
     }
 
     @Override
-    public void submitParticleGroup(@NonNull ParticleGroupRenderer particleGroupRenderer) {
-        delegate.submitParticleGroup(particleGroupRenderer);
+    public void submitQuadParticleGroup(@NonNull QuadParticleRenderState particleGroupRenderer) {
+        delegate.submitQuadParticleGroup(particleGroupRenderer);
+    }
+
+    @Override
+    public void submitGizmoPrimitives(DrawableGizmoPrimitives.@NonNull Group group, @NonNull CameraRenderState camera, boolean onTop) {
+        delegate.submitGizmoPrimitives(group, camera, onTop);
     }
 
     @Override

@@ -47,9 +47,9 @@ public abstract class InventoryScreenMixin extends AbstractRecipeBookScreen<Inve
             if (!FieldGuideClient.canOpenGuide()) return;
             String defaultMode = ClientConfig.get().defaultScreen;
             if ("last_opened_screen".equals(defaultMode) && BookScreen.lastOpenedScreen != null) {
-                this.minecraft.setScreen(BookScreen.lastOpenedScreen);
+                this.minecraft.gui.setScreen(BookScreen.lastOpenedScreen);
             } else {
-                this.minecraft.setScreen(new FieldGuideCategoryScreen());
+                this.minecraft.gui.setScreen(new FieldGuideCategoryScreen());
             }
         }
         );

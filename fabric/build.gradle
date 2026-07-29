@@ -13,8 +13,8 @@ dependencies {
         transitive = false
     }
 
-    // Cloth Config
-    implementation "me.shedaniel.cloth:cloth-config-fabric:${cloth_config_version}"
+    // YACL
+    implementation "dev.isxander:yet-another-config-lib:${yacl_version}-fabric"
     implementation "com.terraformersmc:modmenu:${mod_menu_version}"
 
     // Item Descriptions
@@ -27,8 +27,8 @@ dependencies {
     //runtimeOnly "maven.modrinth:spyglass-improvements:${spyglass_improvements_version}+fabric"
 
     // ETF & EMF
-    compileOnly "maven.modrinth:entitytexturefeatures:${etf_version}-fabric-26.1"
-    compileOnly "maven.modrinth:entity-model-features:${emf_version}-fabric-26.1"
+    compileOnly "maven.modrinth:entitytexturefeatures:${etf_version}-fabric-26.2"
+    compileOnly "maven.modrinth:entity-model-features:${emf_version}-fabric-26.2"
 
     // Reliable Remover
     compileOnly "maven.modrinth:reliable-remover:${reliable_remover_version}-fabric"

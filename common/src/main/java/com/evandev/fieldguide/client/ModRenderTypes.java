@@ -1,6 +1,7 @@
 package com.evandev.fieldguide.client;
 
 import com.evandev.fieldguide.Constants;
+import com.mojang.blaze3d.pipeline.BindGroupLayout;
 import com.mojang.blaze3d.pipeline.DepthStencilState;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.platform.CompareOp;
@@ -59,7 +60,8 @@ public class ModRenderTypes {
                     .withLocation(Identifier.fromNamespaceAndPath(Constants.MOD_ID, "scan_depth_wrap"))
                     .withVertexShader(SCAN_SHADER_ID)
                     .withFragmentShader(SCAN_SHADER_ID)
-                    .withVertexFormat(originalPipeline.getVertexFormat(), originalPipeline.getVertexFormatMode())
+                    .withVertexBinding(0, originalPipeline.getVertexFormatBindings()[0])
+                    .withPrimitiveTopology(originalPipeline.getPrimitiveTopology())
                     .withColorTargetState(translucentPipeline.getColorTargetState())
                     .withCull(originalPipeline.isCull());
 
@@ -67,16 +69,8 @@ public class ModRenderTypes {
                 builder.withDepthStencilState(Optional.of(originalPipeline.getDepthStencilState()));
             }
 
-            for (String sampler : originalPipeline.getSamplers()) {
-                builder.withSampler(sampler);
-            }
-
-            for (RenderPipeline.UniformDescription uniform : originalPipeline.getUniforms()) {
-                if (uniform.textureFormat() != null) {
-                    builder.withUniform(uniform.name(), uniform.type(), uniform.textureFormat());
-                } else {
-                    builder.withUniform(uniform.name(), uniform.type());
-                }
+            for (BindGroupLayout layout : originalPipeline.getBindGroupLayouts()) {
+                builder.withBindGroupLayout(layout);
             }
 
             RenderSetup setup = RenderSetup.builder(builder.build())
@@ -101,22 +95,15 @@ public class ModRenderTypes {
                     .withLocation(Identifier.fromNamespaceAndPath(Constants.MOD_ID, "scan_wrap"))
                     .withVertexShader(SCAN_SHADER_ID)
                     .withFragmentShader(SCAN_SHADER_ID)
-                    .withVertexFormat(originalPipeline.getVertexFormat(), originalPipeline.getVertexFormatMode())
+                    .withVertexBinding(0, originalPipeline.getVertexFormatBindings()[0])
+                    .withPrimitiveTopology(originalPipeline.getPrimitiveTopology())
                     .withColorTargetState(translucentPipeline.getColorTargetState())
                     .withCull(originalPipeline.isCull());
 
             builder.withDepthStencilState(Optional.of(new DepthStencilState(CompareOp.EQUAL, false)));
 
-            for (String sampler : originalPipeline.getSamplers()) {
-                builder.withSampler(sampler);
-            }
-
-            for (RenderPipeline.UniformDescription uniform : originalPipeline.getUniforms()) {
-                if (uniform.textureFormat() != null) {
-                    builder.withUniform(uniform.name(), uniform.type(), uniform.textureFormat());
-                } else {
-                    builder.withUniform(uniform.name(), uniform.type());
-                }
+            for (BindGroupLayout layout : originalPipeline.getBindGroupLayouts()) {
+                builder.withBindGroupLayout(layout);
             }
 
             RenderSetup setup = RenderSetup.builder(builder.build())

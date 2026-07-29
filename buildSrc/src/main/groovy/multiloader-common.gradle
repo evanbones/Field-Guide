@@ -63,8 +63,20 @@ repositories {
     }
 
     maven {
-        name = "ClothConfig"
-        url = "https://maven.shedaniel.me/"
+        name = "Xander Maven"
+        url = uri("https://maven.isxander.dev/releases")
+        content {
+            includeGroupAndSubgroups("dev.isxander")
+            includeGroupAndSubgroups("org.quiltmc.parsers")
+        }
+    }
+
+    maven {
+        name = "Quilt Maven"
+        url = uri("https://maven.quiltmc.org/repository/release/")
+        content {
+            includeGroupAndSubgroups("org.quiltmc.parsers")
+        }
     }
 
     maven { url = "https://maven.impactdev.net/repository/development/" }
@@ -142,7 +154,8 @@ processResources {
             'neoforge_version'             : neoforge_version,
             'neoforge_loader_version_range': neoforge_loader_version_range,
             'credits'                      : credits,
-            'java_version'                 : java_version
+            'java_version'                 : java_version,
+            'yacl_version'                 : yacl_version
     ]
 
     var jsonExpandProps = expandProps.collectEntries {

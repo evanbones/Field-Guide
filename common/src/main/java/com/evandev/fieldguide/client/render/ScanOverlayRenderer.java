@@ -324,7 +324,7 @@ public class ScanOverlayRenderer {
         SubmitNodeCollector depthCollector = new ScanNodeCollector(collector, 1f, 1f, 1f, 0f, localScanLimitY, true);
         SubmitNodeCollector forcedCollector = new ScanNodeCollector(collector, red, green, blue, alpha, localScanLimitY, false);
 
-        CameraRenderState cameraState = mc.gameRenderer.getGameRenderState().levelRenderState.cameraRenderState;
+        CameraRenderState cameraState = mc.gameRenderer.gameRenderState().levelRenderState.cameraRenderState;
 
         double x = state.x - camPos.x;
         double y = state.y - camPos.y;

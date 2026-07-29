@@ -239,7 +239,7 @@ public class EntryRenderHelper {
                 provider.applyToRenderState(mob, state, variantDef);
             }
 
-            CameraRenderState camera = Minecraft.getInstance().gameRenderer.getGameRenderState().levelRenderState.cameraRenderState;
+            CameraRenderState camera = Minecraft.getInstance().gameRenderer.gameRenderState().levelRenderState.cameraRenderState;
             renderer.submit(state, poseStack, new FullbrightNodeCollector(collector), camera);
         } catch (Exception e) {
             Constants.LOG.error("Failed to render entity in Field Guide: {}", entrySource, e);

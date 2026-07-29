@@ -47,18 +47,18 @@ dependencies {
     // RRV
     runtimeOnly("cc.cassian.rrv:reliable-recipe-viewer-neoforge:${rrv_version}")
 
-    // Cloth Config
-    implementation "me.shedaniel.cloth:cloth-config-neoforge:${cloth_config_version}"
+    // YACL
+    implementation "dev.isxander:yet-another-config-lib:${yacl_version}-neoforge"
 
     // Immersive Overlays
-    runtimeOnly "maven.modrinth:immersive-overlays:${immersive_overlays_version}-neoforge"
+    //runtimeOnly "maven.modrinth:immersive-overlays:${immersive_overlays_version}-neoforge"
 
     // Spyglass Improvements
     //runtimeOnly "maven.modrinth:spyglass-improvements:${spyglass_improvements_version}+neoforge"
 
     // ETF & EMF
-    compileOnly "maven.modrinth:entitytexturefeatures:${etf_version}-neoforge-26.1"
-    compileOnly "maven.modrinth:entity-model-features:${emf_version}-neoforge-26.1"
+    compileOnly "maven.modrinth:entitytexturefeatures:${etf_version}-neoforge-26.2"
+    compileOnly "maven.modrinth:entity-model-features:${emf_version}-neoforge-26.2"
 
     // Reliable Remover
     compileOnly "maven.modrinth:reliable-remover:${reliable_remover_version}-neoforge"

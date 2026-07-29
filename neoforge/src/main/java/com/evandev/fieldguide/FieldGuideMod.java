@@ -36,7 +36,7 @@ import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 @Mod(Constants.MOD_ID)
 public class FieldGuideMod {
 
-    public FieldGuideMod(IEventBus modEventBus) {
+    public FieldGuideMod(IEventBus modEventBus, net.neoforged.fml.ModContainer modContainer) {
         NeoForgeRegistryHelper.init(modEventBus);
         CommonClass.init();
 
@@ -52,7 +52,7 @@ public class FieldGuideMod {
         }
 
         if (FMLLoader.getCurrent().getDist() == Dist.CLIENT) {
-            FieldGuideNeoForgeClient.init(modEventBus);
+            FieldGuideNeoForgeClient.init(modEventBus, modContainer);
         }
     }
 

@@ -12,9 +12,9 @@ neoForge {
 }
 
 dependencies {
-    compileOnly "me.shedaniel.cloth:cloth-config-neoforge:${cloth_config_version}"
-    compileOnly "maven.modrinth:entitytexturefeatures:${etf_version}-neoforge-26.1"
-    compileOnly "maven.modrinth:entity-model-features:${emf_version}-neoforge-26.1"
+    compileOnly "dev.isxander:yet-another-config-lib:${yacl_version}-neoforge"
+    compileOnly "maven.modrinth:entitytexturefeatures:${etf_version}-neoforge-26.2"
+    compileOnly "maven.modrinth:entity-model-features:${emf_version}-neoforge-26.2"
     compileOnly "maven.modrinth:reliable-remover:${reliable_remover_version}-neoforge"
     //compileOnly "maven.modrinth:exposure:${exposure_neoforge_version}"
     //compileOnly "maven.modrinth:mixed-litter:${mixed_litter_version}"

@@ -162,7 +162,7 @@ public class FieldGuideCategoryScreen extends BookScreen {
         this.isSearching = !this.searchQuery.trim().isEmpty();
 
         if (!this.isSearching && this.getSelectedCategory() != null && this.getSelectedCategory().getId().getPath().equals("intro")) {
-            Objects.requireNonNull(this.minecraft).setScreen(new FieldGuideJournalScreen(this.getSelectedCategory(), lastOpenedJournalPage));
+            Objects.requireNonNull(this.minecraft).gui.setScreen(new FieldGuideJournalScreen(this.getSelectedCategory(), lastOpenedJournalPage));
             return;
         }
 
@@ -201,7 +201,7 @@ public class FieldGuideCategoryScreen extends BookScreen {
                 ClientConstants.BACK_SPRITES,
                 b -> {
                     if (parent != null) {
-                        Objects.requireNonNull(this.minecraft).setScreen(parent);
+                        Objects.requireNonNull(this.minecraft).gui.setScreen(parent);
                     } else {
                         this.searchBox.setValue("");
                     }
@@ -247,7 +247,7 @@ public class FieldGuideCategoryScreen extends BookScreen {
         if (!isSearching) {
             Category category = ClientFieldGuideManager.getCategories().get(lastOpenedCategory);
             if (category != null && category.getId().getPath().equals("intro")) {
-                Objects.requireNonNull(this.minecraft).setScreen(new FieldGuideJournalScreen(category, lastOpenedJournalPage));
+                Objects.requireNonNull(this.minecraft).gui.setScreen(new FieldGuideJournalScreen(category, lastOpenedJournalPage));
                 return;
             }
             this.setSelectedCategory(category);
@@ -283,7 +283,7 @@ public class FieldGuideCategoryScreen extends BookScreen {
         lastOpenedCategory = category.getId();
 
         if (category.getId().getPath().equals("intro")) {
-            Objects.requireNonNull(this.minecraft).setScreen(new FieldGuideJournalScreen(category, lastOpenedJournalPage));
+            Objects.requireNonNull(this.minecraft).gui.setScreen(new FieldGuideJournalScreen(category, lastOpenedJournalPage));
             return;
         }
 
@@ -393,7 +393,7 @@ public class FieldGuideCategoryScreen extends BookScreen {
             }
         }
 
-        Minecraft.getInstance().setScreen(new FieldGuideEntryScreen(this, entry));
+        Minecraft.getInstance().gui.setScreen(new FieldGuideEntryScreen(this, entry));
     }
 
     @Override
@@ -408,7 +408,7 @@ public class FieldGuideCategoryScreen extends BookScreen {
         }
 
         if (this.minecraft.player != null && this.minecraft.options.keyInventory.matches(event)) {
-            this.minecraft.setScreen(new InventoryScreen(this.minecraft.player));
+            this.minecraft.gui.setScreen(new InventoryScreen(this.minecraft.player));
             return true;
         }
 

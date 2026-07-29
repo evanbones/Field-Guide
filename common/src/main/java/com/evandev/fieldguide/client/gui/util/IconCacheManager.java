@@ -7,6 +7,9 @@ import com.evandev.fieldguide.entry.EntryResolver;
 import com.evandev.fieldguide.platform.Services;
 import com.mojang.blaze3d.ProjectionType;
 import com.mojang.blaze3d.buffers.GpuBuffer;
+import com.mojang.blaze3d.buffers.GpuBufferSlice;
+import com.mojang.blaze3d.GpuFormat;
+import org.joml.Vector4f;
 import com.mojang.blaze3d.buffers.Std140Builder;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.pipeline.TextureTarget;
@@ -177,10 +180,10 @@ public class IconCacheManager {
 
         Minecraft mc = Minecraft.getInstance();
 
-        RenderTarget renderTarget = new TextureTarget("IconGenerator", RENDER_SIZE, RENDER_SIZE, true);
+        RenderTarget renderTarget = new TextureTarget("IconGenerator", RENDER_SIZE, RENDER_SIZE, true, GpuFormat.RGBA8_UNORM);
         CommandEncoder encoder = RenderSystem.getDevice().createCommandEncoder();
 
-        encoder.clearColorAndDepthTextures(renderTarget.getColorTexture(), 0, renderTarget.getDepthTexture(), 1.0);
+        encoder.clearColorAndDepthTextures(renderTarget.getColorTexture(), new Vector4f(0, 0, 0, 0), renderTarget.getDepthTexture(), 1.0f);
 
         RenderSystem.outputColorTextureOverride = renderTarget.getColorTextureView();
         RenderSystem.outputDepthTextureOverride = renderTarget.getDepthTextureView();
@@ -210,6 +213,7 @@ public class IconCacheManager {
 
         GpuBuffer lightBuffer = RenderSystem.getDevice().createBuffer(() -> "FieldGuide Lighting", 136, Lighting.UBO_SIZE);
 
+        // todo: this is also terrible
         try (MemoryStack memoryStack = MemoryStack.stackPush()) {
             ByteBuffer buffer = Std140Builder.onStack(memoryStack, Lighting.UBO_SIZE)
                     .putVec3(light0)
@@ -223,16 +227,12 @@ public class IconCacheManager {
             EmfCompat.setInGui(true);
         }
 
-        SubmitNodeStorage storage = mc.gameRenderer.getSubmitNodeStorage();
-        FeatureRenderDispatcher featureDispatcher = mc.gameRenderer.getFeatureRenderDispatcher();
-        MultiBufferSource.BufferSource buffers = mc.renderBuffers().bufferSource();
+        SubmitNodeStorage storage = new SubmitNodeStorage();
+        FeatureRenderDispatcher featureDispatcher = mc.gameRenderer.featureRenderDispatcher();
 
         renderAction.accept(poseStack, storage);
 
-        featureDispatcher.renderAllFeatures();
-        buffers.endBatch();
-
-        storage.clear();
+        featureDispatcher.renderAllFeatures(storage);
 
         if (Services.PLATFORM.isModLoaded("entity_model_features")) {
             EmfCompat.setInGui(false);
@@ -249,9 +249,7 @@ public class IconCacheManager {
 
         encoder.copyTextureToBuffer(renderTarget.getColorTexture(), readbackBuffer, 0, () -> {
             try {
-                CommandEncoder mapEncoder = RenderSystem.getDevice().createCommandEncoder();
-
-                try (GpuBuffer.MappedView view = mapEncoder.mapBuffer(readbackBuffer, true, false)) {
+                try (GpuBufferSlice.MappedView view = readbackBuffer.map(true, false)) {
                     ByteBuffer pixels = view.data();
 
                     NativeImage nativeImage = new NativeImage(RENDER_SIZE, RENDER_SIZE, false);

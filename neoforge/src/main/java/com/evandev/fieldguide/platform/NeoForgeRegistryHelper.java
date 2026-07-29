@@ -2,7 +2,7 @@ package com.evandev.fieldguide.platform;
 
 import com.evandev.fieldguide.Constants;
 import com.evandev.fieldguide.platform.services.IRegistryHelper;
-import net.minecraft.advancements.CriterionTrigger;
+import net.minecraft.advancements.triggers.CriterionTrigger;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;

@@ -7,6 +7,7 @@ import com.evandev.fieldguide.config.ServerConfig;
 import com.evandev.fieldguide.entry.EntryResolver;
 import com.evandev.fieldguide.platform.Services;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
@@ -40,18 +41,18 @@ public class ClientTextManager {
             String variantStr = variantId.toLowerCase(java.util.Locale.ROOT);
 
             String newVariantKey = "fieldguide." + entryType + "." + path + "." + variantStr + ".hint";
-            if (I18n.exists(newVariantKey)) return I18n.get(newVariantKey);
+            if (Language.getInstance().has(newVariantKey)) return I18n.get(newVariantKey);
 
             String oldVariantKey = "fieldguide." + id.getNamespace() + "." + id.getPath() + "." + variantStr + ".hint";
-            if (I18n.exists(oldVariantKey)) return I18n.get(oldVariantKey);
+            if (Language.getInstance().has(oldVariantKey)) return I18n.get(oldVariantKey);
         }
 
         // 2. custom base hint
         String newOverrideKey = "fieldguide." + entryType + "." + path + ".hint";
-        if (I18n.exists(newOverrideKey)) return I18n.get(newOverrideKey);
+        if (Language.getInstance().has(newOverrideKey)) return I18n.get(newOverrideKey);
 
         String oldOverrideKey = "fieldguide." + id.getNamespace() + "." + id.getPath() + ".hint";
-        if (I18n.exists(oldOverrideKey)) return I18n.get(oldOverrideKey);
+        if (Language.getInstance().has(oldOverrideKey)) return I18n.get(oldOverrideKey);
 
         // 3. defaults based on known triggers
         ProgressManager progress = ProgressManager.getInstance();
@@ -90,7 +91,7 @@ public class ClientTextManager {
             if (underscore != -1) species = species.substring(0, underscore);
 
             String descKey = "cobblemon.species." + species + ".desc";
-            if (I18n.exists(descKey)) return I18n.get(descKey);
+            if (Language.getInstance().has(descKey)) return I18n.get(descKey);
         }
 
         String entryType = prefixedId.getNamespace();
@@ -100,24 +101,24 @@ public class ClientTextManager {
             String variantStr = variantId.toLowerCase(java.util.Locale.ROOT);
 
             String newVariantKey = "fieldguide." + entryType + "." + path + "." + variantStr + ".description";
-            if (I18n.exists(newVariantKey)) return I18n.get(newVariantKey);
+            if (Language.getInstance().has(newVariantKey)) return I18n.get(newVariantKey);
 
             String oldVariantKey = "fieldguide." + id.getNamespace() + "." + id.getPath() + "." + variantStr + ".description";
-            if (I18n.exists(oldVariantKey)) return I18n.get(oldVariantKey);
+            if (Language.getInstance().has(oldVariantKey)) return I18n.get(oldVariantKey);
         }
 
         String newOverrideKey = "fieldguide." + entryType + "." + path + ".description";
-        if (I18n.exists(newOverrideKey)) return I18n.get(newOverrideKey);
+        if (Language.getInstance().has(newOverrideKey)) return I18n.get(newOverrideKey);
 
         String oldOverrideKey = "fieldguide." + id.getNamespace() + "." + id.getPath() + ".description";
-        if (I18n.exists(oldOverrideKey)) return I18n.get(oldOverrideKey);
+        if (Language.getInstance().has(oldOverrideKey)) return I18n.get(oldOverrideKey);
 
         Object coreEntry = EntryResolver.resolveCoreEntry(entry);
 
         // Item Descriptions Compat
         if (Services.PLATFORM.isModLoaded("item_descriptions")) {
             String compatKey = ItemDescriptionsCompat.tryGetDescriptionKey(coreEntry);
-            if (compatKey != null && I18n.exists(compatKey)) {
+            if (compatKey != null && Language.getInstance().has(compatKey)) {
                 return I18n.get(compatKey);
             }
         }
@@ -125,24 +126,24 @@ public class ClientTextManager {
         // Entity Descriptions Compat
         String entityKey = "entity." + id.getNamespace() + "." + id.getPath() + ".description";
         if (coreEntry instanceof EntityType) {
-            if (I18n.exists(entityKey)) return I18n.get(entityKey);
+            if (Language.getInstance().has(entityKey)) return I18n.get(entityKey);
         }
 
         // Quark JEI Hint
         String quarkJeiKey = "quark.jei.hint." + id.getPath();
-        if (id.getNamespace().equals("quark") && I18n.exists(quarkJeiKey)) {
+        if (id.getNamespace().equals("quark") && Language.getInstance().has(quarkJeiKey)) {
             return I18n.get(quarkJeiKey);
         }
 
         // Lore & Item Fallbacks
         String loreKey = "lore." + id.getNamespace() + "." + id.getPath();
-        if (I18n.exists(loreKey)) return I18n.get(loreKey);
+        if (Language.getInstance().has(loreKey)) return I18n.get(loreKey);
 
         String fallbackKey = (coreEntry instanceof EntityType) ? entityKey : loreKey;
         if (coreEntry instanceof Item) {
             fallbackKey = "item." + id.getNamespace() + "." + id.getPath() + ".description";
         }
-        return I18n.exists(fallbackKey) ? I18n.get(fallbackKey) : I18n.get("fieldguide.description.missing");
+        return Language.getInstance().has(fallbackKey) ? I18n.get(fallbackKey) : I18n.get("fieldguide.description.missing");
     }
 
     public Component getDefaultNameComponent(Object entry, String variantId) {
@@ -156,7 +157,7 @@ public class ClientTextManager {
                 if (underscore != -1) species = species.substring(0, underscore);
 
                 String nameKey = "cobblemon.species." + species + ".name";
-                if (I18n.exists(nameKey)) {
+                if (Language.getInstance().has(nameKey)) {
                     return Component.translatable(nameKey);
                 }
             }
@@ -168,17 +169,17 @@ public class ClientTextManager {
                 String variantStr = variantId.toLowerCase(java.util.Locale.ROOT);
 
                 String newVariantKey = "fieldguide.name." + entryType + "." + path + "." + variantStr;
-                if (I18n.exists(newVariantKey)) return Component.translatable(newVariantKey);
+                if (Language.getInstance().has(newVariantKey)) return Component.translatable(newVariantKey);
 
                 String oldVariantKey = "fieldguide.name." + id.getNamespace() + "." + id.getPath() + "." + variantStr;
-                if (I18n.exists(oldVariantKey)) return Component.translatable(oldVariantKey);
+                if (Language.getInstance().has(oldVariantKey)) return Component.translatable(oldVariantKey);
             }
 
             String newOverrideKey = "fieldguide.name." + entryType + "." + path;
-            if (I18n.exists(newOverrideKey)) return Component.translatable(newOverrideKey);
+            if (Language.getInstance().has(newOverrideKey)) return Component.translatable(newOverrideKey);
 
             String oldOverrideKey = "fieldguide.name." + id.getNamespace() + "." + id.getPath();
-            if (I18n.exists(oldOverrideKey)) return Component.translatable(oldOverrideKey);
+            if (Language.getInstance().has(oldOverrideKey)) return Component.translatable(oldOverrideKey);
         }
 
         Object coreEntry = EntryResolver.resolveCoreEntry(entry);

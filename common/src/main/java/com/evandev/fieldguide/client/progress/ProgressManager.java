@@ -143,7 +143,7 @@ public class ProgressManager {
                 this.lastUnlockedEntry = entry;
                 this.lastUnlockedVariant = entryToToast.getValue();
                 if (ClientConfig.get().showToasts) {
-                    Minecraft.getInstance().getToastManager().addToast(new FieldGuideToast(entry, entryToToast.getValue()));
+                    Minecraft.getInstance().gui.toastManager().addToast(new FieldGuideToast(entry, entryToToast.getValue()));
                 }
             }
         }

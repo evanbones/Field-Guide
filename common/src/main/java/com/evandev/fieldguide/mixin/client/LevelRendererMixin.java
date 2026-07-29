@@ -21,7 +21,7 @@ public class LevelRendererMixin {
     )
     private void renderScanOverlays(PoseStack poseStack, LevelRenderState levelRenderState, SubmitNodeCollector output, CallbackInfo ci) {
         float partialTick = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(true);
-        Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
+        Camera camera = Minecraft.getInstance().gameRenderer.mainCamera();
 
         ScanOverlayRenderer.render(
                 poseStack,

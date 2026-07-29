@@ -106,7 +106,7 @@ public class FieldGuideJournalScreen extends BookScreen {
             if (!q.isEmpty()) {
                 FieldGuideCategoryScreen searchScreen = new FieldGuideCategoryScreen(q, this);
                 searchScreen.setInitialSearchFocus(true);
-                this.minecraft.setScreen(searchScreen);
+                this.minecraft.gui.setScreen(searchScreen);
             }
         });
         this.addRenderableWidget(this.searchBox);
@@ -129,7 +129,7 @@ public class FieldGuideJournalScreen extends BookScreen {
     private void changeSpread(int direction) {
         cleanupEmptyPages();
         currentSpread += direction;
-        Minecraft.getInstance().setScreen(new FieldGuideJournalScreen(this.getSelectedCategory(), currentSpread));
+        Minecraft.getInstance().gui.setScreen(new FieldGuideJournalScreen(this.getSelectedCategory(), currentSpread));
     }
 
     private void handleSpillover(String spill, int targetPageIndex) {
@@ -143,7 +143,7 @@ public class FieldGuideJournalScreen extends BookScreen {
         targetPage.content = spill + targetPage.content;
         manager.saveJournal();
 
-        Minecraft.getInstance().setScreen(new FieldGuideJournalScreen(this.getSelectedCategory(), currentSpread));
+        Minecraft.getInstance().gui.setScreen(new FieldGuideJournalScreen(this.getSelectedCategory(), currentSpread));
     }
 
     private void cleanupEmptyPages() {
@@ -177,7 +177,7 @@ public class FieldGuideJournalScreen extends BookScreen {
     public void onTabClick(Category category) {
         if (category.getId().getPath().equals("intro")) return;
         cleanupEmptyPages();
-        Objects.requireNonNull(this.minecraft).setScreen(new FieldGuideCategoryScreen(category, 0));
+        Objects.requireNonNull(this.minecraft).gui.setScreen(new FieldGuideCategoryScreen(category, 0));
     }
 
     @Override

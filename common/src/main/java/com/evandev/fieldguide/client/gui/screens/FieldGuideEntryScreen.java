@@ -359,7 +359,7 @@ public class FieldGuideEntryScreen extends BookScreen {
             for (int i = 0; i < seasons.size(); i++) {
                 int drawX = startX + (i * (iconSize + spacing));
                 if (Bounds.isMouseOver(mouseX, mouseY, drawX - 2, startY - 2, iconSize + 4, iconSize + 4)) {
-                    this.minecraft.setScreen(new FieldGuideCategoryScreen("=$" + seasons.get(i).getId(), this));
+                    this.minecraft.gui.setScreen(new FieldGuideCategoryScreen("=$" + seasons.get(i).getId(), this));
                     return true;
                 }
             }
@@ -726,7 +726,7 @@ public class FieldGuideEntryScreen extends BookScreen {
                 if (Bounds.isMouseOver(mouseX, mouseY, x + offset, y + offset, 16, 16)) {
                     graphics.setTooltipForNextFrame(this.font, Component.translatable("biome." + item.getNamespace() + "." + item.getPath()), mouseX, mouseY);
                 }
-            }, item -> this.minecraft.setScreen(new FieldGuideCategoryScreen("=!" + item, this))));
+            }, item -> this.minecraft.gui.setScreen(new FieldGuideCategoryScreen("=!" + item, this))));
         }
     }
 
@@ -767,14 +767,14 @@ public class FieldGuideEntryScreen extends BookScreen {
                     graphics.setComponentTooltipForNextFrame(this.font, tooltip, mouseX, mouseY);
                 }
             }, stack -> {
-                this.minecraft.setScreen(new FieldGuideCategoryScreen("=^" + stack.getHoverName().getString().toLowerCase(Locale.ROOT), this));
+                this.minecraft.gui.setScreen(new FieldGuideCategoryScreen("=^" + stack.getHoverName().getString().toLowerCase(Locale.ROOT), this));
             }));
         }
     }
 
     private void setupNavigationButtons() {
         this.addRenderableWidget(new PageTurnButton(this.bounds.right() - 13, this.bounds.top() + 26, 24, 24, ClientConstants.BACK_SPRITES, b -> {
-            this.minecraft.setScreen(parent);
+            this.minecraft.gui.setScreen(parent);
         })).setTooltip(Tooltip.create(Component.translatable("gui.fieldguide.back")));
 
         List<Object> entries = parent.getCurrentEntries();
@@ -784,11 +784,11 @@ public class FieldGuideEntryScreen extends BookScreen {
 
             PageTurnButton prevEntryButton = new PageTurnButton(this.bounds.left() + 15, this.leftPageBounds.bottom() - 15, 16, 16, ClientConstants.PREV_PAGE_SPRITES, b -> {
                 if (index > 0)
-                    this.minecraft.setScreen(new FieldGuideEntryScreen(parent, entries.get(index - 1)));
+                    this.minecraft.gui.setScreen(new FieldGuideEntryScreen(parent, entries.get(index - 1)));
             });
             PageTurnButton nextEntryButton = new PageTurnButton(this.bounds.right() - 30, this.rightPageBounds.bottom() - 15, 16, 16, ClientConstants.NEXT_PAGE_SPRITES, b -> {
                 if (index >= 0 && index < entries.size() - 1)
-                    this.minecraft.setScreen(new FieldGuideEntryScreen(parent, entries.get(index + 1)));
+                    this.minecraft.gui.setScreen(new FieldGuideEntryScreen(parent, entries.get(index + 1)));
             });
 
             prevEntryButton.visible = index > 0;
@@ -801,7 +801,7 @@ public class FieldGuideEntryScreen extends BookScreen {
             if (!q.isEmpty()) {
                 FieldGuideCategoryScreen searchScreen = new FieldGuideCategoryScreen(q, this);
                 searchScreen.setInitialSearchFocus(true);
-                this.minecraft.setScreen(searchScreen);
+                this.minecraft.gui.setScreen(searchScreen);
             }
         }));
     }
@@ -814,7 +814,7 @@ public class FieldGuideEntryScreen extends BookScreen {
         }
 
         if (this.minecraft.player != null && this.minecraft.options.keyInventory.matches(event)) {
-            this.minecraft.setScreen(new InventoryScreen(this.minecraft.player));
+            this.minecraft.gui.setScreen(new InventoryScreen(this.minecraft.player));
             return true;
         }
 
@@ -823,7 +823,7 @@ public class FieldGuideEntryScreen extends BookScreen {
 
     @Override
     public void onTabClick(Category category) {
-        this.minecraft.setScreen(parent);
+        this.minecraft.gui.setScreen(parent);
         parent.onTabClick(category);
     }
 

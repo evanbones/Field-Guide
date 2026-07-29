@@ -8,6 +8,6 @@ public class NeoForgeClientHelper implements IClientHelper {
 
     @Override
     public void openFieldGuide() {
-        Minecraft.getInstance().setScreen(new FieldGuideCategoryScreen(null));
+        Minecraft.getInstance().gui.setScreen(new FieldGuideCategoryScreen(null));
     }
 }

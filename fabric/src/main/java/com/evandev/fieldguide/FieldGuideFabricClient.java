@@ -50,7 +50,7 @@ public class FieldGuideFabricClient implements ClientModInitializer {
             context.client().execute(() -> {
                 ClientFieldGuideManager.getInstance().updateLootCache(packet.lootCache(), packet.clearCache());
 
-                if (context.client().screen instanceof FieldGuideEntryScreen screen) {
+                if (context.client().gui.screen() instanceof FieldGuideEntryScreen screen) {
                     screen.refresh();
                 }
             });

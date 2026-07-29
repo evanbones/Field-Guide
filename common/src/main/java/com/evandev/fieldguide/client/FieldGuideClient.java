@@ -90,7 +90,7 @@ public class FieldGuideClient {
 
     public static void openGuide() {
         Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft.screen == null && minecraft.player != null) {
+        if (minecraft.gui.screen() == null && minecraft.player != null) {
             if (!canOpenGuide()) return;
             minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.BOOK_PAGE_TURN, 1.0F, 1.0F));
             ClientFieldGuideManager manager = ClientFieldGuideManager.getInstance();
@@ -110,16 +110,16 @@ public class FieldGuideClient {
                         entryScreen.setInitialVariant(lastVariant);
                     }
 
-                    minecraft.setScreen(entryScreen);
+                    minecraft.gui.setScreen(entryScreen);
                     return;
                 }
             }
 
             String defaultMode = ClientConfig.get().defaultScreen;
             if ("last_opened_screen".equals(defaultMode) && BookScreen.lastOpenedScreen != null) {
-                minecraft.setScreen(BookScreen.lastOpenedScreen);
+                minecraft.gui.setScreen(BookScreen.lastOpenedScreen);
             } else {
-                minecraft.setScreen(new FieldGuideCategoryScreen());
+                minecraft.gui.setScreen(new FieldGuideCategoryScreen());
             }
         }
     }
