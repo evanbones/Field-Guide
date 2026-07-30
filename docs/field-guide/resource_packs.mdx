@@ -48,15 +48,34 @@ the [Mod Descriptions GitHub](https://github.com/cassiancc/Mod-Descriptions/pull
 
 ### Texture Overrides (2D Sprites)
 
-If an entity renders poorly (or if you prefer 2D illustrations), you can force the Field Guide to use a texture instead of the 3D model. Place textures in: `assets/<namespace>/textures/fieldguide/entries/`
+If an entity or entry renders poorly (or if you prefer 2D illustrations), you can force the Field Guide to use custom PNG textures instead of 3D models. Place textures in: `assets/<namespace>/textures/fieldguide/entries/`
 
-The mod looks for textures in this specific order:
+#### Texture Naming Formats
 
-1. **View-Specific:** `<id>_page.png` (Used on the details page) or `<id>_grid.png` (Used in the list).
-2. **General:** `<id>.png` (Used for both if specifics aren't found).
+File names use entry ID keys. The mod checks for textures using candidate prefixes in the following order:
 
-*Example:* To override the specific rendering of a pig in `minecraft`, place a file at
-`assets/minecraft/textures/fieldguide/entries/pig.png`.
+1. **Full Type Prefixed:** `<type>_<namespace>_<path>.png` (e.g., `entity_minecraft_pig.png`, `item_minecraft_diamond.png`, `block_minecraft_oak_log.png`)
+2. **Alternate Type Prefixed:** For IDs shared between entities and items (like `minecraft:chicken`), both `item_minecraft_chicken.png` and `entity_minecraft_chicken.png` are supported.
+3. **Namespaced Path:** `<namespace>_<path>.png` (e.g., `minecraft_pig.png`)
+4. **Simple Path:** `<path>.png` (e.g., `pig.png`)
+
+#### View-Specific Textures
+
+You can provide separate textures for the entry list (grid) and the details page:
+
+* **Details Page Only:** `<name>_page.png` (e.g., `entity_minecraft_pig_page.png` or `pig_page.png`)
+* **List Grid Only:** `<name>_grid.png` (e.g., `entity_minecraft_pig_grid.png` or `pig_grid.png`)
+* **General (Fallback):** `<name>.png` (Used for both views if view-specific textures aren't found)
+
+#### Variant Textures
+
+To override images for **specific entry variants** (e.g., Cat breeds, Frog variants, Cobblemon forms), append `_<variant_id>` to the texture filename before view suffixes:
+
+* **Variant Details Page:** `<name>_<variant_id>_page.png` (e.g., `entity_minecraft_frog_warm_page.png` or `frog_warm_page.png`)
+* **Variant List Grid:** `<name>_<variant_id>_grid.png` (e.g., `entity_minecraft_frog_warm_grid.png` or `frog_warm_grid.png`)
+* **Variant General:** `<name>_<variant_id>.png` (e.g., `entity_minecraft_frog_warm.png` or `frog_warm.png`)
+
+*Example:* To override the Warm Frog variant, save your texture at `assets/minecraft/textures/fieldguide/entries/entity_minecraft_frog_warm.png` (or `frog_warm.png`).
 
 ---
 

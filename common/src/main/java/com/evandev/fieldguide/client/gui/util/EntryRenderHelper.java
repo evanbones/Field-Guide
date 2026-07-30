@@ -77,33 +77,61 @@ public class EntryRenderHelper {
         ResourceLocation id = AutoPopulateRegistry.getEntryId(baseEntry);
         if (id != null && !entryKey.isEmpty()) {
             var resourceManager = Minecraft.getInstance().getResourceManager();
-            String prefix = entryKey.replace(":", "_").replace("/", "_");
+            String primaryPrefix = entryKey.replace(":", "_").replace("/", "_");
 
-            if (cacheKey instanceof String str && str.contains("#")) {
-                String variantId = str.substring(str.indexOf('#') + 1).replace(":", "_").toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9._\\-]", "_");
+            List<String> prefixCandidates = new ArrayList<>();
+            prefixCandidates.add(primaryPrefix);
 
-                ResourceLocation specificVariantLoc = ResourceLocation.fromNamespaceAndPath(id.getNamespace(), "textures/fieldguide/entries/" + prefix + "_" + variantId + (isPage ? "_page.png" : "_grid.png"));
-                if (resourceManager.getResource(specificVariantLoc).isPresent()) {
-                    OVERRIDE_CACHE.put(key, Optional.of(specificVariantLoc));
-                    return Optional.of(specificVariantLoc);
+            if (primaryPrefix.startsWith("item_")) {
+                String entityPrefix = "entity_" + primaryPrefix.substring("item_".length());
+                if (!prefixCandidates.contains(entityPrefix)) {
+                    prefixCandidates.add(entityPrefix);
                 }
-
-                ResourceLocation genericVariantLoc = ResourceLocation.fromNamespaceAndPath(id.getNamespace(), "textures/fieldguide/entries/" + prefix + "_" + variantId + ".png");
-                if (resourceManager.getResource(genericVariantLoc).isPresent()) {
-                    OVERRIDE_CACHE.put(key, Optional.of(genericVariantLoc));
-                    return Optional.of(genericVariantLoc);
+            } else if (primaryPrefix.startsWith("entity_")) {
+                String itemPrefix = "item_" + primaryPrefix.substring("entity_".length());
+                if (!prefixCandidates.contains(itemPrefix)) {
+                    prefixCandidates.add(itemPrefix);
                 }
             }
 
-            ResourceLocation specificLoc = ResourceLocation.fromNamespaceAndPath(id.getNamespace(), "textures/fieldguide/entries/" + prefix + (isPage ? "_page.png" : "_grid.png"));
-            ResourceLocation defaultLoc = ResourceLocation.fromNamespaceAndPath(id.getNamespace(), "textures/fieldguide/entries/" + prefix + ".png");
+            String nsPath = id.getNamespace() + "_" + id.getPath();
+            if (!prefixCandidates.contains(nsPath)) {
+                prefixCandidates.add(nsPath);
+            }
+            if (!prefixCandidates.contains(id.getPath())) {
+                prefixCandidates.add(id.getPath());
+            }
 
-            if (resourceManager.getResource(specificLoc).isPresent()) {
-                OVERRIDE_CACHE.put(key, Optional.of(specificLoc));
-                return Optional.of(specificLoc);
-            } else if (resourceManager.getResource(defaultLoc).isPresent()) {
-                OVERRIDE_CACHE.put(key, Optional.of(defaultLoc));
-                return Optional.of(defaultLoc);
+            String variantId = null;
+            if (cacheKey instanceof String str && str.contains("#")) {
+                variantId = str.substring(str.indexOf('#') + 1).replace(":", "_").toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9._\\-]", "_");
+            }
+
+            for (String prefix : prefixCandidates) {
+                if (variantId != null) {
+                    ResourceLocation specificVariantLoc = ResourceLocation.fromNamespaceAndPath(id.getNamespace(), "textures/fieldguide/entries/" + prefix + "_" + variantId + (isPage ? "_page.png" : "_grid.png"));
+                    if (resourceManager.getResource(specificVariantLoc).isPresent()) {
+                        OVERRIDE_CACHE.put(key, Optional.of(specificVariantLoc));
+                        return Optional.of(specificVariantLoc);
+                    }
+
+                    ResourceLocation genericVariantLoc = ResourceLocation.fromNamespaceAndPath(id.getNamespace(), "textures/fieldguide/entries/" + prefix + "_" + variantId + ".png");
+                    if (resourceManager.getResource(genericVariantLoc).isPresent()) {
+                        OVERRIDE_CACHE.put(key, Optional.of(genericVariantLoc));
+                        return Optional.of(genericVariantLoc);
+                    }
+                }
+
+                ResourceLocation specificLoc = ResourceLocation.fromNamespaceAndPath(id.getNamespace(), "textures/fieldguide/entries/" + prefix + (isPage ? "_page.png" : "_grid.png"));
+                ResourceLocation defaultLoc = ResourceLocation.fromNamespaceAndPath(id.getNamespace(), "textures/fieldguide/entries/" + prefix + ".png");
+
+                if (resourceManager.getResource(specificLoc).isPresent()) {
+                    OVERRIDE_CACHE.put(key, Optional.of(specificLoc));
+                    return Optional.of(specificLoc);
+                } else if (resourceManager.getResource(defaultLoc).isPresent()) {
+                    OVERRIDE_CACHE.put(key, Optional.of(defaultLoc));
+                    return Optional.of(defaultLoc);
+                }
             }
         }
         OVERRIDE_CACHE.put(key, Optional.empty());
@@ -124,18 +152,15 @@ public class EntryRenderHelper {
         renderEntityNormalized(guiGraphics, entity, x, y, maxWidth, maxHeight, unlocked, isPage, bounceScale, !isPage);
     }
 
-    /**
-     * Renders a pre-configured entity using an explicit variant id as the icon-cache key.
-     * Use this when the entity has already been set up for a specific variant and re-applying
-     * via getCurrent() would produce the wrong (or duplicate) cache key.
-     */
     public static void renderEntityNormalized(GuiGraphics guiGraphics, Entity entity, int x, int y, int maxWidth, int maxHeight, boolean unlocked, boolean isPage, float bounceScale, String explicitVariantId) {
         ResourceLocation baseId = AutoPopulateRegistry.getEntryId(entity.getType());
-        if (Services.PLATFORM.isModLoaded("cobblemon") && FieldGuideCobblemonCompat.isPokemon(entity)) {
+        boolean isCobblemon = Services.PLATFORM.isModLoaded("cobblemon") && FieldGuideCobblemonCompat.isPokemon(entity);
+        if (isCobblemon) {
             baseId = FieldGuideCobblemonCompat.getPokemonEntryId(entity);
         }
+        Object baseEntry = isCobblemon ? baseId : entity.getType();
         Object cacheKey = (explicitVariantId == null || explicitVariantId.isEmpty()) ? baseId : baseId.toString() + "#" + explicitVariantId;
-        renderWithCache(baseId, cacheKey, guiGraphics, x, y, maxWidth, maxHeight, unlocked, isPage, bounceScale, () -> renderEntity(entity, entity.getType(), isPage, -30.0F));
+        renderWithCache(baseEntry, cacheKey, guiGraphics, x, y, maxWidth, maxHeight, unlocked, isPage, bounceScale, () -> renderEntity(entity, entity.getType(), isPage, -30.0F));
     }
 
     public static void renderEntityNormalized(GuiGraphics guiGraphics, Entity entity, int x, int y, int maxWidth, int maxHeight, boolean unlocked, boolean isPage, float bounceScale, boolean syncWithProgress) {
@@ -168,23 +193,24 @@ public class EntryRenderHelper {
         }
 
         ResourceLocation baseId = AutoPopulateRegistry.getEntryId(entity.getType());
-        if (Services.PLATFORM.isModLoaded("cobblemon") && FieldGuideCobblemonCompat.isPokemon(entity)) {
+        boolean isCobblemon = Services.PLATFORM.isModLoaded("cobblemon") && FieldGuideCobblemonCompat.isPokemon(entity);
+        if (isCobblemon) {
             baseId = FieldGuideCobblemonCompat.getPokemonEntryId(entity);
         }
 
         String finalVariantId = variantId;
-        if (Services.PLATFORM.isModLoaded("cobblemon") && FieldGuideCobblemonCompat.isPokemon(entity)) {
+        if (isCobblemon) {
             if (finalVariantId.isEmpty()) {
                 finalVariantId = ClientFieldGuideCobblemonCompat.getFormForEntry(baseId);
             }
         }
+        Object baseEntry = isCobblemon ? baseId : entity.getType();
         Object cacheKey = finalVariantId.isEmpty() ? baseId : baseId.toString() + "#" + finalVariantId;
 
         final VariantProvider<Mob> finalProvider = provider;
         final VariantDef finalVariant = currentVariant;
 
-        renderWithCache(baseId, cacheKey, guiGraphics, x, y, maxWidth, maxHeight, unlocked, isPage, bounceScale, () -> {
-
+        renderWithCache(baseEntry, cacheKey, guiGraphics, x, y, maxWidth, maxHeight, unlocked, isPage, bounceScale, () -> {
             VariantDef tempOriginal = null;
 
             if (finalProvider != null && entity instanceof Mob mob) {

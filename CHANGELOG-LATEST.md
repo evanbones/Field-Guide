@@ -1,7 +1,3 @@
-### Added
+### Changed
 
-- Added Russian translation (@megatocha).
-
-### Fixed
-
-- Fixed issues with variant-specific image overrides.
+- Improvements to resource pack override IDs.
