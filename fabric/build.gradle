@@ -12,7 +12,8 @@ dependencies {
     implementation 'com.electronwill.night-config:toml:3.8.0'
 
     // EMI
-    modImplementation "dev.emi:emi-fabric:${emi_version}:api"
+    modCompileOnly "dev.emi:emi-fabric:${emi_version}:api"
+    modRuntimeOnly "dev.emi:emi-fabric:${emi_version}"
 
     // Cloth Config
     modImplementation "me.shedaniel.cloth:cloth-config-fabric:${cloth_config_version}"
