@@ -44,10 +44,12 @@ publishMods {
         accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
         projectId = "1470590"
         minecraftVersions.add("${minecraft_version}")
+        client = true
+        server = true
 
-        requires { slug = "item-descriptions" }
-        optional { slug = "cloth-config" }
-        requires { slug = "immersive-overlays" }
+        requires("item-descriptions")
+        optional("cloth-config")
+        requires("immersive-overlays")
     }
 
     modrinth {
@@ -55,8 +57,8 @@ publishMods {
         projectId = "72RRCWM6"
         minecraftVersions.add("${minecraft_version}")
 
-        requires { slug = "item-descriptions" }
-        optional { slug = "cloth-config" }
-        requires { slug = "immersive-overlays" }
+        requires("item-descriptions")
+        optional("cloth-config")
+        requires("immersive-overlays")
     }
 }
