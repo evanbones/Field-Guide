@@ -74,32 +74,63 @@ public class EntryRenderHelper {
         }
 
         ResourceLocation id = AutoPopulateRegistry.getEntryId(baseEntry);
-        if (id != null) {
-            String subDir = "";
-            if (baseEntry instanceof GuideEntry ge && ge.displayId() != null && !ge.displayId().equals(ge.id())) {
-                int colon = entryKey.indexOf(':');
-                if (colon > 0) subDir = entryKey.substring(0, colon) + "/";
-            }
+        if (id != null && !entryKey.isEmpty()) {
+            var resourceManager = Minecraft.getInstance().getResourceManager();
+            String primaryPrefix = entryKey.replace(":", "_").replace("/", "_");
 
-            if (cacheKey instanceof String str && str.contains("#")) {
-                String variantId = str.substring(str.indexOf('#') + 1).replace(":", "_").toLowerCase(Locale.ROOT);
-                ResourceLocation specificVariantLoc = new ResourceLocation(id.getNamespace(), "textures/fieldguide/entries/" + subDir + id.getPath() + "_" + variantId + (isPage ? "_page.png" : "_grid.png"));
-                if (Minecraft.getInstance().getResourceManager().getResource(specificVariantLoc).isPresent()) {
-                    OVERRIDE_CACHE.put(key, Optional.of(specificVariantLoc));
-                    return Optional.of(specificVariantLoc);
+            List<String> prefixCandidates = new ArrayList<>();
+            prefixCandidates.add(primaryPrefix);
+
+            if (primaryPrefix.startsWith("item_")) {
+                String entityPrefix = "entity_" + primaryPrefix.substring("item_".length());
+                if (!prefixCandidates.contains(entityPrefix)) {
+                    prefixCandidates.add(entityPrefix);
+                }
+            } else if (primaryPrefix.startsWith("entity_")) {
+                String itemPrefix = "item_" + primaryPrefix.substring("entity_".length());
+                if (!prefixCandidates.contains(itemPrefix)) {
+                    prefixCandidates.add(itemPrefix);
                 }
             }
 
-            ResourceLocation specificLoc = new ResourceLocation(id.getNamespace(), "textures/fieldguide/entries/" + subDir + id.getPath() + (isPage ? "_page.png" : "_grid.png"));
-            ResourceLocation defaultLoc = new ResourceLocation(id.getNamespace(), "textures/fieldguide/entries/" + subDir + id.getPath() + ".png");
+            String nsPath = id.getNamespace() + "_" + id.getPath();
+            if (!prefixCandidates.contains(nsPath)) {
+                prefixCandidates.add(nsPath);
+            }
+            if (!prefixCandidates.contains(id.getPath())) {
+                prefixCandidates.add(id.getPath());
+            }
 
-            var resourceManager = Minecraft.getInstance().getResourceManager();
-            if (resourceManager.getResource(specificLoc).isPresent()) {
-                OVERRIDE_CACHE.put(key, Optional.of(specificLoc));
-                return Optional.of(specificLoc);
-            } else if (resourceManager.getResource(defaultLoc).isPresent()) {
-                OVERRIDE_CACHE.put(key, Optional.of(defaultLoc));
-                return Optional.of(defaultLoc);
+            String variantId = null;
+            if (cacheKey instanceof String str && str.contains("#")) {
+                variantId = str.substring(str.indexOf('#') + 1).replace(":", "_").toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9._\\-]", "_");
+            }
+
+            for (String prefix : prefixCandidates) {
+                if (variantId != null) {
+                    ResourceLocation specificVariantLoc = new ResourceLocation(id.getNamespace(), "textures/fieldguide/entries/" + prefix + "_" + variantId + (isPage ? "_page.png" : "_grid.png"));
+                    if (resourceManager.getResource(specificVariantLoc).isPresent()) {
+                        OVERRIDE_CACHE.put(key, Optional.of(specificVariantLoc));
+                        return Optional.of(specificVariantLoc);
+                    }
+
+                    ResourceLocation genericVariantLoc = new ResourceLocation(id.getNamespace(), "textures/fieldguide/entries/" + prefix + "_" + variantId + ".png");
+                    if (resourceManager.getResource(genericVariantLoc).isPresent()) {
+                        OVERRIDE_CACHE.put(key, Optional.of(genericVariantLoc));
+                        return Optional.of(genericVariantLoc);
+                    }
+                }
+
+                ResourceLocation specificLoc = new ResourceLocation(id.getNamespace(), "textures/fieldguide/entries/" + prefix + (isPage ? "_page.png" : "_grid.png"));
+                ResourceLocation defaultLoc = new ResourceLocation(id.getNamespace(), "textures/fieldguide/entries/" + prefix + ".png");
+
+                if (resourceManager.getResource(specificLoc).isPresent()) {
+                    OVERRIDE_CACHE.put(key, Optional.of(specificLoc));
+                    return Optional.of(specificLoc);
+                } else if (resourceManager.getResource(defaultLoc).isPresent()) {
+                    OVERRIDE_CACHE.put(key, Optional.of(defaultLoc));
+                    return Optional.of(defaultLoc);
+                }
             }
         }
 

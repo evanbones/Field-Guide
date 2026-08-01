@@ -74,9 +74,11 @@ public class IconCacheManager {
 
         if (Files.exists(CACHE_DIR)) {
             try (Stream<Path> walk = Files.walk(CACHE_DIR)) {
-                walk.sorted(Comparator.reverseOrder())
-                        .map(Path::toFile)
-                        .forEach(File::delete);
+                walk.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(f -> {
+                    if (!f.delete()) {
+                        Constants.LOG.warn("Could not delete file: {}", f);
+                    }
+                });
             } catch (IOException e) {
                 Constants.LOG.error("Failed to delete icon cache directory", e);
             }
@@ -87,10 +89,12 @@ public class IconCacheManager {
         String entryKey = AutoPopulateRegistry.getEntryKey(baseEntry);
         if (entryKey.isEmpty()) return Optional.empty();
 
-        String variantSuffix = "";
+        String variantSuffix;
         String cacheKeyStr = cacheKey.toString();
         if (cacheKeyStr.contains("#")) {
-            variantSuffix = "_" + cacheKeyStr.substring(cacheKeyStr.indexOf('#') + 1).replace(":", "_").toLowerCase(Locale.ROOT);
+            variantSuffix = "_" + cacheKeyStr.substring(cacheKeyStr.indexOf('#') + 1).replace(":", "_").toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9._\\-]", "_");
+        } else {
+            variantSuffix = "";
         }
 
         String fileName = (entryKey.replace(":", "_").replace("/", "_") + variantSuffix + (isPage ? "_page" : "_grid") + ".png").toLowerCase(Locale.ROOT);
@@ -107,9 +111,10 @@ public class IconCacheManager {
         CompletableFuture.supplyAsync(() -> {
             if (!Files.exists(CACHE_DIR)) init();
             ResourceLocation id = AutoPopulateRegistry.getEntryId(baseEntry);
+            if (id == null) return null;
+
             Path cachedFilePath = CACHE_DIR.resolve(id.getNamespace()).resolve("textures/fieldguide/entries").resolve(fileName);
             File cachedFile = cachedFilePath.toFile();
-
             if (cachedFile.exists()) {
                 try {
                     return NativeImage.read(Files.newInputStream(cachedFile.toPath()));
@@ -117,6 +122,18 @@ public class IconCacheManager {
                     Constants.LOG.error("Failed to load cached icon: {}", key, e);
                 }
             }
+
+            String genericFileName = (entryKey.replace(":", "_").replace("/", "_") + variantSuffix + ".png").toLowerCase(Locale.ROOT);
+            Path genericFilePath = CACHE_DIR.resolve(id.getNamespace()).resolve("textures/fieldguide/entries").resolve(genericFileName);
+            File genericFile = genericFilePath.toFile();
+            if (genericFile.exists()) {
+                try {
+                    return NativeImage.read(Files.newInputStream(genericFile.toPath()));
+                } catch (IOException e) {
+                    Constants.LOG.error("Failed to load generic cached icon: {}", key, e);
+                }
+            }
+
             return null;
         }, IO_EXECUTOR).thenAcceptAsync(image -> {
             if (image != null) {
@@ -127,7 +144,11 @@ public class IconCacheManager {
                 PENDING_GENERATIONS.remove(key);
             } else {
                 ResourceLocation id = AutoPopulateRegistry.getEntryId(baseEntry);
-                MAIN_THREAD_TASKS.addFirst(() -> generateAndSaveIcon(id.getNamespace(), fileName, key, renderAction));
+                if (id != null) {
+                    MAIN_THREAD_TASKS.addFirst(() -> generateAndSaveIcon(id.getNamespace(), fileName, key, renderAction));
+                } else {
+                    PENDING_GENERATIONS.remove(key);
+                }
             }
         }, Minecraft.getInstance());
 
