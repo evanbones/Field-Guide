@@ -43,7 +43,7 @@ public class FieldGuideSearchBox extends EditBox {
 
         super.extractWidgetRenderState(guiGraphics, mouseX, mouseY, partialTick);
 
-        if (this.getValue().isEmpty()) {
+        if (this.getValue().isEmpty() && !this.isFocused()) {
             guiGraphics.text(Minecraft.getInstance().font, Component.translatable("gui.fieldguide.search"), this.getX() + 4, this.getY() + 6, ClientConfig.get().getTextMutedColorInt(), false);
         }
 

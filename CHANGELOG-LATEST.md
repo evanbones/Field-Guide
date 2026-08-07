@@ -1,1 +1,3 @@
-- Ported to 26.2.
+### Fixed
+
+- Search text is now hidden when text box is selected.
