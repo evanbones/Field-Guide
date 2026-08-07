@@ -28,12 +28,14 @@ import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 
-public record ScanNodeCollector(SubmitNodeCollector delegate, float r, float g, float b, float a, float limitY,
+public record ScanNodeCollector(OrderedSubmitNodeCollector delegate, float r, float g, float b, float a, float limitY,
                                  boolean isDepth) implements SubmitNodeCollector {
 
     @Override
     public @NonNull OrderedSubmitNodeCollector order(int order) {
-        return this;
+        return delegate instanceof SubmitNodeCollector collector
+                ? new ScanNodeCollector(collector.order(order), r, g, b, a, limitY, isDepth)
+                : this;
     }
 
     @Override

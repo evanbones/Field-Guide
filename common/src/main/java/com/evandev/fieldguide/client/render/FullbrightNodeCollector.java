@@ -27,10 +27,10 @@ import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 
-public record FullbrightNodeCollector(SubmitNodeCollector delegate) implements SubmitNodeCollector {
+public record FullbrightNodeCollector(OrderedSubmitNodeCollector delegate) implements SubmitNodeCollector {
     @Override
     public @NonNull OrderedSubmitNodeCollector order(int order) {
-        return this;
+        return delegate instanceof SubmitNodeCollector collector ? new FullbrightNodeCollector(collector.order(order)) : this;
     }
 
     @Override

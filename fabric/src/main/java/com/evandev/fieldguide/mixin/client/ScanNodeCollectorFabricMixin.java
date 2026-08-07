@@ -10,7 +10,7 @@ import net.fabricmc.fabric.api.client.renderer.v1.mesh.MutableMesh;
 import net.fabricmc.fabric.api.client.renderer.v1.mesh.QuadEmitter;
 import net.fabricmc.fabric.api.client.renderer.v1.render.FabricOrderedSubmitNodeCollector;
 import net.fabricmc.fabric.api.util.TriState;
-import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.OrderedSubmitNodeCollector;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.rendertype.RenderType;
@@ -34,7 +34,7 @@ public abstract class ScanNodeCollectorFabricMixin implements FabricOrderedSubmi
 
     @Shadow
     @Final
-    private SubmitNodeCollector delegate;
+    private OrderedSubmitNodeCollector delegate;
 
     @Shadow
     public abstract boolean isDepth();
@@ -60,7 +60,6 @@ public abstract class ScanNodeCollectorFabricMixin implements FabricOrderedSubmi
         int packedLight = ScanOverlayRenderer.getPackedScanLightCoords(limitY(), r(), g(), b(), a());
         Map<RenderType, MutableMesh> meshMap = new HashMap<>();
 
-        // probably does nothing tbh
         if (!parts.isEmpty()) {
             Direction[] directions = new Direction[]{Direction.DOWN, Direction.UP, Direction.NORTH, Direction.SOUTH, Direction.WEST, Direction.EAST, null};
             QuadEmitter temp = Renderer.get().quadEmitter(q -> {

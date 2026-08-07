@@ -1,3 +1,1 @@
-### Fixed
-
-- Fixed issues with Longview (@EnnuiL).
+- Ported to 26.2.
