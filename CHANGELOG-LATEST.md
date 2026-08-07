@@ -1,3 +1,3 @@
 ### Fixed
 
-- Fixed issues with Longview (@EnnuiL).
+- Search text is now hidden when text box is selected.
