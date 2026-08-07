@@ -58,12 +58,12 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 
-import static com.mojang.blaze3d.platform.Lighting.Entry.ENTITY_IN_UI;
-
 public class EntryRenderHelper {
 
     private static final Map<String, Optional<Identifier>> OVERRIDE_CACHE = new HashMap<>();
     private static final Set<Identifier> GENERATED_RP_SILHOUETTES = ConcurrentHashMap.newKeySet();
+
+    private static final int DISPLAY_ENTITY_ID = 1;
 
     public static void clearCache() {
         OVERRIDE_CACHE.clear();
@@ -222,6 +222,10 @@ public class EntryRenderHelper {
 
         if (entity instanceof WaterAnimal) {
             ((EntityAccessor) entity).fieldguide$setWasTouchingWater(true);
+        }
+
+        if (((EntityAccessor) entity).fieldguide$rawId() == 0) {
+            entity.setId(DISPLAY_ENTITY_ID);
         }
 
         if (Services.PLATFORM.isModLoaded("tide")) {

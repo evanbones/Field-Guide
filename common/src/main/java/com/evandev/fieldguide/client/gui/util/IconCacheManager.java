@@ -183,7 +183,7 @@ public class IconCacheManager {
         RenderTarget renderTarget = new TextureTarget("IconGenerator", RENDER_SIZE, RENDER_SIZE, true, GpuFormat.RGBA8_UNORM);
         CommandEncoder encoder = RenderSystem.getDevice().createCommandEncoder();
 
-        encoder.clearColorAndDepthTextures(renderTarget.getColorTexture(), new Vector4f(0, 0, 0, 0), renderTarget.getDepthTexture(), 1.0f);
+        encoder.clearColorAndDepthTextures(renderTarget.getColorTexture(), new Vector4f(0, 0, 0, 0), renderTarget.getDepthTexture(), 0.0f);
 
         RenderSystem.outputColorTextureOverride = renderTarget.getColorTextureView();
         RenderSystem.outputDepthTextureOverride = renderTarget.getDepthTextureView();
