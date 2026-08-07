@@ -693,8 +693,8 @@ public class ServerFieldGuideManager extends SimplePreparableReloadListener<Serv
                     if (json.has("entries")) {
                         for (JsonElement el : GsonHelper.getAsJsonArray(json, "entries")) {
                             JsonObject obj = el.getAsJsonObject();
-                            ResourceLocation source = ResourceLocation.parse(GsonHelper.getAsString(obj, "source"));
-                            ResourceLocation target = ResourceLocation.parse(GsonHelper.getAsString(obj, "target"));
+                            ResourceLocation source = EntryResolver.getRawId(ResourceLocation.parse(GsonHelper.getAsString(obj, "source")));
+                            ResourceLocation target = EntryResolver.getRawId(ResourceLocation.parse(GsonHelper.getAsString(obj, "target")));
                             data.redirects.put(source, target);
                         }
                     }
