@@ -56,6 +56,8 @@ publishMods {
         minecraftVersions.add("${minecraft_version}")
         minecraftVersions.add("26.1.1")
         minecraftVersions.add("26.1")
+        client = true
+        server = true
 
         requires("item-descriptions")
         optional("cloth-config")
