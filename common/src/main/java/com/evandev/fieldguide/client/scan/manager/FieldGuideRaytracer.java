@@ -11,6 +11,7 @@ import com.evandev.fieldguide.compat.cobblemon.FieldGuideCobblemonCompat;
 import com.evandev.fieldguide.config.ServerConfig;
 import com.evandev.fieldguide.entry.EntryResolver;
 import com.evandev.fieldguide.platform.Services;
+import com.evandev.fieldguide.util.ScanRayTraceUtil;
 import com.evandev.fieldguide.variant.FieldGuideVariantManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -23,7 +24,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.boss.EnderDragonPart;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -49,7 +49,7 @@ public class FieldGuideRaytracer {
         Vec3 endPos = eyePos.add(viewVec.scale(range));
 
         AABB searchBox = minecraft.player.getBoundingBox().expandTowards(viewVec.scale(range)).inflate(1.0D);
-        EntityHitResult entityHit = ProjectileUtil.getEntityHitResult(
+        EntityHitResult entityHit = ScanRayTraceUtil.getScanEntityHitResult(
                 minecraft.player, eyePos, endPos, searchBox,
                 (entity) -> !entity.isSpectator() && entity.isPickable(),
                 range * range
@@ -147,13 +147,10 @@ public class FieldGuideRaytracer {
                     needsScan = FieldGuideScanManager.needsVariantScan(ge, scannedRawId);
                 } else {
                     needsScan = !ProgressManager.getInstance().isUnlocked(entryForTarget);
-                    if (hitEntity instanceof Mob mob) {
-                        var provider = FieldGuideVariantManager.getProvider(mob);
-                        if (provider != null && !ServerConfig.get().unlockAllVariants) {
-                            String variantId = provider.getCurrent(mob).id();
-                            if (!ClientFieldGuideManager.isVariantUnlocked(entryForTarget, variantId)) {
-                                needsScan = true;
-                            }
+                    if (hitEntity instanceof Mob mob && !ServerConfig.get().unlockAllVariants) {
+                        String variantId = FieldGuideVariantManager.getTrackedVariantId(mob);
+                        if (!variantId.isEmpty() && !ClientFieldGuideManager.isVariantUnlocked(entryForTarget, variantId)) {
+                            needsScan = true;
                         }
                     }
                 }

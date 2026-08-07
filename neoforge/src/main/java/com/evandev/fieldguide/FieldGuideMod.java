@@ -1,8 +1,6 @@
 package com.evandev.fieldguide;
 
 import com.evandev.fieldguide.api.EntryUnlockData;
-import com.evandev.fieldguide.api.variant.VariantDef;
-import com.evandev.fieldguide.api.variant.VariantProvider;
 import com.evandev.fieldguide.compat.exposure.ExposureNeoForgeEventHandler;
 import com.evandev.fieldguide.compat.mixedlitter.MixedLitterCompat;
 import com.evandev.fieldguide.entry.EntryResolver;
@@ -154,11 +152,8 @@ public class FieldGuideMod {
             if (progress != null) {
                 String variantId = null;
                 if (event.getEntity() instanceof Mob mob) {
-                    VariantProvider<Mob> provider = FieldGuideVariantManager.getProvider(mob);
-                    if (provider != null) {
-                        VariantDef current = provider.getCurrent(mob);
-                        if (current != null) variantId = current.id();
-                    }
+                    String tracked = FieldGuideVariantManager.getTrackedVariantId(mob);
+                    if (!tracked.isEmpty()) variantId = tracked;
                 }
                 progress.tryUnlock(player, entityId, variantId, EntryUnlockData.UnlockTrigger.KILL);
             }

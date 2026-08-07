@@ -2,13 +2,12 @@ package com.evandev.fieldguide.compat.exposure;
 
 import com.evandev.fieldguide.api.EntryUnlockData;
 import com.evandev.fieldguide.api.GuideEntry;
-import com.evandev.fieldguide.api.variant.VariantDef;
-import com.evandev.fieldguide.api.variant.VariantProvider;
 import com.evandev.fieldguide.config.ServerConfig;
 import com.evandev.fieldguide.server.ServerFieldGuideManager;
 import com.evandev.fieldguide.server.progress.FieldGuideProgressManager;
 import com.evandev.fieldguide.server.progress.PlayerFieldGuideProgress;
 import com.evandev.fieldguide.entry.EntryResolver;
+import com.evandev.fieldguide.util.ScanRayTraceUtil;
 import com.evandev.fieldguide.variant.FieldGuideVariantManager;
 import io.github.mortuusars.exposure.world.camera.frame.EntityInFrame;
 import io.github.mortuusars.exposure.world.camera.frame.Frame;
@@ -21,7 +20,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.boss.EnderDragonPart;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.Block;
@@ -62,7 +60,7 @@ public class ExposureCompat {
         Vec3 centerViewVec = calculateViewVector(pitch, yaw);
         Vec3 centerEndPos = eyePos.add(centerViewVec.scale(range));
         AABB searchBox = player.getBoundingBox().expandTowards(centerViewVec.scale(range)).inflate(1.0D);
-        EntityHitResult entityHit = ProjectileUtil.getEntityHitResult(
+        EntityHitResult entityHit = ScanRayTraceUtil.getScanEntityHitResult(
                 player, eyePos, centerEndPos, searchBox,
                 (entity) -> !entity.isSpectator() && entity.isPickable(),
                 range * range
@@ -74,13 +72,8 @@ public class ExposureCompat {
 
             String variantId = null;
             if (hitEntity instanceof Mob mob) {
-                VariantProvider<Mob> provider = FieldGuideVariantManager.getProvider(mob);
-                if (provider != null) {
-                    VariantDef current = provider.getCurrent(mob);
-                    if (current != null) {
-                        variantId = current.id();
-                    }
-                }
+                String tracked = FieldGuideVariantManager.getTrackedVariantId(mob);
+                if (!tracked.isEmpty()) variantId = tracked;
             }
 
             hitTargets.put(hitEntity.getType(), variantId);

@@ -57,6 +57,7 @@ public class ServerConfig {
     public boolean hideUndiscoveredFromSearch = false;
 
     public double scanSpeed = 1.0D;
+    public double minScanHitboxSize = 1.0D;
     public boolean grantXpOnScan = true;
     public int xpAmountOnScan = 5;
 

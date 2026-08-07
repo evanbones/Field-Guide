@@ -288,9 +288,8 @@ public class FieldGuideScanManager {
                     if (compositeVariants) {
                         variantId = resolveVisualVariantId((GuideEntry) targetKey, BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()));
                     } else if (entity instanceof Mob mob) {
-                        var provider = FieldGuideVariantManager.getProvider(mob);
-                        if (provider != null) {
-                            variantId = provider.getCurrent(mob).id();
+                        variantId = FieldGuideVariantManager.getTrackedVariantId(mob);
+                        if (!variantId.isEmpty()) {
                             ProgressManager.getInstance().setSelectedVariant(targetKey, variantId);
                         }
                     }

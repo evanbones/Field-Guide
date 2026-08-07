@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.14.0] - 2026-08-06
+
+### Added
+
+- Added a "Minimum Scan Hitbox Size" config option that pads small entity hitboxes, so tiny mobs are easier to scan.
+
+### Fixed
+
+- Search bar text is now hidden when focused.
+- Fixed scanning No Man's Land Sheep.
+
 ## [1.13.6] - 2026-07-30
 
 ### Changed

@@ -113,6 +113,14 @@ public class ClothConfigIntegration {
                 .setSaveConsumer(newValue -> serverConfig.scanSpeed = newValue)
                 .build());
 
+        general.addEntry(entryBuilder.startDoubleField(Component.translatable("option.fieldguide.min_scan_hitbox_size"), serverConfig.minScanHitboxSize)
+                .setDefaultValue(1.0D)
+                .setMin(0.0D)
+                .setMax(20.0D)
+                .setTooltip(Component.translatable("option.fieldguide.min_scan_hitbox_size.tooltip"))
+                .setSaveConsumer(newValue -> serverConfig.minScanHitboxSize = newValue)
+                .build());
+
         general.addEntry(entryBuilder.startDoubleField(Component.translatable("option.fieldguide.spyglass_scan_distance"), serverConfig.spyglassScanDistance)
                 .setDefaultValue(64.0D)
                 .setMin(1.0D)

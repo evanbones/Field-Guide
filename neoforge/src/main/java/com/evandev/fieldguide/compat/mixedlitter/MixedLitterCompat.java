@@ -278,15 +278,19 @@ public class MixedLitterCompat {
                 if (!variantIds.isEmpty()) {
                     Registry<Variant> variantRegistry = entity.registryAccess().registryOrThrow(MLRegistries.VARIANT_KEY);
                     Registry<VariantGroup> groupRegistry = entity.registryAccess().registryOrThrow(MLRegistries.VARIANT_GROUP_KEY);
+
+                    ResourceLocation current = variantIds.getLast();
                     for (ResourceLocation id : variantIds) {
                         Variant variant = variantRegistry.get(id);
                         if (variant == null || variant.group().isEmpty()) continue;
                         VariantGroup group = groupRegistry.get(variant.group().get());
                         if (group != null && group.replaceDefault()) {
-                            return new VariantDef(id.toString(), id);
+                            current = id;
+                            break;
                         }
                     }
-                    return new VariantDef(variantIds.getLast().toString(), variantIds.getLast());
+
+                    return new VariantDef(hasFullVariants(entity) ? current.toString() : "default", current);
                 }
             }
         } catch (Exception ignored) {
