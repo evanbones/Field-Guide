@@ -1,3 +1,3 @@
 ### Fixed
 
-- Search text is now hidden when text box is selected.
+- Fixed issues with GeckoLib render (thanks, @cassiancc!)
