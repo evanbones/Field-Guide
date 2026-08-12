@@ -35,6 +35,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -232,8 +233,8 @@ public class EntryRenderHelper {
             EntityRenderDispatcher dispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
             EntityRenderer<T, S> renderer = (EntityRenderer<T, S>) dispatcher.getRenderer(entity);
 
-            S state = renderer.createRenderState();
-            renderer.extractRenderState(entity, state, 0.0F);
+            S state = renderer.createRenderState(entity, 0.0F);
+            state.lightCoords = LightCoordsUtil.FULL_BRIGHT;
 
             if (provider != null && variantDef != null && entity instanceof Mob mob) {
                 provider.applyToRenderState(mob, state, variantDef);
