@@ -1,11 +1,3 @@
 plugins {
     id 'groovy-gradle-plugin'
 }
-
-repositories {
-    gradlePluginPortal()
-}
-
-dependencies {
-    implementation 'me.modmuss50:mod-publish-plugin:2.1.1'
-}
