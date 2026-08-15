@@ -98,33 +98,38 @@ public class PlayerFieldGuideProgress {
     }
 
     public void unlock(ServerPlayer player, ResourceLocation entryId, String variantId, boolean grantXp) {
-        String id = entryId.toString();
+        ResourceLocation canonicalId = ServerFieldGuideManager.getInstance().resolveCanonicalEntryId(entryId);
+        if (canonicalId == null) canonicalId = entryId;
+        String id = canonicalId.toString();
         boolean newlyUnlocked = false;
 
-        if (unlockedEntries.add(id)) {
+        if (!EntryResolver.isUnlocked(unlockedEntries, canonicalId, canonicalId, null) && unlockedEntries.add(id)) {
             discoveryTimes.put(id, System.currentTimeMillis());
             discoveryGameTimes.put(id, player.serverLevel().dayTime());
             pendingUnlocks.add(id);
             pendingRevokes.remove(id);
             newlyUnlocked = true;
-            UnlockRewards.grant(player, entryId, grantXp);
-            FieldGuideTriggers.ENTRY_UNLOCKED.get().trigger(player, entryId);
+            UnlockRewards.grant(player, canonicalId, grantXp);
+            FieldGuideTriggers.ENTRY_UNLOCKED.get().trigger(player, canonicalId);
+            Services.PLATFORM.onEntryUnlocked(player, canonicalId, null, true, this);
 
-            ResourceLocation categoryId = ServerFieldGuideManager.getInstance().getCategoryForEntryId(entryId);
+            ResourceLocation categoryId = ServerFieldGuideManager.getInstance().getCategoryForEntryId(canonicalId);
             if (categoryId != null) {
                 Set<ResourceLocation> categoryEntries = ServerFieldGuideManager.getInstance().getEntryIdsForCategory(categoryId);
                 if (!categoryEntries.isEmpty() && categoryEntries.stream().allMatch(e -> isUnlocked(e.toString()))) {
                     FieldGuideTriggers.CATEGORY_COMPLETED.get().trigger(player, categoryId);
+                    Services.PLATFORM.onCategoryCompleted(player, categoryId, this);
                 }
             }
         }
 
         if (variantId != null && !variantId.isEmpty()) {
             String fullVariantId = id + "#" + variantId;
-            if (unlockedEntries.add(fullVariantId)) {
+            if (!EntryResolver.isUnlocked(unlockedEntries, canonicalId, canonicalId, variantId) && unlockedEntries.add(fullVariantId)) {
                 pendingUnlocks.add(fullVariantId);
                 pendingRevokes.remove(fullVariantId);
                 newlyUnlocked = true;
+                Services.PLATFORM.onEntryUnlocked(player, canonicalId, variantId, false, this);
             }
         }
 
@@ -137,8 +142,16 @@ public class PlayerFieldGuideProgress {
     public boolean revoke(String entryId) {
         boolean removed = false;
         List<String> toRemove = new ArrayList<>();
+        ResourceLocation idLoc = null;
+        ResourceLocation canonicalLoc = null;
+        try {
+            idLoc = ResourceLocation.parse(entryId);
+            canonicalLoc = ServerFieldGuideManager.getInstance().resolveCanonicalEntryId(idLoc);
+        } catch (Exception ignored) {
+        }
+
         for (String id : unlockedEntries) {
-            if (id.equals(entryId) || id.startsWith(entryId + "#")) {
+            if (EntryResolver.matchesStoredEntry(id, entryId, canonicalLoc, idLoc)) {
                 toRemove.add(id);
             }
         }
@@ -166,9 +179,22 @@ public class PlayerFieldGuideProgress {
 
     public List<String> getUnlockedVariants(String entryId) {
         List<String> variants = new ArrayList<>();
+        ResourceLocation idLoc = null;
+        ResourceLocation canonicalLoc = null;
+        try {
+            idLoc = ResourceLocation.parse(entryId);
+            canonicalLoc = ServerFieldGuideManager.getInstance().resolveCanonicalEntryId(idLoc);
+        } catch (Exception ignored) {
+        }
+
         for (String id : unlockedEntries) {
-            if (id.startsWith(entryId + "#")) {
-                variants.add(id.substring(entryId.length() + 1));
+            int hashIdx = id.indexOf('#');
+            if (hashIdx == -1) continue;
+            String base = id.substring(0, hashIdx);
+            String variant = id.substring(hashIdx + 1);
+
+            if (EntryResolver.matchesStoredEntry(base, entryId, canonicalLoc, idLoc) && !variants.contains(variant)) {
+                variants.add(variant);
             }
         }
         return variants;
@@ -278,22 +304,46 @@ public class PlayerFieldGuideProgress {
     }
 
     public boolean isUnlocked(String entryId) {
-        if (unlockedEntries.contains(entryId)) return true;
+        if (entryId == null) return false;
         try {
             ResourceLocation id = ResourceLocation.parse(entryId);
-            ResourceLocation rawId = EntryResolver.getRawId(id);
-            return unlockedEntries.contains(rawId.toString());
+            ResourceLocation canonical = ServerFieldGuideManager.getInstance().resolveCanonicalEntryId(id);
+            return EntryResolver.isUnlocked(unlockedEntries, id, canonical, null);
         } catch (Exception e) {
-            return false;
+            return unlockedEntries.contains(entryId);
+        }
+    }
+
+    public boolean isUnlocked(String entryId, String variantId) {
+        if (entryId == null) return false;
+        try {
+            ResourceLocation id = ResourceLocation.parse(entryId);
+            ResourceLocation canonical = ServerFieldGuideManager.getInstance().resolveCanonicalEntryId(id);
+            return EntryResolver.isUnlocked(unlockedEntries, id, canonical, variantId);
+        } catch (Exception e) {
+            String suffix = (variantId != null && !variantId.isEmpty()) ? "#" + variantId : "";
+            return unlockedEntries.contains(entryId + suffix);
         }
     }
 
     public boolean isUnlocked(ResourceLocation entryId) {
-        return isUnlocked(entryId.toString());
+        if (entryId == null) return false;
+        ResourceLocation canonical = ServerFieldGuideManager.getInstance().resolveCanonicalEntryId(entryId);
+        return EntryResolver.isUnlocked(unlockedEntries, entryId, canonical, null);
+    }
+
+    public boolean isUnlocked(ResourceLocation entryId, String variantId) {
+        if (entryId == null) return false;
+        ResourceLocation canonical = ServerFieldGuideManager.getInstance().resolveCanonicalEntryId(entryId);
+        return EntryResolver.isUnlocked(unlockedEntries, entryId, canonical, variantId);
     }
 
     public Set<String> getUnlockedEntries() {
         return Collections.unmodifiableSet(unlockedEntries);
+    }
+
+    public int getUnlockedEntryCount() {
+        return (int) unlockedEntries.stream().filter(id -> id.indexOf('#') == -1).count();
     }
 
     public void setJournalTitle(String title) {
@@ -414,12 +464,12 @@ public class PlayerFieldGuideProgress {
         }
 
         Services.NETWORK.sendToPlayer(
-            new ProgressUpdatePacket.Builder()
-                .silent(true)
-                .journalTitle(journalTitle != null ? journalTitle : "")
-                .journalPages(new ArrayList<>(journalPages))
-                .build(),
-            player);
+                new ProgressUpdatePacket.Builder()
+                        .silent(true)
+                        .journalTitle(journalTitle != null ? journalTitle : "")
+                        .journalPages(new ArrayList<>(journalPages))
+                        .build(),
+                player);
     }
 
     private void sendDelta(ServerPlayer player) {
@@ -518,7 +568,6 @@ public class PlayerFieldGuideProgress {
             }
             if (json.has("journalTitle")) {
                 String loaded = json.get("journalTitle").getAsString();
-                // Migrate old default title to null if it's still present in the save file
                 if (!loaded.isEmpty() && !loaded.equals("My Field Guide")) {
                     journalTitle = loaded;
                 } else {

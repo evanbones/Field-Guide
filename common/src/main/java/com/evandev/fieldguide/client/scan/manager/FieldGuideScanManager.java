@@ -250,14 +250,7 @@ public class FieldGuideScanManager {
         if (targetId != null) {
             ResourceLocation redirectId = ClientFieldGuideManager.getInstance().getRedirect(targetId);
             if (redirectId != null) {
-                ResourceLocation rawRedirectId = EntryResolver.getRawId(redirectId);
-
-                Object newTargetKey = BuiltInRegistries.ENTITY_TYPE.getOptional(rawRedirectId)
-                        .map(Object.class::cast)
-                        .or(() -> BuiltInRegistries.ITEM.getOptional(rawRedirectId))
-                        .or(() -> BuiltInRegistries.BLOCK.getOptional(rawRedirectId))
-                        .orElse(null);
-
+                Object newTargetKey = EntryResolver.resolveRegistryObject(redirectId, EntryResolver.RegistryType.ENTITY, EntryResolver.RegistryType.ITEM, EntryResolver.RegistryType.BLOCK);
                 if (newTargetKey != null) {
                     Object resolvedTarget = ClientFieldGuideManager.getInstance().getEntryForTarget(newTargetKey);
                     targetKey = Objects.requireNonNullElse(resolvedTarget, newTargetKey);

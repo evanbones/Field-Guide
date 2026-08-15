@@ -1,6 +1,8 @@
 package com.evandev.fieldguide.server.progress;
 
+import com.evandev.fieldguide.entry.EntryResolver;
 import com.evandev.fieldguide.platform.Services;
+import com.evandev.fieldguide.server.ServerFieldGuideManager;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.advancements.critereon.*;
@@ -43,7 +45,10 @@ public class FieldGuideTriggers {
             ).apply(instance, TriggerInstance::new));
 
             public boolean matches(ResourceLocation entryId) {
-                return this.entryId.isEmpty() || this.entryId.get().equals(entryId);
+                if (this.entryId.isEmpty()) return true;
+                ResourceLocation expected = this.entryId.get();
+                if (expected.equals(entryId)) return true;
+                return EntryResolver.rawIdsCompatible(expected, entryId);
             }
         }
     }
@@ -65,7 +70,16 @@ public class FieldGuideTriggers {
             ).apply(instance, TriggerInstance::new));
 
             public boolean matches(ResourceLocation categoryId) {
-                return this.categoryId.isEmpty() || this.categoryId.get().equals(categoryId);
+                if (this.categoryId.isEmpty()) return true;
+                ResourceLocation expected = this.categoryId.get();
+                if (expected.equals(categoryId)) return true;
+
+                if (!"minecraft".equals(expected.getNamespace()) || !categoryId.getPath().equals(expected.getPath())) {
+                    return false;
+                }
+                return ServerFieldGuideManager.getInstance().getCategories().keySet().stream()
+                        .filter(id -> id.getPath().equals(expected.getPath()))
+                        .count() == 1;
             }
         }
     }

@@ -1,5 +1,8 @@
 package com.evandev.fieldguide.platform.services;
 
+import com.evandev.fieldguide.server.progress.PlayerFieldGuideProgress;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 
@@ -59,5 +62,17 @@ public interface IPlatformHelper {
      */
     default boolean hasSpyglass(Player player) {
         return true; // TODO
+    }
+
+    /**
+     * Called when a player unlocks an entry or variant.
+     */
+    default void onEntryUnlocked(ServerPlayer player, ResourceLocation entryId, String variantId, boolean newlyUnlocked, PlayerFieldGuideProgress progress) {
+    }
+
+    /**
+     * Called when a player completes all entries in a category.
+     */
+    default void onCategoryCompleted(ServerPlayer player, ResourceLocation categoryId, PlayerFieldGuideProgress progress) {
     }
 }

@@ -49,6 +49,7 @@ publishMods {
         requires("item-descriptions")
         optional("cloth-config")
         requires("immersive-overlays")
+        optional("kubejs")
     }
 
     modrinth {
@@ -59,5 +60,6 @@ publishMods {
         requires("item-descriptions")
         optional("cloth-config")
         requires("immersive-overlays")
+        optional("kubejs")
     }
 }

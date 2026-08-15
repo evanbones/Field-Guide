@@ -5,6 +5,7 @@ import com.evandev.fieldguide.api.AutoPopulateRegistry;
 import com.evandev.fieldguide.api.EntryVariantData;
 import com.evandev.fieldguide.api.GuideEntry;
 import com.evandev.fieldguide.compat.cobblemon.ClientFieldGuideCobblemonCompat;
+import com.evandev.fieldguide.entry.EntryResolver;
 import com.evandev.fieldguide.network.RequestLootPacket;
 import com.evandev.fieldguide.platform.Services;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -44,7 +45,6 @@ public class ClientLootManager {
                 List<ItemStack> drops = entry.getValue();
                 dropCache.put(id, drops);
 
-                // Index drops by name
                 for (ItemStack stack : drops) {
                     String name = stack.getHoverName().getString().toLowerCase(Locale.ROOT);
                     dropIndex.computeIfAbsent(name, k -> new HashSet<>()).add(id);
@@ -118,15 +118,11 @@ public class ClientLootManager {
         if (entry instanceof GuideEntry ge && ge.isComposite()) {
             Set<Object> uniqueComponents = new HashSet<>();
             if (ge.displayId() != null) {
-                BuiltInRegistries.BLOCK.getOptional(ge.displayId()).ifPresent(uniqueComponents::add);
-                BuiltInRegistries.ITEM.getOptional(ge.displayId()).ifPresent(uniqueComponents::add);
-                BuiltInRegistries.ENTITY_TYPE.getOptional(ge.displayId()).ifPresent(uniqueComponents::add);
+                uniqueComponents.addAll(EntryResolver.resolveAllRegistryObjects(ge.displayId()));
             }
             if (ge.childEntries() != null) {
                 for (ResourceLocation compId : ge.childEntries()) {
-                    BuiltInRegistries.BLOCK.getOptional(compId).ifPresent(uniqueComponents::add);
-                    BuiltInRegistries.ITEM.getOptional(compId).ifPresent(uniqueComponents::add);
-                    BuiltInRegistries.ENTITY_TYPE.getOptional(compId).ifPresent(uniqueComponents::add);
+                    uniqueComponents.addAll(EntryResolver.resolveAllRegistryObjects(compId));
                 }
             }
             for (Object comp : uniqueComponents) {
@@ -164,10 +160,7 @@ public class ClientLootManager {
     }
 
     private void addLootTarget(Set<Object> targets, ResourceLocation id) {
-        if (id == null) return;
-        BuiltInRegistries.BLOCK.getOptional(id).ifPresent(targets::add);
-        BuiltInRegistries.ITEM.getOptional(id).ifPresent(targets::add);
-        BuiltInRegistries.ENTITY_TYPE.getOptional(id).ifPresent(targets::add);
+        targets.addAll(EntryResolver.resolveAllRegistryObjects(id));
     }
 
     private List<ItemStack> distinctLoot(List<ItemStack> rawDrops) {

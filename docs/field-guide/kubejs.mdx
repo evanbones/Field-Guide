@@ -4,84 +4,218 @@ title: KubeJS Integration
 
 Field Guide provides KubeJS integration that allows you to interact with player progress and mod systems through scripts.
 
-### The 'FieldGuide' Global
-You can access the integration via the global `FieldGuide` object in your server scripts.
+---
+
+### FieldGuideEvents
+
+Field Guide registers custom events under the `FieldGuideEvents` group in server scripts (`server_scripts`).
+
+#### `FieldGuideEvents.entryUnlocked`
+Triggered whenever a player scans, interacts, kills, or otherwise unlocks a Field Guide entry or variant.
+
+##### Event Properties & Methods
+
+| Property / Method | Type | Description |
+| :--- | :--- | :--- |
+| `event.player` | `ServerPlayer` | The player who unlocked the entry. |
+| `event.entryId` | `ResourceLocation` | The canonical resource location ID of the unlocked entry (e.g. `entity:minecraft/cow`). |
+| `event.entryIdString` | `string` | The string form of the canonical entry ID. |
+| `event.rawEntryId` / `event.getRawEntryId()` | `ResourceLocation` | The raw unprefixed registry ID (e.g. `minecraft:cow`). |
+| `event.rawEntryIdString` / `event.getRawEntryIdString()` | `string` | The raw entry ID string (e.g. `'minecraft:cow'`). |
+| `event.variantId` | `string` | The variant ID if a variant was unlocked (e.g. `temperate`), or `""` if none. |
+| `event.hasVariant()` | `boolean` | Returns `true` if this unlock was for a specific variant. |
+| `event.newUnlock` / `event.isNewUnlock()` | `boolean` | `true` if this was the very first time the player unlocked this entry. |
+| `event.unlockedCount` | `int` | Total number of unlocked entries the player now has in their guide. Variants are not counted separately. |
+| `event.categoryId` / `event.category` | `ResourceLocation` | The category ID containing this entry (e.g. `fieldguide:creatures`). |
+| `event.progress` | `PlayerFieldGuideProgress` | The player's progress data instance. |
+
+##### Targeted Listeners
+You can listen to all unlocks globally, or filter for specific entry IDs directly. Both raw registry IDs (e.g. `'minecraft:warden'`) and typed prefix IDs (e.g. `'entity:minecraft/warden'` or `'minecraft:entity/warden'`) are supported:
+
+```javascript
+// Target a specific creature or block directly by ID:
+FieldGuideEvents.entryUnlocked('minecraft:warden', event => {
+    event.player.tell('You have researched the Warden!')
+    event.player.potionEffects.add('minecraft:night_vision', 20 * 60)
+})
+
+FieldGuideEvents.entryUnlocked('minecraft:ancient_debris', event => {
+    event.player.tell('Ancient Debris discovered! Check your Field Guide for details.')
+})
+```
+
+---
+
+#### `FieldGuideEvents.categoryCompleted`
+Triggered when a player unlocks the last remaining entry in a category, completing the whole chapter.
+
+##### Event Properties & Methods
+
+| Property / Method | Type | Description |
+| :--- | :--- | :--- |
+| `event.player` | `ServerPlayer` | The player who completed the category. |
+| `event.categoryId` / `event.category` | `ResourceLocation` | The category ID (e.g. `fieldguide:creatures`). |
+| `event.categoryIdString` | `string` | The string form of the category ID. |
+| `event.progress` | `PlayerFieldGuideProgress` | The player's progress data. |
+
+##### Example
+
+```javascript
+FieldGuideEvents.categoryCompleted('fieldguide:creatures', event => {
+    event.player.tell('Congratulations! You have catalogued every creature in your Field Guide!')
+    event.player.giveExperienceLevels(10)
+})
+```
+
+---
+
+### The 'FieldGuide' Global Helper
+
+You can access the global `FieldGuide` object anywhere in your server scripts.
 
 #### Methods
 
-| Method | Description |
-| :--- | :--- |
-| `isUnlocked(player, entryId)` | Returns `true` if the player has unlocked the specified entry. Supports entities, blocks, and items. |
-| `unlock(player, entryId)` | Unlocks an entry for the player. Supports entities, blocks, and items. |
-| `unlock(player, entryId, variantId)` | Unlocks a specific variant of an entry for the player. |
-| `revoke(player, entryId)` | Revokes an entry from the player's progress. |
-| `revokeAll(player)` | Clears all progress for the player. |
-| `getProgress(player)` | Returns the `PlayerFieldGuideProgress` object for the player. |
-| `getManager()` | Returns the `ServerFieldGuideManager` instance. |
-| `getProgressManager()` | Returns the `FieldGuideProgressManager` instance. |
+| Method | Returns | Description |
+| :--- | :--- | :--- |
+| `FieldGuide.getCanonicalEntryId(entryId)` | `ResourceLocation` | Resolves any raw or path-prefixed entry ID to its canonical registered ID. |
+| `FieldGuide.getRawEntryId(entryId)` | `ResourceLocation` | Strips any type or path prefix to return the raw registry ID. |
+| `FieldGuide.isUnlocked(player, entryId)` | `boolean` | Returns `true` if the player has unlocked the entry (accepts raw or prefixed IDs). |
+| `FieldGuide.isUnlocked(player, entryId, variantId)` | `boolean` | Returns `true` if the player has unlocked a specific variant. |
+| `FieldGuide.unlock(player, entryId)` | `void` | Unlocks an entry for the player (grants scan XP, accepts raw or prefixed IDs). |
+| `FieldGuide.unlock(player, entryId, variantId)` | `void` | Unlocks a specific variant of an entry for the player. |
+| `FieldGuide.unlock(player, entryId, variantId, grantXp)` | `void` | Unlocks an entry with optional XP grant control. |
+| `FieldGuide.revoke(player, entryId)` | `boolean` | Revokes an entry and all its variants from the player's progress. |
+| `FieldGuide.revokeAll(player)` | `void` | Clears all Field Guide progress for the player. |
+| `FieldGuide.getUnlockedCount(player)` | `int` | Returns the total count of unlocked entries for the player. |
+| `FieldGuide.getUnlockedEntries(player)` | `Set<String>` | Returns a set containing all unlocked entry IDs. |
+| `FieldGuide.getUnlockedVariants(player, entryId)` | `List<String>` | Returns all unlocked variant IDs for a specific entry. |
+| `FieldGuide.isCategoryCompleted(player, categoryId)` | `boolean` | Returns `true` if the player has unlocked all entries in a category. |
+| `FieldGuide.getUnlockedCountForCategory(player, categoryId)` | `int` | Returns the number of entries unlocked in a specific category. |
+| `FieldGuide.getTotalCountForCategory(categoryId)` | `int` | Returns the total number of entries defined in a category. |
+| `FieldGuide.getProgress(player)` | `PlayerFieldGuideProgress` | Returns the raw `PlayerFieldGuideProgress` instance. |
+| `FieldGuide.getManager()` | `ServerFieldGuideManager` | Returns the mod's `ServerFieldGuideManager` instance. |
+| `FieldGuide.getProgressManager()` | `FieldGuideProgressManager` | Returns the mod's `FieldGuideProgressManager` instance. |
 
-### Examples
+---
 
-#### Unlocking an entry when an item is used
+### Script Examples
+
+#### 1. Milestones (Every X Entries Unlocked)
+Give players special tiered rewards for every 10 entries they unlock:
+
 ```javascript
-ItemEvents.rightClicked('minecraft:stick', event => {
-    if (event.player.isCrouching()) {
-        FieldGuide.unlock(event.player, 'minecraft:cow')
-        event.player.tell('You unlocked the Cow entry!')
+// server_scripts/field_guide_milestones.js
+
+FieldGuideEvents.entryUnlocked(event => {
+    // Only reward on brand new unlocks
+    if (!event.newUnlock) return
+
+    const count = event.unlockedCount
+    const player = event.player
+
+    // Reward every 10 unlocks
+    if (count % 10 === 0) {
+        player.tell(`§aMilestone reached! You have cataloged §e${count}§a entries!`)
+        player.giveExperienceLevels(5)
+    }
+
+    // Special milestone at 50 unlocks
+    if (count === 50) {
+        player.tell('50 entries completed!')
     }
 })
 ```
 
-#### Checking if an entry is unlocked
+#### 2. Rewarding Specific Creatures and Blocks
+Give custom rewards when discovering specific mobs or blocks:
+
 ```javascript
-PlayerEvents.loggedIn(event => {
-    if (FieldGuide.isUnlocked(event.player, 'minecraft:zombie')) {
-        event.player.tell('Welcome back, zombie hunter!')
+// server_scripts/field_guide_rewards.js
+
+FieldGuideEvents.entryUnlocked('minecraft:ender_dragon', event => {
+    event.player.tell('§5You researched the Ender Dragon!')
+})
+
+FieldGuideEvents.entryUnlocked('minecraft:sniffer', event => {
+    event.player.tell('§aSniffer researched!')
+})
+```
+
+#### 3. Rewarding Variants
+Check if the player researched a specific variant:
+
+```javascript
+// server_scripts/field_guide_variants.js
+
+FieldGuideEvents.entryUnlocked('minecraft:mooshroom', event => {
+    if (event.variantId === 'brown') {
+        event.player.tell('§6You discovered the Brown Mooshroom!')
     }
 })
 ```
 
-#### Revoking progress
+#### 4. Right-Click Unlocking
+Create consumable items that unlock specific Field Guide entries:
+
 ```javascript
+// server_scripts/item_unlocking.js
+
+ItemEvents.rightClicked('minecraft:enchanted_book', event => {
+    const player = event.player
+    const entry = 'minecraft:allay'
+
+    if (!FieldGuide.isUnlocked(player, entry)) {
+        FieldGuide.unlock(player, entry)
+        event.item.count--
+        player.tell('§aThe book revealed knowledge about the Allay!')
+    } else {
+        player.tell('§7You already know about this creature.')
+    }
+})
+```
+
+#### 5. Reset Command
+Create a custom command to reset a player's Field Guide:
+
+```javascript
+// server_scripts/reset_command.js
+
 ServerEvents.commandRegistry(event => {
-    const { commands: Commands, arguments: Arguments } = event;
-    
+    const { commands: Commands } = event
+
     event.register(
-        Commands.literal('reset_guide')
+        Commands.literal('reset_field_guide')
+            .requires(src => src.hasPermission(2))
             .executes(ctx => {
-                const player = ctx.source.player;
+                const player = ctx.source.player
                 if (player) {
-                    FieldGuide.revokeAll(player);
-                    player.tell('Your Field Guide has been reset.');
+                    FieldGuide.revokeAll(player)
+                    player.tell('§cYour Field Guide progress has been reset.')
                 }
-                return 1;
+                return 1
             })
-    );
-});
+    )
+})
 ```
 
-### API Reference
+---
 
-For advanced users, `FieldGuide.getManager()` and `FieldGuide.getProgress(player)` return the actual Java objects used by the mod. Below are some of the most useful methods available on these objects.
+### Java API Reference
 
-#### PlayerFieldGuideProgress
-Accessible via `FieldGuide.getProgress(player)`.
+For advanced pack developers, `FieldGuide.getManager()` and `FieldGuide.getProgress(player)` give access to the underlying Java instances:
 
-| Method | Description |
-| :--- | :--- |
-| `getUnlockedEntries()` | Returns a `Set<String>` of all entry IDs the player has unlocked. |
-| `markSeen(String entryId)` | Marks an unlocked entry as "seen" (removes the notification dot). |
-| `setCustomName(String entryId, String name)` | Sets a custom name for an entry for this player. |
-| `setCustomDescription(String entryId, String desc)` | Sets a custom description for an entry for this player. |
-| `setJournalTitle(String title)` | Changes the title of the player's journal. |
-| `isUnlocked(String entryId)` | Check if an entry (or variant like `minecraft:cow#variant`) is unlocked. |
+#### `PlayerFieldGuideProgress`
+- `getUnlockedEntries()`: `Set<String>` of all unlocked entry and variant IDs.
+- `getUnlockedVariants(String entryId)`: `List<String>` of unlocked variant IDs for the given entry.
+- `isUnlocked(String entryId)`: Check if an entry or variant ID is unlocked.
+- `markSeen(String entryId)`: Marks an unlocked entry as seen (removes notification).
+- `setCustomName(String entryId, String name)`: Sets custom name for an entry.
+- `setCustomDescription(String entryId, String desc)`: Sets custom description for an entry.
+- `setJournalTitle(String title)`: Changes the title of the player's journal.
 
-#### ServerFieldGuideManager
-Accessible via `FieldGuide.getManager()`.
-
-| Method | Description |
-| :--- | :--- |
-| `getAllEntryIds()` | Returns a `Set<ResourceLocation>` of every valid entry in the guide. |
-| `hasEntry(ResourceLocation id)` | Returns `true` if the ID is a valid entry defined in a category. |
-| `getCategoryForEntryId(ResourceLocation id)` | Returns the `ResourceLocation` of the category containing the entry. |
-| `isKillToUnlock(ResourceLocation id)` | Returns `true` if the entry is tagged as `#fieldguide:kill_to_unlock`. |
+#### `ServerFieldGuideManager`
+- `getAllEntryIds()`: `Set<ResourceLocation>` of every valid entry in the guide.
+- `hasEntry(ResourceLocation id)`: `true` if the ID is a valid entry defined in categories.
+- `getCategoryForEntryId(ResourceLocation id)`: Returns the `ResourceLocation` of the category containing the entry.
+- `getEntryIdsForCategory(ResourceLocation categoryId)`: Returns `Set<ResourceLocation>` of all entry IDs in a category.
+- `isKillToUnlock(ResourceLocation id)`: Returns `true` if the entry requires killing to unlock.

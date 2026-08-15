@@ -1,3 +1,4 @@
-### Fixed
+### Changed
 
-- Updated dependencies (may resolve Item Descriptions crash).
+- Revamped/rewrote KubeJS integration.
+- Backend rewrites for ID handling (may fix some random ID-related bugs).

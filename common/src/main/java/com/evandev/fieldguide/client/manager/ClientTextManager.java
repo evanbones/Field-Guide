@@ -82,10 +82,7 @@ public class ClientTextManager {
         if (variantId == null || !(entry instanceof GuideEntry ge) || ge.visualVariants() == null) return null;
         for (EntryVariantData vd : ge.visualVariants()) {
             if (vd.variantId().equals(variantId) && vd.displayId() != null) {
-                return BuiltInRegistries.ENTITY_TYPE.getOptional(vd.displayId()).map(Object.class::cast)
-                        .or(() -> BuiltInRegistries.BLOCK.getOptional(vd.displayId()).map(Object.class::cast))
-                        .or(() -> BuiltInRegistries.ITEM.getOptional(vd.displayId()).map(Object.class::cast))
-                        .orElse(null);
+                return EntryResolver.resolveRegistryObject(vd.displayId());
             }
         }
         return null;

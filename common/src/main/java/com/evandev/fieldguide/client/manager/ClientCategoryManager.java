@@ -183,7 +183,14 @@ public class ClientCategoryManager {
     }
 
     public ResourceLocation getRedirect(ResourceLocation source) {
-        return redirects.get(source);
+        if (source == null) return null;
+        ResourceLocation target = redirects.get(source);
+        if (target != null) return target;
+        ResourceLocation raw = EntryResolver.getRawId(source);
+        if (raw != null) {
+            return redirects.get(raw);
+        }
+        return null;
     }
 
     public Map<ResourceLocation, List<Object>> getResolvedCategoryEntries() {

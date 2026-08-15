@@ -46,12 +46,14 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.Reader;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ServerFieldGuideManager extends SimplePreparableReloadListener<ServerFieldGuideManager.ReloadData> {
     private static final ServerFieldGuideManager INSTANCE = new ServerFieldGuideManager();
     private final Map<ResourceLocation, List<Object>> resolvedCategoryEntries = new HashMap<>();
     private final Map<ResourceLocation, EntryUnlockData> entryUnlockDataMap = new HashMap<>();
     private final Map<ResourceLocation, Set<ResourceLocation>> triggerOnMap = new HashMap<>();
+    private final Map<ResourceLocation, Optional<ResourceLocation>> canonicalIdCache = new ConcurrentHashMap<>();
 
     private Map<ResourceLocation, Category> categories = new LinkedHashMap<>();
     private Map<ResourceLocation, GuideEntry> allEntries = new HashMap<>();
@@ -72,7 +74,26 @@ public class ServerFieldGuideManager extends SimplePreparableReloadListener<Serv
         return INSTANCE;
     }
 
+    public ResourceLocation resolveCanonicalEntryId(ResourceLocation entryId) {
+        ResourceLocation canonical = findCanonicalEntryId(entryId);
+        return canonical != null ? canonical : entryId;
+    }
+
+    public ResourceLocation findCanonicalEntryId(ResourceLocation entryId) {
+        if (entryId == null) return null;
+        return canonicalIdCache.computeIfAbsent(entryId, id -> Optional.ofNullable(
+                EntryResolver.findCanonicalEntryId(resolvedCategoryEntries, id))).orElse(null);
+    }
+
     public EntryUnlockData getUnlockData(ResourceLocation entryId) {
+        ResourceLocation canonicalId = resolveCanonicalEntryId(entryId);
+        if (canonicalId != null && entryUnlockDataMap.containsKey(canonicalId)) {
+            EntryUnlockData mapData = entryUnlockDataMap.get(canonicalId);
+            if (mapData != null && !EntryUnlockData.DEFAULT.equals(mapData)) {
+                return mapData;
+            }
+        }
+
         EntryUnlockData mapData = entryUnlockDataMap.get(entryId);
         if (mapData != null && !EntryUnlockData.DEFAULT.equals(mapData)) {
             return mapData;
@@ -130,14 +151,18 @@ public class ServerFieldGuideManager extends SimplePreparableReloadListener<Serv
     }
 
     public boolean hasEntry(ResourceLocation entryId) {
-        return EntryResolver.hasEntry(resolvedCategoryEntries, entryId);
+        return EntryResolver.hasEntry(resolvedCategoryEntries, entryId, findCanonicalEntryId(entryId));
     }
 
     public GuideEntry getResolvedEntry(ResourceLocation entryId) {
+        ResourceLocation canonicalId = resolveCanonicalEntryId(entryId);
         for (List<Object> entries : resolvedCategoryEntries.values()) {
             for (Object entry : entries) {
-                if (entry instanceof GuideEntry ge && entryId.equals(EntryResolver.getEntryId(ge))) {
-                    return ge;
+                if (entry instanceof GuideEntry ge) {
+                    ResourceLocation id = EntryResolver.getEntryId(ge);
+                    if (entryId.equals(id) || (canonicalId != null && canonicalId.equals(id))) {
+                        return ge;
+                    }
                 }
             }
         }
@@ -172,7 +197,7 @@ public class ServerFieldGuideManager extends SimplePreparableReloadListener<Serv
     }
 
     public ResourceLocation getCategoryForEntryId(ResourceLocation entryId) {
-        return EntryResolver.getCategoryForEntryId(resolvedCategoryEntries, entryId);
+        return EntryResolver.getCategoryForEntryId(resolvedCategoryEntries, entryId, findCanonicalEntryId(entryId));
     }
 
     public Set<ResourceLocation> getAllEntryIds() {
@@ -207,9 +232,20 @@ public class ServerFieldGuideManager extends SimplePreparableReloadListener<Serv
     private List<String> prefixList(List<String> original) {
         return original.stream().map(s -> {
             String[] parts = s.split("\\|", 2);
-            if (parts.length == 2 && !parts[0].contains(":")) {
-                Optional<Object> entry = EntryResolutionHelper.resolveSingleEntry(ResourceLocation.parse(parts[0]), null, null);
-                if (entry.isPresent()) return AutoPopulateRegistry.getEntryId(entry.get(), true) + "|" + parts[1];
+            if (parts.length == 2) {
+                try {
+                    ResourceLocation entryLoc = ResourceLocation.parse(parts[0]);
+                    ResourceLocation canonical = findCanonicalEntryId(entryLoc);
+                    if (canonical != null) {
+                        return canonical + "|" + parts[1];
+                    }
+                    Optional<Object> entry = EntryResolutionHelper.resolveSingleEntry(entryLoc, null, null);
+                    if (entry.isPresent()) {
+                        ResourceLocation autoId = AutoPopulateRegistry.getEntryId(entry.get(), true);
+                        if (autoId != null) return autoId + "|" + parts[1];
+                    }
+                } catch (Exception ignored) {
+                }
             }
             return s;
         }).toList();
@@ -354,6 +390,7 @@ public class ServerFieldGuideManager extends SimplePreparableReloadListener<Serv
 
     private void resolveAllCategories() {
         resolvedCategoryEntries.clear();
+        canonicalIdCache.clear();
         Set<String> allCompositeComponents = new HashSet<>();
 
         for (Category cat : categories.values()) {

@@ -80,6 +80,7 @@ dependencies {
 
     // KubeJS
     compileOnly "maven.modrinth:kubejs:${kubejs_version}"
+    compileOnly "dev.latvian.mods:rhino:${rhino_version}"
 
     // Serene Seasons
     compileOnly "maven.modrinth:serene-seasons:${serene_seasons_neoforge_version}"

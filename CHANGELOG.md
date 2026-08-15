@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.15.0] - 2026-08-14
+
+### Changed
+
+- Revamped/rewrote KubeJS integration.
+- Backend rewrites for ID handling (may fix some random ID-related bugs).
+
 ## [1.14.1] - 2026-08-12
 
 ### Fixed

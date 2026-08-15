@@ -93,6 +93,15 @@ repositories {
             includeGroup "folk.sisby"
         }
     }
+
+    maven {
+        name = "Latvian Maven"
+        url = "https://maven.latvian.dev/releases"
+        content {
+            includeGroup "dev.latvian.mods"
+            includeGroup "dev.latvian.apps"
+        }
+    }
 }
 
 ['apiElements', 'runtimeElements'].each { variant ->
