@@ -23,7 +23,7 @@ public class FieldGuideItem extends Item {
 
     @Override
     public @NotNull InteractionResultHolder<ItemStack> use(@NotNull Level level, @NotNull Player player, @NotNull InteractionHand hand) {
-        if (!ServerConfig.get().enableFieldGuideItem) {
+        if (!ServerConfig.get().enableFieldGuideItem || ServerConfig.get().enableFieldGuideScanning) {
             return InteractionResultHolder.pass(player.getItemInHand(hand));
         }
 

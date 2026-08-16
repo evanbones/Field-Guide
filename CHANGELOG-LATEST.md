@@ -1,4 +1,3 @@
-### Changed
+### Fixed
 
-- Revamped/rewrote KubeJS integration.
-- Backend rewrites for ID handling (may fix some random ID-related bugs).
+- Fixed issues with the Field Guide item scanning config option.
