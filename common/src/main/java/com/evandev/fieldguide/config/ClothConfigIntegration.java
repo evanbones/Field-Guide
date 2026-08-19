@@ -93,6 +93,12 @@ public class ClothConfigIntegration {
                 .setSaveConsumer(newValue -> serverConfig.disableScanning = newValue)
                 .build());
 
+        general.addEntry(entryBuilder.startBooleanToggle(Component.translatable("option.fieldguide.disable_obtain_unlocks"), serverConfig.disableObtainUnlocks)
+                .setDefaultValue(false)
+                .setTooltip(Component.translatable("option.fieldguide.disable_obtain_unlocks.tooltip"))
+                .setSaveConsumer(newValue -> serverConfig.disableObtainUnlocks = newValue)
+                .build());
+
         general.addEntry(entryBuilder.startBooleanToggle(Component.translatable("option.fieldguide.enable_spyglass_scanning"), serverConfig.enableSpyglassScanning)
                 .setDefaultValue(true)
                 .setTooltip(Component.translatable("option.fieldguide.enable_spyglass_scanning.tooltip"))

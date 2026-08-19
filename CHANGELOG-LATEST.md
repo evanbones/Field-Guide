@@ -1,3 +1,4 @@
-### Fixed
+### Added
 
-- Fixed issues with the Field Guide item scanning config option.
+- Added an option to disable `obtain` unlocks entirely.
+- Added the ability to define category-level unlock criteria.

@@ -33,6 +33,7 @@ public class ServerConfig {
     public boolean enableLensItem = false;
     public boolean requireItemToOpen = false;
     public boolean enableCopyingPages = true;
+    public boolean disableObtainUnlocks = false;
 
     public boolean hideTabsUntilUnlocked = false;
 

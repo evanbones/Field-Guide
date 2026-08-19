@@ -413,6 +413,30 @@ public class ServerFieldGuideManager extends SimplePreparableReloadListener<Serv
                 return allCompositeComponents.contains(AutoPopulateRegistry.getEntryKey(entry));
             });
         }
+
+        for (Category cat : categories.values()) {
+            for (ResourceLocation entryId : cat.getEntryIds()) {
+                GuideEntry autoDef = allEntries.get(entryId);
+                if (autoDef != null && autoDef.isAutoPopulate() && autoDef.strategy() != null) {
+                    EntryUnlockData autoUnlock = autoDef.unlockData();
+                    if (autoUnlock != null && !EntryUnlockData.DEFAULT.equals(autoUnlock)) {
+                        for (Object obj : AutoPopulateRegistry.getEntries(autoDef.strategy(), cat.getId())) {
+                            ResourceLocation keyLoc = AutoPopulateRegistry.getEntryId(obj, true);
+                            if (keyLoc != null && !this.entryUnlockDataMap.containsKey(keyLoc)) {
+                                this.entryUnlockDataMap.put(keyLoc, autoUnlock);
+                                for (ResourceLocation triggerId : autoUnlock.triggerOn()) {
+                                    this.triggerOnMap.computeIfAbsent(triggerId, k -> new HashSet<>()).add(keyLoc);
+                                }
+                            }
+                            ResourceLocation rawKeyLoc = AutoPopulateRegistry.getEntryId(obj, false);
+                            if (rawKeyLoc != null && !this.entryUnlockDataMap.containsKey(rawKeyLoc)) {
+                                this.entryUnlockDataMap.put(rawKeyLoc, autoUnlock);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public void onServerStarted(MinecraftServer server) {
@@ -516,12 +540,14 @@ public class ServerFieldGuideManager extends SimplePreparableReloadListener<Serv
                         category.setGroupByQueries(queries);
                     }
 
+                    EntryUnlockData categoryUnlockData = parseUnlockData(json);
+
                     if (json.has("contents")) {
                         JsonArray contents = GsonHelper.getAsJsonArray(json, "contents");
                         for (JsonElement el : contents) {
                             JsonObject obj = el.getAsJsonObject();
                             String typeStr = GsonHelper.getAsString(obj, "type");
-                            EntryUnlockData unlockData = parseUnlockData(obj);
+                            EntryUnlockData unlockData = obj.has("unlock") ? parseUnlockData(obj) : categoryUnlockData;
 
                             switch (typeStr) {
                                 case "entry" -> {
@@ -529,7 +555,9 @@ public class ServerFieldGuideManager extends SimplePreparableReloadListener<Serv
                                     GuideEntry ge = new GuideEntry(id, id, null, EntryKind.NORMAL, false, false, null, null, null, null, null, unlockData, null, null);
                                     data.allEntries.put(id, ge);
                                     category.addEntryId(id);
-                                    data.entryUnlockData.put(id, unlockData);
+                                    if (unlockData != null && !EntryUnlockData.DEFAULT.equals(unlockData)) {
+                                        data.entryUnlockData.put(id, unlockData);
+                                    }
                                 }
                                 case "virtual_entry" -> {
                                     ResourceLocation id = ResourceLocation.parse(GsonHelper.getAsString(obj, "id"));
@@ -538,7 +566,9 @@ public class ServerFieldGuideManager extends SimplePreparableReloadListener<Serv
                                     GuideEntry ge = new GuideEntry(id, null, icon, EntryKind.NORMAL, true, false, null, null, null, null, new VirtualData(virtualType), unlockData, null, null);
                                     data.allEntries.put(id, ge);
                                     category.addEntryId(id);
-                                    data.entryUnlockData.put(id, unlockData);
+                                    if (unlockData != null && !EntryUnlockData.DEFAULT.equals(unlockData)) {
+                                        data.entryUnlockData.put(id, unlockData);
+                                    }
                                 }
                                 case "auto_populate" -> {
                                     String strategy = GsonHelper.getAsString(obj, "strategy");
@@ -547,6 +577,9 @@ public class ServerFieldGuideManager extends SimplePreparableReloadListener<Serv
                                     GuideEntry ge = new GuideEntry(id, null, null, EntryKind.NORMAL, false, true, strategy, null, null, null, null, unlockData, null, null);
                                     data.allEntries.put(id, ge);
                                     category.addEntryId(id);
+                                    if (unlockData != null && !EntryUnlockData.DEFAULT.equals(unlockData)) {
+                                        data.entryUnlockData.put(id, unlockData);
+                                    }
                                 }
                                 case "nbt_entry" -> {
                                     ResourceLocation id = ResourceLocation.parse(GsonHelper.getAsString(obj, "id"));
@@ -556,7 +589,9 @@ public class ServerFieldGuideManager extends SimplePreparableReloadListener<Serv
                                     GuideEntry ge = new GuideEntry(id, displayId, null, EntryKind.NORMAL, false, false, null, null, null, null, null, unlockData, entityType, nbt);
                                     data.allEntries.put(id, ge);
                                     category.addEntryId(id);
-                                    data.entryUnlockData.put(id, unlockData);
+                                    if (unlockData != null && !EntryUnlockData.DEFAULT.equals(unlockData)) {
+                                        data.entryUnlockData.put(id, unlockData);
+                                    }
                                 }
                             }
                         }

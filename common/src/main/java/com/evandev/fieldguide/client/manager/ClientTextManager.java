@@ -63,7 +63,7 @@ public class ClientTextManager {
         if (progress.isEatToUnlock(prefixedId) || progress.hasTrigger(prefixedId, "EAT")) {
             return I18n.get("fieldguide.hint.eat");
         }
-        if (progress.hasTrigger(prefixedId, "OBTAIN")) {
+        if (!ServerConfig.get().disableObtainUnlocks && progress.hasTrigger(prefixedId, "OBTAIN")) {
             return I18n.get("fieldguide.hint.obtain");
         }
 

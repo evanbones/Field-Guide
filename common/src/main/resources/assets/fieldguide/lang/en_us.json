@@ -47,6 +47,9 @@
   "option.fieldguide.disable_scanning": "Disable Scanning",
   "option.fieldguide.disable_scanning.tooltip": "If enabled, you will no longer be able to scan entries with spyglasses.",
 
+  "option.fieldguide.disable_obtain_unlocks": "Disable Obtain Unlocks",
+  "option.fieldguide.disable_obtain_unlocks.tooltip": "If enabled, picking up or possessing items will not unlock their Field Guide entries.",
+
   "option.fieldguide.scan_speed": "Scanning Speed",
   "option.fieldguide.scan_speed.tooltip": "The time in seconds it takes to scan an entry.",
 

@@ -25,7 +25,25 @@ public class EntryResolutionHelper {
             if (entry == null) continue;
 
             if (entry.isAutoPopulate() && entry.strategy() != null) {
+                EntryUnlockData inheritUnlock = entry.unlockData();
                 for (Object obj : AutoPopulateRegistry.getEntries(entry.strategy(), categoryId)) {
+                    if (obj instanceof GuideEntry(
+                            ResourceLocation id, ResourceLocation displayId, ResourceLocation icon, EntryKind kind,
+                            boolean virtual, boolean autoPopulate, String strategy, List<ResourceLocation> childEntries,
+                            StructureData structureData, List<EntryVariantData> visualVariants, VirtualData virtualData,
+                            EntryUnlockData unlockData, ResourceLocation targetEntityType,
+                            net.minecraft.nbt.CompoundTag nbtPredicate
+                    )) {
+                        if (inheritUnlock != null && !EntryUnlockData.DEFAULT.equals(inheritUnlock) &&
+                                (unlockData == null || EntryUnlockData.DEFAULT.equals(unlockData))) {
+                            obj = new GuideEntry(
+                                    id, displayId, icon, kind,
+                                    virtual, autoPopulate, strategy,
+                                    childEntries, structureData, visualVariants,
+                                    virtualData, inheritUnlock, targetEntityType, nbtPredicate
+                            );
+                        }
+                    }
                     String key = AutoPopulateRegistry.getEntryKey(obj);
                     if (!key.isEmpty() && !addedKeys.contains(key)) {
                         foundEntries.add(obj);

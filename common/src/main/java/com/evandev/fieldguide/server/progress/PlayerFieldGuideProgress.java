@@ -2,6 +2,7 @@ package com.evandev.fieldguide.server.progress;
 
 import com.evandev.fieldguide.Constants;
 import com.evandev.fieldguide.api.EntryUnlockData;
+import com.evandev.fieldguide.config.ServerConfig;
 import com.evandev.fieldguide.entry.EntryResolver;
 import com.evandev.fieldguide.network.ProgressUpdatePacket;
 import com.evandev.fieldguide.platform.Services;
@@ -78,6 +79,7 @@ public class PlayerFieldGuideProgress {
     }
 
     private void tryUnlockDirect(ServerPlayer player, ResourceLocation entryId, String variantId, EntryUnlockData.UnlockTrigger trigger) {
+        if (trigger == EntryUnlockData.UnlockTrigger.OBTAIN && ServerConfig.get().disableObtainUnlocks) return;
         if (!ServerFieldGuideManager.getInstance().hasEntry(entryId)) return;
 
         if (isUnlocked(entryId)) {
