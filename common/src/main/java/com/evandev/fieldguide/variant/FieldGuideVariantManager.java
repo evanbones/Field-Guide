@@ -13,10 +13,7 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ProblemReporter;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntitySpawnReason;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.animal.axolotl.Axolotl;
 import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.entity.animal.equine.Llama;
@@ -348,6 +345,24 @@ public class FieldGuideVariantManager {
         return Component.literal(name);
     }
 
+    private static void saveWithoutIdSafely(Entity entity, TagValueOutput output) {
+        Leashable.LeashData invalidLeashData = null;
+        if (entity instanceof Leashable leashable) {
+            Leashable.LeashData data = leashable.getLeashData();
+            if (data != null && data.leashHolder == null && data.delayedLeashInfo == null) {
+                invalidLeashData = data;
+                leashable.setLeashData(null);
+            }
+        }
+        try {
+            entity.saveWithoutId(output);
+        } finally {
+            if (invalidLeashData != null) {
+                ((Leashable) entity).setLeashData(invalidLeashData);
+            }
+        }
+    }
+
     private static VariantProvider<Mob> getDatapackProvider(Identifier entityId) {
         List<DatapackVariant> variants = DATAPACK_VARIANTS.get(entityId);
         if (variants == null) return null;
@@ -364,7 +379,7 @@ public class FieldGuideVariantManager {
                 if (def.value() instanceof CompoundTag nbt) {
                     try (ProblemReporter.ScopedCollector reporter = new ProblemReporter.ScopedCollector(Constants.LOG)) {
                         TagValueOutput output = TagValueOutput.createWithContext(reporter, entity.registryAccess());
-                        entity.saveWithoutId(output);
+                        saveWithoutIdSafely(entity, output);
 
                         if (output.buildResult() instanceof CompoundTag current) {
                             current.merge(nbt);
@@ -378,7 +393,7 @@ public class FieldGuideVariantManager {
             public VariantDef getCurrent(Mob entity) {
                 try (ProblemReporter.ScopedCollector reporter = new ProblemReporter.ScopedCollector(Constants.LOG)) {
                     TagValueOutput output = TagValueOutput.createWithContext(reporter, entity.registryAccess());
-                    entity.saveWithoutId(output);
+                    saveWithoutIdSafely(entity, output);
 
                     if (output.buildResult() instanceof CompoundTag entityNbt) {
                         for (DatapackVariant v : variants) {
@@ -427,69 +442,69 @@ public class FieldGuideVariantManager {
         };
     }
 
-    private static VariantProvider<Mob> getReflectionProvider(Mob mob) {  
-        Class<?> clazz = mob.getClass();  
-        while (clazz != null && clazz != Mob.class && clazz != Object.class) {  
-            Method[] methods;  
-            try {  
-                methods = clazz.getDeclaredMethods();  
-            } catch (NoClassDefFoundError | RuntimeException e) {  
-                clazz = clazz.getSuperclass();  
-                continue;  
-            }  
-  
-            for (Method m : methods) {  
-                String name = m.getName();  
-                if (m.getParameterCount() == 0 && (name.startsWith("get") || name.startsWith("is")) &&  
-                        (name.contains("Variant") || name.contains("Variation") || name.contains("Type") || name.contains("Color")) &&  
-                        !name.equals("getCollarColor") && !name.contains("Order") && !name.contains("Mode") && !name.contains("Status") &&  
-                        !name.contains("Behaviour") && !name.contains("Accessibility") && !name.contains("State") &&  
-                        !name.contains("SpawnType")) {  
-  
-                    if (!m.getReturnType().isEnum() || m.getReturnType().getSimpleName().equals("DyeColor")) {  
-                        continue;  
-                    }  
-  
-                    String suffix = name.startsWith("get") ? name.substring(3) : name.substring(2);  
-                    try {  
-                        Method potentialSetter = mob.getClass().getMethod("set" + suffix, m.getReturnType());  
-  
-                        final Method finalGetter = m;  
-                        final Method finalSetter = potentialSetter;  
-  
-                        return new VariantProvider<>() {  
-                            @Override  
-                            public List<VariantDef> getVariants(Mob entity) {  
-                                return Arrays.stream(finalGetter.getReturnType().getEnumConstants())  
-                                        .map(e -> new VariantDef(((Enum<?>) e).name(), e))  
-                                        .toList();  
-                            }  
-  
-                            @Override  
-                            public void apply(Mob entity, VariantDef def) {  
-                                try {  
-                                    finalSetter.invoke(entity, def.value());  
-                                } catch (Exception ignored) {  
-                                }  
-                            }  
-  
-                            @Override  
-                            public VariantDef getCurrent(Mob entity) {  
-                                try {  
-                                    Object val = finalGetter.invoke(entity);  
-                                    if (val instanceof Enum<?> e) return new VariantDef(e.name(), e);  
-                                } catch (Exception ignored) {  
-                                }  
-                                return new VariantDef("default", null);  
-                            }  
-                        };  
-                    } catch (NoSuchMethodException | NoClassDefFoundError | RuntimeException ignored) {  
-                    }  
-                }  
-            }  
-            clazz = clazz.getSuperclass();  
-        }  
-        return null;  
+    private static VariantProvider<Mob> getReflectionProvider(Mob mob) {
+        Class<?> clazz = mob.getClass();
+        while (clazz != null && clazz != Mob.class && clazz != Object.class) {
+            Method[] methods;
+            try {
+                methods = clazz.getDeclaredMethods();
+            } catch (NoClassDefFoundError | RuntimeException e) {
+                clazz = clazz.getSuperclass();
+                continue;
+            }
+
+            for (Method m : methods) {
+                String name = m.getName();
+                if (m.getParameterCount() == 0 && (name.startsWith("get") || name.startsWith("is")) &&
+                        (name.contains("Variant") || name.contains("Variation") || name.contains("Type") || name.contains("Color")) &&
+                        !name.equals("getCollarColor") && !name.contains("Order") && !name.contains("Mode") && !name.contains("Status") &&
+                        !name.contains("Behaviour") && !name.contains("Accessibility") && !name.contains("State") &&
+                        !name.contains("SpawnType")) {
+
+                    if (!m.getReturnType().isEnum() || m.getReturnType().getSimpleName().equals("DyeColor")) {
+                        continue;
+                    }
+
+                    String suffix = name.startsWith("get") ? name.substring(3) : name.substring(2);
+                    try {
+                        Method potentialSetter = mob.getClass().getMethod("set" + suffix, m.getReturnType());
+
+                        final Method finalGetter = m;
+                        final Method finalSetter = potentialSetter;
+
+                        return new VariantProvider<>() {
+                            @Override
+                            public List<VariantDef> getVariants(Mob entity) {
+                                return Arrays.stream(finalGetter.getReturnType().getEnumConstants())
+                                        .map(e -> new VariantDef(((Enum<?>) e).name(), e))
+                                        .toList();
+                            }
+
+                            @Override
+                            public void apply(Mob entity, VariantDef def) {
+                                try {
+                                    finalSetter.invoke(entity, def.value());
+                                } catch (Exception ignored) {
+                                }
+                            }
+
+                            @Override
+                            public VariantDef getCurrent(Mob entity) {
+                                try {
+                                    Object val = finalGetter.invoke(entity);
+                                    if (val instanceof Enum<?> e) return new VariantDef(e.name(), e);
+                                } catch (Exception ignored) {
+                                }
+                                return new VariantDef("default", null);
+                            }
+                        };
+                    } catch (NoSuchMethodException | NoClassDefFoundError | RuntimeException ignored) {
+                    }
+                }
+            }
+            clazz = clazz.getSuperclass();
+        }
+        return null;
     }
 
     private static class CompositeVariantProvider<T extends Mob> implements VariantProvider<T> {
