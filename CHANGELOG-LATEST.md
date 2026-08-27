@@ -1,3 +1,3 @@
 ### Fixed
 
-- Fixed issues with GeckoLib render (thanks, @cassiancc!)
+- Fixed crash when unleashing mobs.
