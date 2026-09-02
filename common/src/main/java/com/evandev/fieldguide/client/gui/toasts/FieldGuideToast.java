@@ -8,6 +8,7 @@ import com.evandev.fieldguide.client.ClientFieldGuideManager;
 import com.evandev.fieldguide.client.gui.util.EntryRenderHelper;
 import com.evandev.fieldguide.config.ClientConfig;
 import com.evandev.fieldguide.entry.EntryResolver;
+import com.evandev.fieldguide.util.DummyEntities;
 import com.evandev.fieldguide.variant.FieldGuideVariantManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -67,7 +68,7 @@ public class FieldGuideToast implements Toast {
 
         if (!entityInitialized) {
             if (coreEntry instanceof EntityType<?> type) {
-                cachedEntity = type.create(Objects.requireNonNull(Minecraft.getInstance().level), EntitySpawnReason.TRIGGERED);
+                cachedEntity = DummyEntities.create(type, Objects.requireNonNull(Minecraft.getInstance().level), EntitySpawnReason.TRIGGERED);
 
                 if (variantId != null && cachedEntity instanceof Mob mob) {
                     VariantProvider<Mob> provider = FieldGuideVariantManager.getProvider(mob);

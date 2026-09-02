@@ -19,6 +19,7 @@ import com.evandev.fieldguide.config.ClientConfig;
 import com.evandev.fieldguide.config.ServerConfig;
 import com.evandev.fieldguide.entry.EntryResolver;
 import com.evandev.fieldguide.platform.Services;
+import com.evandev.fieldguide.util.DummyEntities;
 import com.evandev.fieldguide.variant.FieldGuideVariantManager;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -746,7 +747,7 @@ public class FieldGuideCategoryScreen extends BookScreen {
             Object coreEntry = EntryResolver.resolveCoreEntry(entry);
             if (coreEntry instanceof EntityType<?> type) {
                 try {
-                    entity = type.create(this.minecraft.level, EntitySpawnReason.LOAD);
+                    entity = DummyEntities.create(type, this.minecraft.level, EntitySpawnReason.LOAD);
                     if (Services.PLATFORM.isModLoaded("mixed_litter")) {
                         Services.PLATFORM.applyMixedLitterCompat(entity);
                     }

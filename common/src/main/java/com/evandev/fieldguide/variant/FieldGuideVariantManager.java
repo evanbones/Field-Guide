@@ -6,6 +6,7 @@ import com.evandev.fieldguide.api.variant.VariantDef;
 import com.evandev.fieldguide.api.variant.VariantProvider;
 import com.evandev.fieldguide.config.ServerConfig;
 import com.evandev.fieldguide.platform.Services;
+import com.evandev.fieldguide.util.DummyEntities;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -310,7 +311,7 @@ public class FieldGuideVariantManager {
 
         if (level != null) {
             try {
-                Entity entity = type.create(level, EntitySpawnReason.COMMAND);
+                Entity entity = DummyEntities.create(type, level, EntitySpawnReason.COMMAND);
                 if (entity instanceof Mob mob) {
                     VariantProvider<Mob> provider = getProvider(entity);
                     String cacheKey = provider != null ? provider.getCacheKey(mob) : BuiltInRegistries.ENTITY_TYPE.getKey(type).toString();
