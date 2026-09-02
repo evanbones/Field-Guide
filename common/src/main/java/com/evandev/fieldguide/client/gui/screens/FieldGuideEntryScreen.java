@@ -30,6 +30,7 @@ import com.evandev.fieldguide.entry.EntryResolver;
 import com.evandev.fieldguide.network.CopyPagePacket;
 import com.evandev.fieldguide.network.UpdateEntryDataPacket;
 import com.evandev.fieldguide.platform.Services;
+import com.evandev.fieldguide.util.DummyEntities;
 import com.evandev.fieldguide.variant.FieldGuideVariantManager;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -294,7 +295,7 @@ public class FieldGuideEntryScreen extends BookScreen {
 
         if (renderEntry instanceof EntityType<?> type) {
             try {
-                this.renderedEntity = type.create(this.minecraft.level, EntitySpawnReason.LOAD);
+                this.renderedEntity = DummyEntities.create(type, this.minecraft.level, EntitySpawnReason.LOAD);
             } catch (Exception ignored) {
             }
         }

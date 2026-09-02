@@ -1,3 +1,3 @@
 ### Fixed
 
-- Fixed crash when unleashing mobs.
+- Fixed random crash when scanning entities.
