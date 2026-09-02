@@ -1,5 +1,6 @@
 package com.evandev.fieldguide.client.manager;
 
+import com.evandev.fieldguide.Constants;
 import com.evandev.fieldguide.api.EntryVariantData;
 import com.evandev.fieldguide.api.GuideEntry;
 import com.evandev.fieldguide.client.progress.ProgressManager;
@@ -8,7 +9,6 @@ import com.evandev.fieldguide.config.ServerConfig;
 import com.evandev.fieldguide.entry.EntryResolver;
 import com.evandev.fieldguide.platform.Services;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
@@ -17,6 +17,7 @@ import net.minecraft.world.level.block.Block;
 
 public class ClientTextManager {
     private static final ClientTextManager INSTANCE = new ClientTextManager();
+    private static boolean itemDescriptionsAvailable = true;
 
     private ClientTextManager() {
     }
@@ -131,11 +132,15 @@ public class ClientTextManager {
 
         Object coreEntry = EntryResolver.resolveCoreEntry(entry);
 
-        // Item Descriptions Compat
-        if (Services.PLATFORM.isModLoaded("item_descriptions")) {
-            String compatKey = ItemDescriptionsCompat.tryGetDescriptionKey(coreEntry);
-            if (compatKey != null && I18n.exists(compatKey)) {
-                return I18n.get(compatKey);
+        if (itemDescriptionsAvailable && Services.PLATFORM.isModLoaded("item_descriptions")) {
+            try {
+                String compatKey = ItemDescriptionsCompat.tryGetDescriptionKey(coreEntry);
+                if (compatKey != null && I18n.exists(compatKey)) {
+                    return I18n.get(compatKey);
+                }
+            } catch (LinkageError e) {
+                itemDescriptionsAvailable = false;
+                Constants.LOG.warn("Disabling Item Descriptions compat: incompatible version", e);
             }
         }
 

@@ -36,7 +36,9 @@
         "java": ">=21"
     },
     "suggests": {
-        "cloth-config": "*"
+        "cloth-config": "*",
+        "item_descriptions": "*",
+        "immersiveoverlays": "*"
     },
     "breaks": {
         "entity_texture_features": "<7.2",

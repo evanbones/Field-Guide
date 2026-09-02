@@ -45,3 +45,17 @@ type = "optional"
 versionRange = "[3.3,)"
 ordering = "NONE"
 side = "CLIENT"
+
+[[dependencies.${ mod_id }]]
+modId = "item_descriptions"
+type = "optional"
+versionRange = "[2.8.0,)"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies.${ mod_id }]]
+modId = "immersiveoverlays"
+type = "optional"
+versionRange = "[1.7.5,)"
+ordering = "NONE"
+side = "CLIENT"

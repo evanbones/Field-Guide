@@ -152,21 +152,29 @@ public class PlayerFieldGuideProgress {
         } catch (Exception ignored) {
         }
 
-        for (String id : unlockedEntries) {
+        Set<String> candidates = new LinkedHashSet<>(unlockedEntries);
+        candidates.addAll(customNames.keySet());
+        candidates.addAll(customDescriptions.keySet());
+        candidates.addAll(entryPhotographs.keySet());
+        candidates.addAll(selectedVariants.keySet());
+
+        for (String id : candidates) {
             if (EntryResolver.matchesStoredEntry(id, entryId, canonicalLoc, idLoc)) {
                 toRemove.add(id);
             }
         }
 
         for (String id : toRemove) {
-            if (unlockedEntries.remove(id)) {
+            boolean wasUnlocked = unlockedEntries.remove(id);
+            boolean hadData = entryPhotographs.remove(id) != null
+                    | customNames.remove(id) != null
+                    | customDescriptions.remove(id) != null
+                    | selectedVariants.remove(id) != null;
+
+            if (wasUnlocked || hadData) {
                 seenEntries.remove(id);
                 discoveryTimes.remove(id);
                 discoveryGameTimes.remove(id);
-                entryPhotographs.remove(id);
-                customNames.remove(id);
-                customDescriptions.remove(id);
-                selectedVariants.remove(id);
                 pendingRevokes.add(id);
                 pendingUnlocks.remove(id);
                 removed = true;
@@ -465,6 +473,8 @@ public class PlayerFieldGuideProgress {
             }
         }
 
+        sendOrphanedEntryData(player, allUnlocked, chunkSize);
+
         Services.NETWORK.sendToPlayer(
                 new ProgressUpdatePacket.Builder()
                         .silent(true)
@@ -472,6 +482,53 @@ public class PlayerFieldGuideProgress {
                         .journalPages(new ArrayList<>(journalPages))
                         .build(),
                 player);
+    }
+
+    private void sendOrphanedEntryData(ServerPlayer player, List<String> alreadySent, int chunkSize) {
+        Set<String> sent = new HashSet<>(alreadySent);
+        Set<String> remaining = new LinkedHashSet<>();
+        for (Map<String, String> map : List.of(customNames, customDescriptions, entryPhotographs, selectedVariants)) {
+            for (String id : map.keySet()) {
+                if (!sent.contains(id)) remaining.add(id);
+            }
+        }
+        if (remaining.isEmpty()) return;
+
+        List<String> ids = new ArrayList<>(remaining);
+        for (int i = 0; i < ids.size(); i += chunkSize) {
+            List<String> chunk = chunkAt(ids, i, chunkSize);
+
+            Map<String, String> names = new HashMap<>();
+            Map<String, String> descs = new HashMap<>();
+            Map<String, String> photos = new HashMap<>();
+            Map<String, String> variants = new HashMap<>();
+            for (String id : chunk) {
+                if (customNames.containsKey(id)) names.put(id, customNames.get(id));
+                if (customDescriptions.containsKey(id)) descs.put(id, customDescriptions.get(id));
+                if (entryPhotographs.containsKey(id)) photos.put(id, entryPhotographs.get(id));
+                if (selectedVariants.containsKey(id)) variants.put(id, selectedVariants.get(id));
+            }
+
+            Services.NETWORK.sendToPlayer(
+                    new ProgressUpdatePacket.Builder()
+                            .silent(true)
+                            .customNames(names)
+                            .customDescriptions(descs)
+                            .selectedVariants(variants)
+                            .build(),
+                    player
+            );
+
+            if (!photos.isEmpty()) {
+                Services.NETWORK.sendToPlayer(
+                        new ProgressUpdatePacket.Builder()
+                                .silent(true)
+                                .entryPhotographs(photos)
+                                .build(),
+                        player
+                );
+            }
+        }
     }
 
     private void sendDelta(ServerPlayer player) {

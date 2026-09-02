@@ -3,6 +3,7 @@ package com.evandev.fieldguide.network;
 import com.evandev.fieldguide.Constants;
 import com.evandev.fieldguide.FieldGuideLimits;
 import com.evandev.fieldguide.compat.exposure.ExposureCompat;
+import com.evandev.fieldguide.config.ServerConfig;
 import com.evandev.fieldguide.platform.Services;
 import com.evandev.fieldguide.server.progress.FieldGuideProgressManager;
 import com.evandev.fieldguide.server.progress.PlayerFieldGuideProgress;
@@ -93,11 +94,18 @@ public class UpdateEntryDataPacket implements CustomPacketPayload {
         if (progress == null) return;
 
         String id = entryId.toString();
-        if (variantId != null && !variantId.isEmpty()) {
+        boolean hasVariant = variantId != null && !variantId.isEmpty();
+        if (hasVariant) {
             id += "#" + variantId;
         }
 
-        if (!progress.isUnlocked(id)) return;
+        if (hasVariant) {
+            boolean allowed = progress.isUnlocked(entryId, variantId)
+                    || (ServerConfig.get().unlockAllVariants && progress.isUnlocked(entryId));
+            if (!allowed) return;
+        } else if (!progress.isUnlocked(entryId)) {
+            return;
+        }
 
         data.apply(id, progress, player);
     }
@@ -107,7 +115,7 @@ public class UpdateEntryDataPacket implements CustomPacketPayload {
         SET_DESCRIPTION,
         SET_PHOTOGRAPH,
         REMOVE_PHOTOGRAPH,
-        SET_SELECTED_VARIANT;
+        SET_SELECTED_VARIANT
     }
 
     private interface Data {

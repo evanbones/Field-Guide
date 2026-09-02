@@ -31,6 +31,17 @@ public class FieldGuideSearchBox extends EditBox {
     }
 
     @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (button == 1 && this.isActive() && this.isMouseOver(mouseX, mouseY)) {
+            this.setValue("");
+            this.setFocused(true);
+            return true;
+        }
+
+        return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    @Override
     public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         int boxX = this.getX() - 6;
         int boxY = this.getY() - 8;

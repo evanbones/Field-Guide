@@ -126,6 +126,8 @@ public class ProgressManager {
             discoveryGameTimes.remove(id);
             entryPhotographs.remove(id);
             selectedVariants.remove(id);
+            customNames.remove(id);
+            customDescriptions.remove(id);
         }
 
         Map<String, String> toastsToShow = new HashMap<>();
