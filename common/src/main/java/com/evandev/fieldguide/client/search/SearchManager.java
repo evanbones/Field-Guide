@@ -239,10 +239,15 @@ public class SearchManager {
             if (id == null) continue;
 
             String name = ClientFieldGuideManager.getDefaultName(entry).toLowerCase(Locale.ROOT);
+            ResourceLocation rawId = EntryResolver.getRawId(id);
+            String rawIdStr = rawId != null ? rawId.toString().toLowerCase(Locale.ROOT) : "";
+            String rawPath = rawId != null ? rawId.getPath().toLowerCase(Locale.ROOT) : "";
+            String fullIdStr = id.toString().toLowerCase(Locale.ROOT);
+            String path = id.getPath().toLowerCase(Locale.ROOT);
 
             boolean match = exactMatch ?
-                    (name.equals(query) || id.getPath().equals(query)) :
-                    (name.contains(query) || id.getPath().contains(query));
+                    (name.equals(query) || path.equals(query) || rawPath.equals(query) || fullIdStr.equals(query) || rawIdStr.equals(query)) :
+                    (name.contains(query) || path.contains(query) || rawPath.contains(query) || fullIdStr.contains(query) || rawIdStr.contains(query));
 
             if (match) results.add(entry);
         }

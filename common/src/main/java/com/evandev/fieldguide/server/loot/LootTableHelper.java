@@ -24,9 +24,7 @@ import java.util.*;
 public class LootTableHelper {
 
     private static void resolveAndAdd(ResourceLocation id, Set<Object> uniqueEntries) {
-        BuiltInRegistries.BLOCK.getOptional(id).ifPresent(uniqueEntries::add);
-        BuiltInRegistries.ITEM.getOptional(id).ifPresent(uniqueEntries::add);
-        BuiltInRegistries.ENTITY_TYPE.getOptional(id).ifPresent(uniqueEntries::add);
+        uniqueEntries.addAll(EntryResolver.resolveAllRegistryObjects(id));
     }
 
     public static Map<ResourceLocation, List<ItemStack>> generateLootMap(ServerLevel level) {

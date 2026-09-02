@@ -31,3 +31,31 @@ mandatory = false
 versionRange = "[1.9.0,)"
 ordering = "NONE"
 side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "entity_texture_features"
+mandatory = false
+versionRange = "[7.2,)"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies.${mod_id}]]
+modId = "entity_model_features"
+mandatory = false
+versionRange = "[3.3,)"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies.${mod_id}]]
+modId = "item_descriptions"
+mandatory = false
+versionRange = "[2.5.4,)"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies.${mod_id}]]
+modId = "immersiveoverlays"
+mandatory = false
+versionRange = "[1.8.3,)"
+ordering = "NONE"
+side = "CLIENT"

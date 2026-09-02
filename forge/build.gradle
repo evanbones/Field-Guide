@@ -49,7 +49,8 @@ dependencies {
     modImplementation "maven.modrinth:item-descriptions:${item_descriptions_version}-forge"
 
     // EMI
-    modImplementation "dev.emi:emi-forge:${emi_version}"
+    modCompileOnly "dev.emi:emi-forge:${emi_version}"
+    modRuntimeOnly "dev.emi:emi-forge:${emi_version}"
 
     // Cloth Config
     modImplementation "me.shedaniel.cloth:cloth-config-forge:${cloth_config_version}"
@@ -65,7 +66,7 @@ dependencies {
     modCompileOnly "maven.modrinth:entity-model-features:${emf_version}-forge-1.20.1"
 
     // Reliable Remover
-    modCompileOnly "maven.modrinth:reliable-remover:${reliable_remover_version}-forge-1.20.1"
+    modCompileOnly "maven.modrinth:reliable-remover:${reliable_remover_version}-forge"
 
     // Exposure
     // This crashes in dev for some reason

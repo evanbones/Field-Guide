@@ -185,14 +185,17 @@ public class IconCacheManager {
         poseStack.translate(RENDER_SIZE / 2.0f, RENDER_SIZE / 2.0f, 1000.0f);
         RenderSystem.applyModelViewMatrix();
 
-        if (Services.PLATFORM.isModLoaded("entity_model_features")) {
+        boolean emfLoaded = Services.PLATFORM.isModLoaded("entity_model_features");
+        if (emfLoaded) {
             EmfCompat.setInGui(true);
         }
 
-        renderAction.run();
-
-        if (Services.PLATFORM.isModLoaded("entity_model_features")) {
-            EmfCompat.setInGui(false);
+        try {
+            renderAction.run();
+        } finally {
+            if (emfLoaded) {
+                EmfCompat.setInGui(false);
+            }
         }
 
         poseStack.popPose();

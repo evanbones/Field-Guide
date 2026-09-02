@@ -83,14 +83,18 @@ public class EntryResolutionHelper {
         List<Object> resolved = new ArrayList<>(foundEntries);
         resolved.removeIf(e -> {
             ResourceLocation id = getEntryId(e);
+            ResourceLocation rawId = id != null ? EntryResolver.getRawId(id) : null;
+            ResourceLocation targetId = null;
             if (id != null && redirects.containsKey(id)) {
-                ResourceLocation targetId = redirects.get(id);
-                if (targetId != null) {
-                    ResourceLocation rawTargetId = EntryResolver.getRawId(targetId);
-                    return BuiltInRegistries.ITEM.containsKey(rawTargetId) ||
-                            BuiltInRegistries.BLOCK.containsKey(rawTargetId) ||
-                            BuiltInRegistries.ENTITY_TYPE.containsKey(rawTargetId);
-                }
+                targetId = redirects.get(id);
+            } else if (rawId != null && redirects.containsKey(rawId)) {
+                targetId = redirects.get(rawId);
+            }
+            if (targetId != null) {
+                ResourceLocation rawTargetId = EntryResolver.getRawId(targetId);
+                return BuiltInRegistries.ITEM.containsKey(rawTargetId) ||
+                        BuiltInRegistries.BLOCK.containsKey(rawTargetId) ||
+                        BuiltInRegistries.ENTITY_TYPE.containsKey(rawTargetId);
             }
             return false;
         });
@@ -99,10 +103,19 @@ public class EntryResolutionHelper {
 
     private static CompositeDefinition findCompositeFor(ResourceLocation id, List<CompositeDefinition> composites) {
         if (id == null) return null;
+        ResourceLocation rawId = EntryResolver.getRawId(id);
         for (CompositeDefinition def : composites) {
             ResourceLocation mainId = def.displayId() != null ? def.displayId() : def.id();
-            if (id.equals(mainId) || (def.components() != null && def.components().contains(id))) {
+            ResourceLocation rawMainId = EntryResolver.getRawId(mainId);
+            if (id.equals(mainId) || (rawId != null && rawId.equals(rawMainId))) {
                 return def;
+            }
+            if (def.components() != null) {
+                for (ResourceLocation comp : def.components()) {
+                    if (id.equals(comp) || (rawId != null && rawId.equals(EntryResolver.getRawId(comp)))) {
+                        return def;
+                    }
+                }
             }
         }
         return null;
@@ -165,6 +178,14 @@ public class EntryResolutionHelper {
             case "block" -> {
                 return lookupBlock(finalId, categoryId);
             }
+        }
+
+        if (id.getPath().startsWith("item/")) {
+            return lookupItem(finalId, categoryId);
+        } else if (id.getPath().startsWith("entity/")) {
+            return lookupEntity(finalId, categoryId);
+        } else if (id.getPath().startsWith("block/")) {
+            return lookupBlock(finalId, categoryId);
         }
 
         String effectiveStrategy = getEffectiveStrategy(categoryId, strategyHint);

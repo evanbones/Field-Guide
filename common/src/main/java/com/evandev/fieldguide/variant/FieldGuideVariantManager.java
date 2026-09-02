@@ -254,6 +254,16 @@ public class FieldGuideVariantManager {
         return List.of();
     }
 
+    public static String getTrackedVariantId(Mob mob) {
+        VariantProvider<Mob> provider = getProvider(mob);
+        if (provider == null) return "";
+
+        VariantDef current = provider.getCurrent(mob);
+        if (current == null) return "";
+
+        return getVariants(mob).stream().anyMatch(v -> v.id().equals(current.id())) ? current.id() : "";
+    }
+
     public static List<VariantDef> getVariants(EntityType<?> type, Level level) {
         if (ServerConfig.get().disableVariants) return List.of();
 

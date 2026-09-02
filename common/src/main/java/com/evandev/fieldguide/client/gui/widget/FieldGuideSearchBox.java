@@ -31,6 +31,17 @@ public class FieldGuideSearchBox extends EditBox {
     }
 
     @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (button == 1 && this.isActive() && this.isMouseOver(mouseX, mouseY)) {
+            this.setValue("");
+            this.setFocused(true);
+            return true;
+        }
+
+        return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    @Override
     public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         int boxX = this.getX() - 2;
         int boxY = this.getY() - 2;
@@ -43,7 +54,7 @@ public class FieldGuideSearchBox extends EditBox {
 
         super.renderWidget(guiGraphics, mouseX, mouseY, partialTick);
 
-        if (this.getValue().isEmpty()) {
+        if (this.getValue().isEmpty() && !this.isFocused()) {
             guiGraphics.drawString(Minecraft.getInstance().font, Component.translatable("gui.fieldguide.search"), this.getX() + 4, this.getY() + 6, ClientConfig.get().getTextMutedColorInt(), false);
         }
 

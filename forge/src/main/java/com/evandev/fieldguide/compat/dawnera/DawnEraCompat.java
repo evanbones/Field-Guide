@@ -1,4 +1,4 @@
-package com.evandev.fieldguide.forge.compat;
+package com.evandev.fieldguide.compat.dawnera;
 
 import com.evandev.fieldguide.mixin.accessor.EntityRenderDispatcherAccessor;
 import com.mojang.blaze3d.platform.Lighting;

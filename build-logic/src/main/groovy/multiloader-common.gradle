@@ -13,6 +13,11 @@ java {
 
 repositories {
     mavenCentral()
+    maven {
+        name = "NeoForge"
+        url = 'https://maven.neoforged.net/releases'
+    }
+
     exclusiveContent {
         forRepository {
             maven {
@@ -22,23 +27,22 @@ repositories {
         }
         filter { includeGroupAndSubgroups('org.spongepowered') }
     }
+
     exclusiveContent {
-        forRepositories(
-                maven {
-                    name = 'ParchmentMC'
-                    url = 'https://maven.parchmentmc.org/'
-                },
-                maven {
-                    name = "NeoForge"
-                    url = 'https://maven.neoforged.net/releases'
-                }
-        )
+        forRepository {
+            maven {
+                name = 'ParchmentMC'
+                url = 'https://maven.parchmentmc.org/'
+            }
+        }
         filter { includeGroup('org.parchmentmc.data') }
     }
+
     maven {
         name = 'BlameJared'
         url = 'https://maven.blamejared.com'
     }
+
     exclusiveContent {
         forRepository {
             maven {
@@ -50,6 +54,7 @@ repositories {
             includeGroup "maven.modrinth"
         }
     }
+
     exclusiveContent {
         forRepository {
             maven {
@@ -60,18 +65,31 @@ repositories {
             includeGroup "curse.maven"
         }
     }
-    maven {
-        name = "TerraformersMC"
-        url = "https://maven.terraformersmc.com/"
-    }
+
     maven {
         name = "ClothConfig"
         url "https://maven.shedaniel.me/"
     }
-    maven {
-        name = "Sleeping Town"
-        url = "https://repo.sleeping.town/"
+
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "Sleeping Town"
+                url = "https://repo.sleeping.town/"
+            }
+        }
+        filter {
+            includeGroup "folk.sisby"
+            includeGroup "emi.dev"
+            includeGroup "dev.emi"
+        }
     }
+
+    maven {
+        name = "Terraformers"
+        url = "https://maven.terraformersmc.com/"
+    }
+
     maven { url = "https://maven.impactdev.net/repository/development/" }
 }
 

@@ -22,6 +22,7 @@ public class ServerConfig {
     private static ServerConfig SYNCED_INSTANCE;
 
     public boolean disableScanning = false;
+    public boolean disableObtainUnlocks = false;
     public boolean disableLootDisplay = false;
     public boolean disableBiomeDisplay = false;
     public boolean disableEditingDescriptions = false;
@@ -45,6 +46,7 @@ public class ServerConfig {
     public boolean hideUndiscoveredFromSearch = false;
 
     public double scanSpeed = 1.0D;
+    public double minScanHitboxSize = 1.0D;
     public boolean grantXpOnScan = true;
     public int xpAmountOnScan = 5;
 

@@ -46,6 +46,9 @@
   "option.fieldguide.disable_scanning": "Disable Scanning",
   "option.fieldguide.disable_scanning.tooltip": "If enabled, you will no longer be able to scan entries with spyglasses.",
 
+  "option.fieldguide.disable_obtain_unlocks": "Disable Obtain Unlocks",
+  "option.fieldguide.disable_obtain_unlocks.tooltip": "If enabled, picking up or possessing items will not unlock their Field Guide entries.",
+
   "option.fieldguide.scan_speed": "Scanning Speed",
   "option.fieldguide.scan_speed.tooltip": "The time in seconds it takes to scan an entry.",
 
@@ -66,6 +69,9 @@
 
   "option.fieldguide.show_scan_icon": "Show Scanning Icon",
   "option.fieldguide.show_scan_icon.tooltip": "Toggles the visibility of the scanning icon near the crosshair.",
+
+  "option.fieldguide.min_scan_hitbox_size": "Minimum Scan Hitbox Size",
+  "option.fieldguide.min_scan_hitbox_size.tooltip": "Pads small entity hitboxes up to this size (in blocks) when scanning, making fast or tiny mobs easier to hit. Does not shrink hitboxes that are already larger than this.",
 
   "option.fieldguide.spyglass_scan_distance": "Spyglass Scan Distance",
   "option.fieldguide.spyglass_scan_distance.tooltip": "The maximum distance from which you can scan an entry while using a Spyglass.",

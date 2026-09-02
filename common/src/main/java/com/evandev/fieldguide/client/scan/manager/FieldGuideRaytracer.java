@@ -10,6 +10,7 @@ import com.evandev.fieldguide.compat.cobblemon.FieldGuideCobblemonCompat;
 import com.evandev.fieldguide.config.ServerConfig;
 import com.evandev.fieldguide.entry.EntryResolver;
 import com.evandev.fieldguide.platform.Services;
+import com.evandev.fieldguide.util.ScanRayTraceUtil;
 import com.evandev.fieldguide.variant.FieldGuideVariantManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -22,7 +23,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.boss.EnderDragonPart;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -48,7 +48,7 @@ public class FieldGuideRaytracer {
         Vec3 endPos = eyePos.add(viewVec.scale(range));
 
         AABB searchBox = minecraft.player.getBoundingBox().expandTowards(viewVec.scale(range)).inflate(1.0D);
-        EntityHitResult entityHit = ProjectileUtil.getEntityHitResult(
+        EntityHitResult entityHit = ScanRayTraceUtil.getScanEntityHitResult(
                 minecraft.player, eyePos, endPos, searchBox,
                 (entity) -> !entity.isSpectator() && entity.isPickable(),
                 range * range
@@ -89,13 +89,8 @@ public class FieldGuideRaytracer {
             } else if (Services.PLATFORM.isModLoaded("cobblemon") && FieldGuideCobblemonCompat.isPokemon(hitEntity)) {
                 actualTargetKey = FieldGuideCobblemonCompat.getPokemonEntryId(hitEntity);
             } else if (redirectId != null) {
-                ResourceLocation rawRedirectId = EntryResolver.getRawId(redirectId);
-                Optional<EntityType<?>> opt = BuiltInRegistries.ENTITY_TYPE.getOptional(rawRedirectId);
-                if (opt.isPresent()) actualTargetKey = opt.get();
-                else {
-                    Optional<Block> optBlock = BuiltInRegistries.BLOCK.getOptional(rawRedirectId);
-                    if (optBlock.isPresent()) actualTargetKey = optBlock.get();
-                }
+                Object redirected = EntryResolver.resolveRegistryObject(redirectId, EntryResolver.RegistryType.ENTITY, EntryResolver.RegistryType.BLOCK);
+                if (redirected != null) actualTargetKey = redirected;
             }
 
             entryForTarget = getContextAwareEntry(actualTargetKey, minecraft, hitEntity.blockPosition());
@@ -134,13 +129,10 @@ public class FieldGuideRaytracer {
 
             if (entryForTarget != null && isScannable && !requiresAction) {
                 boolean needsScan = !ProgressManager.getInstance().isUnlocked(entryForTarget);
-                if (hitEntity instanceof Mob mob) {
-                    var provider = FieldGuideVariantManager.getProvider(mob);
-                    if (provider != null && !ServerConfig.get().unlockAllVariants) {
-                        String variantId = provider.getCurrent(mob).id();
-                        if (!ClientFieldGuideManager.isVariantUnlocked(entryForTarget, variantId)) {
-                            needsScan = true;
-                        }
+                if (hitEntity instanceof Mob mob && !ServerConfig.get().unlockAllVariants) {
+                    String variantId = FieldGuideVariantManager.getTrackedVariantId(mob);
+                    if (!variantId.isEmpty() && !ClientFieldGuideManager.isVariantUnlocked(entryForTarget, variantId)) {
+                        needsScan = true;
                     }
                 }
                 if (needsScan) foundTarget = hitEntity;
@@ -155,13 +147,8 @@ public class FieldGuideRaytracer {
 
                 Object actualTargetKey = block;
                 if (redirectId != null) {
-                    ResourceLocation rawRedirectId = EntryResolver.getRawId(redirectId);
-                    Optional<Block> opt = BuiltInRegistries.BLOCK.getOptional(rawRedirectId);
-                    if (opt.isPresent()) actualTargetKey = opt.get();
-                    else {
-                        Optional<EntityType<?>> optEntity = BuiltInRegistries.ENTITY_TYPE.getOptional(rawRedirectId);
-                        if (optEntity.isPresent()) actualTargetKey = optEntity.get();
-                    }
+                    Object redirected = EntryResolver.resolveRegistryObject(redirectId, EntryResolver.RegistryType.BLOCK, EntryResolver.RegistryType.ENTITY);
+                    if (redirected != null) actualTargetKey = redirected;
                 }
 
                 entryForTarget = getContextAwareEntry(actualTargetKey, minecraft, blockHit.getBlockPos());
@@ -180,13 +167,8 @@ public class FieldGuideRaytracer {
 
                 Object actualTargetKey = block;
                 if (redirectId != null) {
-                    ResourceLocation rawRedirectId = EntryResolver.getRawId(redirectId);
-                    Optional<Block> opt = BuiltInRegistries.BLOCK.getOptional(rawRedirectId);
-                    if (opt.isPresent()) actualTargetKey = opt.get();
-                    else {
-                        Optional<EntityType<?>> optEntity = BuiltInRegistries.ENTITY_TYPE.getOptional(rawRedirectId);
-                        if (optEntity.isPresent()) actualTargetKey = optEntity.get();
-                    }
+                    Object redirected = EntryResolver.resolveRegistryObject(redirectId, EntryResolver.RegistryType.BLOCK, EntryResolver.RegistryType.ENTITY);
+                    if (redirected != null) actualTargetKey = redirected;
                 }
 
                 entryForTarget = getContextAwareEntry(actualTargetKey, minecraft, firstBlockHit.getBlockPos());

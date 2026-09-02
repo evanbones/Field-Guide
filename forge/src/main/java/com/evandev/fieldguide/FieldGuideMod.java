@@ -1,9 +1,8 @@
 package com.evandev.fieldguide;
 
 import com.evandev.fieldguide.api.EntryUnlockData;
-import com.evandev.fieldguide.api.variant.VariantDef;
-import com.evandev.fieldguide.api.variant.VariantProvider;
 import com.evandev.fieldguide.compat.exposure.ExposureForgeEventHandler;
+import com.evandev.fieldguide.entry.EntryResolver;
 import com.evandev.fieldguide.network.*;
 import com.evandev.fieldguide.platform.ForgeNetworkHelper;
 import com.evandev.fieldguide.platform.ForgeRegistryHelper;
@@ -13,7 +12,6 @@ import com.evandev.fieldguide.server.command.FieldGuideCommand;
 import com.evandev.fieldguide.server.progress.FieldGuideProgressManager;
 import com.evandev.fieldguide.server.progress.FieldGuideTriggers;
 import com.evandev.fieldguide.server.progress.PlayerFieldGuideProgress;
-import com.evandev.fieldguide.entry.EntryResolver;
 import com.evandev.fieldguide.variant.FieldGuideVariantManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -25,7 +23,6 @@ import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
@@ -218,13 +215,8 @@ public class FieldGuideMod {
             if (progress != null) {
                 String variantId = null;
                 if (event.getEntity() instanceof Mob mob) {
-                    VariantProvider<Mob> provider = FieldGuideVariantManager.getProvider(mob);
-                    if (provider != null) {
-                        VariantDef current = provider.getCurrent(mob);
-                        if (current != null) {
-                            variantId = current.id();
-                        }
-                    }
+                    String tracked = FieldGuideVariantManager.getTrackedVariantId(mob);
+                    if (!tracked.isEmpty()) variantId = tracked;
                 }
                 progress.tryUnlock(player, entityId, variantId, EntryUnlockData.UnlockTrigger.KILL);
             }

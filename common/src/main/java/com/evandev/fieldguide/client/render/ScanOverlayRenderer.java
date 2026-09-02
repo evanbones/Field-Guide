@@ -433,7 +433,7 @@ public class ScanOverlayRenderer {
         boolean isEtfLoaded = Services.PLATFORM.isModLoaded("entity_texture_features");
 
         if (isEtfLoaded) {
-            EtfCompat.preventRenderLayerTextureModify();
+            EtfCompat.pushPreventRenderLayerTextureModify();
         }
 
         MultiBufferSource depthSource = new ScanBufferSourceWrapper(bufferSource, 1, 1, 1, 1, true);
@@ -456,7 +456,7 @@ public class ScanOverlayRenderer {
         bufferSource.endBatch();
 
         if (isEtfLoaded) {
-            EtfCompat.allowRenderLayerTextureModify();
+            EtfCompat.popRenderLayerTextureModify();
         }
 
         poseStack.popPose();

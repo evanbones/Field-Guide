@@ -40,10 +40,14 @@
     },
     "suggests": {
         "cloth-config": "*",
-        "kubejs": "*"
+        "kubejs": "*",
+        "item_descriptions": "*",
+        "immersiveoverlays": "*"
     },
     "breaks": {
-        "exposure": "<=1.9.0"
+        "exposure": "<=1.9.0",
+        "entity_texture_features": "<7.2",
+        "entity_model_features": "<3.3"
     }
 }
   

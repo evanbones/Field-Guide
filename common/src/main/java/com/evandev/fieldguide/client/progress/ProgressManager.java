@@ -122,6 +122,8 @@ public class ProgressManager {
             discoveryGameTimes.remove(id);
             entryPhotographs.remove(id);
             selectedVariants.remove(id);
+            customNames.remove(id);
+            customDescriptions.remove(id);
         }
 
         Map<String, String> toastsToShow = new HashMap<>();
@@ -191,8 +193,7 @@ public class ProgressManager {
     public boolean isUnlocked(Object entry) {
         ResourceLocation id = ClientFieldGuideManager.getEntryId(entry);
         if (id == null) return false;
-        if (unlockedEntries.contains(id.toString())) return true;
-        return unlockedEntries.contains(EntryResolver.getRawId(id).toString());
+        return EntryResolver.isUnlocked(unlockedEntries, id, null, null);
     }
 
     public boolean isNew(Object entry) {
@@ -200,7 +201,7 @@ public class ProgressManager {
         if (id == null) return false;
         String idStr = id.toString();
         String rawIdStr = EntryResolver.getRawId(id).toString();
-        boolean unlocked = unlockedEntries.contains(idStr) || unlockedEntries.contains(rawIdStr);
+        boolean unlocked = isUnlocked(entry);
         boolean seen = seenEntries.contains(idStr) || seenEntries.contains(rawIdStr);
         return unlocked && !seen;
     }

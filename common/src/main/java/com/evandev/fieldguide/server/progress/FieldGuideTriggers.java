@@ -1,7 +1,9 @@
 package com.evandev.fieldguide.server.progress;
 
 import com.evandev.fieldguide.Constants;
+import com.evandev.fieldguide.entry.EntryResolver;
 import com.evandev.fieldguide.mixin.accessor.CriteriaTriggersAccessor;
+import com.evandev.fieldguide.server.ServerFieldGuideManager;
 import com.google.gson.JsonObject;
 import net.minecraft.advancements.critereon.*;
 import net.minecraft.resources.ResourceLocation;
@@ -142,7 +144,9 @@ public class FieldGuideTriggers {
             }
 
             public boolean matches(ResourceLocation entryId) {
-                return this.entryId == null || this.entryId.equals(entryId);
+                if (this.entryId == null) return true;
+                if (this.entryId.equals(entryId)) return true;
+                return EntryResolver.rawIdsCompatible(this.entryId, entryId);
             }
         }
     }
@@ -183,7 +187,15 @@ public class FieldGuideTriggers {
             }
 
             public boolean matches(ResourceLocation categoryId) {
-                return this.categoryId == null || this.categoryId.equals(categoryId);
+                if (this.categoryId == null) return true;
+                if (this.categoryId.equals(categoryId)) return true;
+
+                if (!"minecraft".equals(this.categoryId.getNamespace()) || !categoryId.getPath().equals(this.categoryId.getPath())) {
+                    return false;
+                }
+                return ServerFieldGuideManager.getInstance().getCategories().keySet().stream()
+                        .filter(id -> id.getPath().equals(this.categoryId.getPath()))
+                        .count() == 1;
             }
         }
     }

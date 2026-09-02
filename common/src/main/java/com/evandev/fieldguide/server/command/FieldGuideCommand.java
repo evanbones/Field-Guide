@@ -167,25 +167,27 @@ public class FieldGuideCommand {
     }
 
     private static int grantVariant(CommandSourceStack source, Collection<ServerPlayer> targets, ResourceLocation entryId, String variantId) {
+        ResourceLocation canonicalId = ServerFieldGuideManager.getInstance().resolveCanonicalEntryId(entryId);
+        ResourceLocation targetEntryId = canonicalId != null ? canonicalId : entryId;
         FieldGuideProgressManager manager = FieldGuideProgressManager.getInstance();
 
         if (variantId.equalsIgnoreCase("all")) {
-            if (Services.PLATFORM.isModLoaded("cobblemon") && entryId.getPath().contains("cobblemon")) {
-                List<String> variants = FieldGuideCobblemonCompat.getVariantIds(entryId);
+            if (Services.PLATFORM.isModLoaded("cobblemon") && targetEntryId.getPath().contains("cobblemon")) {
+                List<String> variants = FieldGuideCobblemonCompat.getVariantIds(targetEntryId);
                 if (!variants.isEmpty()) {
                     for (ServerPlayer player : targets) {
                         PlayerFieldGuideProgress progress = manager.getProgress(player);
                         if (progress != null) {
                             for (String def : variants) {
-                                progress.unlock(player, entryId, def, true);
+                                progress.unlock(player, targetEntryId, def, true);
                             }
                         }
                     }
-                    source.sendSuccess(() -> Component.translatable("commands.fieldguide.grant.variant.success", "all", entryId.toString()), true);
+                    source.sendSuccess(() -> Component.translatable("commands.fieldguide.grant.variant.success", "all", targetEntryId.toString()), true);
                     return targets.size();
                 }
             } else {
-                EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.get(EntryResolver.getRawId(entryId));
+                EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.get(EntryResolver.getRawId(targetEntryId));
                 if (type != BuiltInRegistries.ENTITY_TYPE.get(BuiltInRegistries.ENTITY_TYPE.getDefaultKey())) {
                     List<VariantDef> variants = FieldGuideVariantManager.getVariants(type, source.getLevel());
                     if (!variants.isEmpty()) {
@@ -193,11 +195,11 @@ public class FieldGuideCommand {
                             PlayerFieldGuideProgress progress = manager.getProgress(player);
                             if (progress != null) {
                                 for (VariantDef def : variants) {
-                                    progress.unlock(player, entryId, def.id(), true);
+                                    progress.unlock(player, targetEntryId, def.id(), true);
                                 }
                             }
                         }
-                        source.sendSuccess(() -> Component.translatable("commands.fieldguide.grant.variant.success", "all", entryId.toString()), true);
+                        source.sendSuccess(() -> Component.translatable("commands.fieldguide.grant.variant.success", "all", targetEntryId.toString()), true);
                         return targets.size();
                     }
                 }
@@ -207,33 +209,35 @@ public class FieldGuideCommand {
         for (ServerPlayer player : targets) {
             PlayerFieldGuideProgress progress = manager.getProgress(player);
             if (progress != null) {
-                progress.unlock(player, entryId, variantId, true);
+                progress.unlock(player, targetEntryId, variantId, true);
             }
         }
-        source.sendSuccess(() -> Component.translatable("commands.fieldguide.grant.variant.success", variantId, entryId.toString()), true);
+        source.sendSuccess(() -> Component.translatable("commands.fieldguide.grant.variant.success", variantId, targetEntryId.toString()), true);
         return targets.size();
     }
 
     private static int revokeVariant(CommandSourceStack source, Collection<ServerPlayer> targets, ResourceLocation entryId, String variantId) {
+        ResourceLocation canonicalId = ServerFieldGuideManager.getInstance().resolveCanonicalEntryId(entryId);
+        ResourceLocation targetEntryId = canonicalId != null ? canonicalId : entryId;
         FieldGuideProgressManager manager = FieldGuideProgressManager.getInstance();
 
         if (variantId.equalsIgnoreCase("all")) {
-            if (Services.PLATFORM.isModLoaded("cobblemon") && entryId.getPath().contains("cobblemon")) {
-                List<String> variants = FieldGuideCobblemonCompat.getVariantIds(entryId);
+            if (Services.PLATFORM.isModLoaded("cobblemon") && targetEntryId.getPath().contains("cobblemon")) {
+                List<String> variants = FieldGuideCobblemonCompat.getVariantIds(targetEntryId);
                 if (!variants.isEmpty()) {
                     for (ServerPlayer player : targets) {
                         PlayerFieldGuideProgress progress = manager.getProgress(player);
                         if (progress != null) {
                             for (String def : variants) {
-                                progress.revoke(entryId + "#" + def);
+                                progress.revoke(targetEntryId + "#" + def);
                             }
                         }
                     }
-                    source.sendSuccess(() -> Component.translatable("commands.fieldguide.revoke.variant.success", "all", entryId.toString()), true);
+                    source.sendSuccess(() -> Component.translatable("commands.fieldguide.revoke.variant.success", "all", targetEntryId.toString()), true);
                     return targets.size();
                 }
             } else {
-                EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.get(EntryResolver.getRawId(entryId));
+                EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.get(EntryResolver.getRawId(targetEntryId));
                 if (type != BuiltInRegistries.ENTITY_TYPE.get(BuiltInRegistries.ENTITY_TYPE.getDefaultKey())) {
                     List<VariantDef> variants = FieldGuideVariantManager.getVariants(type, source.getLevel());
                     if (!variants.isEmpty()) {
@@ -241,25 +245,25 @@ public class FieldGuideCommand {
                             PlayerFieldGuideProgress progress = manager.getProgress(player);
                             if (progress != null) {
                                 for (VariantDef def : variants) {
-                                    progress.revoke(entryId.toString() + "#" + def.id());
+                                    progress.revoke(targetEntryId.toString() + "#" + def.id());
                                 }
                             }
                         }
-                        source.sendSuccess(() -> Component.translatable("commands.fieldguide.revoke.variant.success", "all", entryId.toString()), true);
+                        source.sendSuccess(() -> Component.translatable("commands.fieldguide.revoke.variant.success", "all", targetEntryId.toString()), true);
                         return targets.size();
                     }
                 }
             }
         }
 
-        String fullId = entryId.toString() + "#" + variantId;
+        String fullId = targetEntryId.toString() + "#" + variantId;
         for (ServerPlayer player : targets) {
             PlayerFieldGuideProgress progress = manager.getProgress(player);
             if (progress != null) {
                 progress.revoke(fullId);
             }
         }
-        source.sendSuccess(() -> Component.translatable("commands.fieldguide.revoke.variant.success", variantId, entryId.toString()), true);
+        source.sendSuccess(() -> Component.translatable("commands.fieldguide.revoke.variant.success", variantId, targetEntryId.toString()), true);
         return targets.size();
     }
 
@@ -446,15 +450,17 @@ public class FieldGuideCommand {
     }
 
     private static int grantEntry(CommandSourceStack source, Collection<ServerPlayer> targets, ResourceLocation entryId) {
+        ResourceLocation canonicalId = ServerFieldGuideManager.getInstance().resolveCanonicalEntryId(entryId);
+        ResourceLocation targetEntryId = canonicalId != null ? canonicalId : entryId;
         FieldGuideProgressManager manager = FieldGuideProgressManager.getInstance();
         for (ServerPlayer player : targets) {
             PlayerFieldGuideProgress progress = manager.getProgress(player);
             if (progress != null) {
-                progress.unlock(player, entryId, null, true);
-                unlockVariants(player, entryId, source.getLevel());
+                progress.unlock(player, targetEntryId, null, true);
+                unlockVariants(player, targetEntryId, source.getLevel());
             }
         }
-        source.sendSuccess(() -> Component.translatable("commands.fieldguide.grant.entry.success", entryId.toString()), true);
+        source.sendSuccess(() -> Component.translatable("commands.fieldguide.grant.entry.success", targetEntryId.toString()), true);
         return targets.size();
     }
 
@@ -487,15 +493,17 @@ public class FieldGuideCommand {
     }
 
     private static int revokeEntry(CommandSourceStack source, Collection<ServerPlayer> targets, ResourceLocation entryId) {
+        ResourceLocation canonicalId = ServerFieldGuideManager.getInstance().resolveCanonicalEntryId(entryId);
+        ResourceLocation targetEntryId = canonicalId != null ? canonicalId : entryId;
         FieldGuideProgressManager manager = FieldGuideProgressManager.getInstance();
         for (ServerPlayer player : targets) {
             PlayerFieldGuideProgress progress = manager.getProgress(player);
             if (progress != null) {
-                progress.revoke(entryId.toString());
-                revokeVariants(player, entryId, source.getLevel());
+                progress.revoke(targetEntryId.toString());
+                revokeVariants(player, targetEntryId, source.getLevel());
             }
         }
-        source.sendSuccess(() -> Component.translatable("commands.fieldguide.revoke.entry.success", entryId.toString()), true);
+        source.sendSuccess(() -> Component.translatable("commands.fieldguide.revoke.entry.success", targetEntryId.toString()), true);
         return targets.size();
     }
 }

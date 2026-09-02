@@ -79,7 +79,7 @@ public class FieldGuideClient {
         if (ServerConfig.get().requireItemToOpen) {
             boolean hasItem = false;
             for (int i = 0; i < minecraft.player.getInventory().getContainerSize(); i++) {
-                if (minecraft.player.getInventory().getItem(i).getItem() == ModItems.FIELD_GUIDE.get()) {
+                if (ModItems.FIELD_GUIDE != null && minecraft.player.getInventory().getItem(i).getItem() == ModItems.FIELD_GUIDE.get()) {
                     hasItem = true;
                     break;
                 }

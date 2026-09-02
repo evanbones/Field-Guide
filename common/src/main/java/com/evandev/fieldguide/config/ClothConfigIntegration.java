@@ -87,6 +87,12 @@ public class ClothConfigIntegration {
                 .setSaveConsumer(newValue -> serverConfig.disableScanning = newValue)
                 .build());
 
+        general.addEntry(entryBuilder.startBooleanToggle(Component.translatable("option.fieldguide.disable_obtain_unlocks"), serverConfig.disableObtainUnlocks)
+                .setDefaultValue(false)
+                .setTooltip(Component.translatable("option.fieldguide.disable_obtain_unlocks.tooltip"))
+                .setSaveConsumer(newValue -> serverConfig.disableObtainUnlocks = newValue)
+                .build());
+
         general.addEntry(entryBuilder.startBooleanToggle(Component.translatable("option.fieldguide.enable_spyglass_scanning"), serverConfig.enableSpyglassScanning)
                 .setDefaultValue(true)
                 .setTooltip(Component.translatable("option.fieldguide.enable_spyglass_scanning.tooltip"))
@@ -105,6 +111,14 @@ public class ClothConfigIntegration {
                 .setMax(10.0D)
                 .setTooltip(Component.translatable("option.fieldguide.scan_speed.tooltip"))
                 .setSaveConsumer(newValue -> serverConfig.scanSpeed = newValue)
+                .build());
+
+        general.addEntry(entryBuilder.startDoubleField(Component.translatable("option.fieldguide.min_scan_hitbox_size"), serverConfig.minScanHitboxSize)
+                .setDefaultValue(1.0D)
+                .setMin(0.0D)
+                .setMax(20.0D)
+                .setTooltip(Component.translatable("option.fieldguide.min_scan_hitbox_size.tooltip"))
+                .setSaveConsumer(newValue -> serverConfig.minScanHitboxSize = newValue)
                 .build());
 
         general.addEntry(entryBuilder.startDoubleField(Component.translatable("option.fieldguide.spyglass_scan_distance"), serverConfig.spyglassScanDistance)

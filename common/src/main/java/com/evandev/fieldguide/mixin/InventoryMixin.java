@@ -1,6 +1,7 @@
 package com.evandev.fieldguide.mixin;
 
 import com.evandev.fieldguide.api.EntryUnlockData;
+import com.evandev.fieldguide.config.ServerConfig;
 import com.evandev.fieldguide.entry.EntryResolver;
 import com.evandev.fieldguide.server.progress.FieldGuideProgressManager;
 import com.evandev.fieldguide.server.progress.PlayerFieldGuideProgress;
@@ -44,6 +45,8 @@ public abstract class InventoryMixin {
 
     @Unique
     private void fieldguide$tryUnlockItem(ServerPlayer serverPlayer, ItemStack stack) {
+        if (ServerConfig.get().disableObtainUnlocks) return;
+
         PlayerFieldGuideProgress progress = FieldGuideProgressManager.getInstance().getProgress(serverPlayer);
         if (progress == null) return;
 

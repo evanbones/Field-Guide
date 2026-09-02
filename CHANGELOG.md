@@ -5,44 +5,238 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.8.4] - 2026-08-01
+## [1.16.0] - 2026-09-01
+
+### Changed
+
+- Immersive Overlays and Item Descriptions are now optional dependencies.
+    - They're still marked as required on Modrinth and CurseForge so they're automatically downloaded.
+- Right-clicking the search box now clears the search query.
 
 ### Fixed
 
-- Fixed issues with variant-specific image overrides.
+- Fixed issues with custom descriptions not saving with "unlock all variants" enabled.
+
+## [1.15.3] - 2026-09-01
+
+### Changed
+
+- Updated EMF/ETF compatibility.
+
+### Fixed
+
+- Fixed issues with variant textures.
+
+## [1.15.2] - 2026-08-18
+
+### Added
+
+- Added an option to disable `obtain` unlocks entirely.
+- Added the ability to define category-level unlock criteria.
+
+## [1.15.1] - 2026-08-14
+
+### Fixed
+
+- Fixed issues with the Field Guide item scanning config option.
+
+## [1.15.0] - 2026-08-14
+
+### Changed
+
+- Revamped/rewrote KubeJS integration.
+- Backend rewrites for ID handling (may fix some random ID-related bugs).
+
+## [1.14.1] - 2026-08-12
+
+### Fixed
+
+- Updated dependencies (may resolve Item Descriptions crash).
+
+## [1.14.0] - 2026-08-06
+
+### Added
+
+- Added a "Minimum Scan Hitbox Size" config option that pads small entity hitboxes, so tiny mobs are easier to scan.
+
+### Fixed
+
+- Search bar text is now hidden when focused.
+- Fixed scanning No Man's Land Sheep.
+
+## [1.13.6] - 2026-07-30
+
+### Changed
+
+- Improved conditional loading.
+
+## [1.13.5] - 2026-07-30
 
 ### Changed
 
 - Improvements to resource pack override IDs.
 
-## [1.8.3] - 2026-06-15
+## [1.13.4] - 2026-07-29
 
 ### Fixed
 
-- Fixed issues with item/entity model resolving.
-- Item entries no longer show any drops by default.
+- Fixed issues with variant-specific image overrides.
 
-## [1.8.2] - 2026-06-07
-
-### Fixed
-
-- Fixed Axolotl variants.
-
-## [1.8.1] - 2026-06-07
+## [1.13.3] - 2026-07-19
 
 ### Fixed
 
-- Fixed Mooshroom variants.
+- Fixed rendering issues with Flevorium.
 
-## [1.8.0] - 2026-06-06
+### Changed
+
+- Lens items (e.g. the Caverns and Chasms monocle) can now scan while worn in an armor slot, not just while held.
+
+## [1.13.2] - 2026-07-18
+
+### Changed
+
+- Updated API.
+
+## [1.13.1] - 2026-07-01
+
+### Added
+
+- Added `/fieldguide export missing` to export missing descriptions as lang entries.
+
+## [1.13.0] - 2026-06-25
+
+### Added
+
+- Added support for NBT-based entries.
+
+## [1.12.1] - 2026-06-25
+
+### Added
+
+- Fixed automatic variant support for Axolotl, Mooshroom, and Pandas.
+- Loot/biome modifier entries now support `entity:`, `block:`, and `item:` prefixes to disambiguate targets with the
+  same registry name.
 
 ### Fixed
 
-- Fixed `alignment_icon` configuration not working.
-- Added an `autopopulate` strategy for paintings.
-- Added Panda variants.
-- Fixed Fox and Parrot variants in 1.20.
-- Backport various fixes from 1.21.
+- Fixed `alignment_icon` configuration not applying to the entry attribute display.
+- Fixed items that correspond to blocks incorrectly showing block loot tables.
+- Fixed loot modifier `entry` matching failing in edge cases where the entry ID could not be resolved.
+
+## [1.12.0] - 2026-06-24
+
+### Added
+
+- Added new No Man's Land Friend Moon integration (@tazer).
+    - To get started, offer the Field Guide item to the moon (if it's enabled) and
+      the Field Guide will have a new button to replay dialogue for entries.
+
+## [1.11.2] - 2026-06-11
+
+### Added
+
+- Added Spider icon (@bucketBrian).
+
+### Fixed
+
+- Fixed crash with recent Mixed Litter update.
+
+## [1.11.1] - 2026-06-09
+
+### Fixed
+
+- Improved discovery overlay performance.
+- Fixed crash viewing the Friends & Foes Tuff Golem entry.
+
+## [1.11.0] - 2026-06-09
+
+### Added
+
+- Added an optional lens item for up-close scanning (@tazer).
+    - Includes support for the Caverns and Chasms Monocle by default.
+- Nearby scannable objects with now gently pulse with a white overlay (@tazer).
+
+### Fixed
+
+- Fixed Scholar related crash.
+- Fixed crash related to the open guidebook key.
+
+## [1.10.1] - 2026-06-02
+
+### Fixed
+
+- Fixed No Man's Land Fox variants.
+
+## [1.10.0] - 2026-05-31
+
+### Added
+
+- Added support for replacing existing variants.
+- Added support for grouping entities, structures, and items as visual variants.
+    - More info on this is available on the Field Guide wiki.
+
+### Changed
+
+- Entity scan commmands now support the legacy ID format (`minecraft:zombie`) in addition to the prefixed ID format
+  (`entity:minecraft/zombie`).
+
+### Fixed
+
+- Fixed crash with IS&S Necromancers.
+- Fixed scaling not working for entries with composites.
+- Fixed Mixed Litter variants unconditionally applying.
+
+## [1.9.3] - 2026-05-25
+
+### Fixed
+
+- Fixed rendering layer sorting with certain entries.
+
+## [1.9.2] - 2026-05-21
+
+### Fixed
+
+- Fixed crashes when scanning certain modified mobs (When Dungeons Arise, Dungeons and Taverns).
+
+## [1.9.1] - 2026-05-21
+
+### Fixed
+
+- Fixed further issues with Mixed Litter sheep.
+
+## [1.9.0] - 2026-05-20
+
+### Fixed
+
+- Fixed crash with certain Cobblemon variants.
+- Fixed issues with certain Spawn entities.
+- Fixed possible negative index crashes with Scholar integration.
+- Fixed issues loading entity names.
+
+## [1.8.0] - 2026-05-20
+
+### Changed
+
+- Massive reworks to variants and variant handling.
+- Improved No Man's Land and Primal variants.
+
+### Fixed
+
+- Fixed occasional crash when quickly scrolling through variants.
+
+## [1.7.7] - 2026-05-19
+
+### Fixed
+
+- (Hopefully) final hotfix for some Mixed Litter models.
+
+## [1.7.6] - 2026-05-19
+
+### Fixed
+
+- Made Blaze render look less strange.
+- Fixed MORE issues with Mixed Litter models.
 
 ## [1.7.5] - 2026-05-05
 

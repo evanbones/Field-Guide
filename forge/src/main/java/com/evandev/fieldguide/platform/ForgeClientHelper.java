@@ -1,7 +1,7 @@
 package com.evandev.fieldguide.platform;
 
 import com.evandev.fieldguide.client.FieldGuideClient;
-import com.evandev.fieldguide.forge.compat.DawnEraCompat;
+import com.evandev.fieldguide.compat.dawnera.DawnEraCompat;
 import com.evandev.fieldguide.platform.services.IClientHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.MultiBufferSource;
