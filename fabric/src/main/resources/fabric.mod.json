@@ -37,6 +37,10 @@
     },
     "suggests": {
         "cloth-config": "*"
+    },
+    "breaks": {
+        "entity_texture_features": "<7.2",
+        "entity_model_features": "<3.3"
     }
 }
   

@@ -31,3 +31,17 @@ type = "required"
 versionRange = "${minecraft_version_range}"
 ordering = "NONE"
 side = "BOTH"
+
+[[dependencies.${ mod_id }]]
+modId = "entity_texture_features"
+type = "optional"
+versionRange = "[7.2,)"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies.${ mod_id }]]
+modId = "entity_model_features"
+type = "optional"
+versionRange = "[3.3,)"
+ordering = "NONE"
+side = "CLIENT"

@@ -12,6 +12,7 @@ import com.evandev.fieldguide.client.progress.ProgressManager;
 import com.evandev.fieldguide.compat.cobblemon.ClientFieldGuideCobblemonCompat;
 import com.evandev.fieldguide.compat.cobblemon.FieldGuideCobblemonCompat;
 import com.evandev.fieldguide.compat.emf.EmfCompat;
+import com.evandev.fieldguide.compat.etf.EtfCompat;
 import com.evandev.fieldguide.compat.tide.ClientTideCompat;
 import com.evandev.fieldguide.config.ClientConfig;
 import com.evandev.fieldguide.config.ServerConfig;
@@ -311,6 +312,11 @@ public class EntryRenderHelper {
 
         if (Services.PLATFORM.isModLoaded("tide")) {
             ClientTideCompat.applyLavaFishFix(entity);
+        }
+
+        if (entity.blockPosition().equals(BlockPos.ZERO) && Services.PLATFORM.isModLoaded("entity_texture_features")) {
+            ResourceLocation typeId = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
+            EtfCompat.markAsDisplayEntity(entity, typeId.hashCode());
         }
 
         if (Services.PLATFORM.isModLoaded("entity_model_features")) {

@@ -7,12 +7,9 @@ import com.evandev.fieldguide.client.progress.ProgressManager;
 import com.evandev.fieldguide.client.scan.FieldGuideScanner;
 import com.evandev.fieldguide.client.scan.manager.FieldGuideRaytracer;
 import com.evandev.fieldguide.client.scan.manager.FieldGuideScanManager;
-import com.evandev.fieldguide.compat.etf.EtfCompat;
 import com.evandev.fieldguide.config.ClientConfig;
-import com.evandev.fieldguide.platform.Services;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
@@ -42,16 +39,7 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public final class DiscoveryOverlayRenderer {
 
@@ -475,15 +463,12 @@ public final class DiscoveryOverlayRenderer {
 
     private static void drawBlock(Minecraft mc, BlockState state, BlockPos pos, PoseStack poseStack,
                                   MultiBufferSource.BufferSource bufferSource, boolean depth, float r, float g, float b, float a) {
+        MultiBufferSource source = new ScanOverlayRenderer.ScanBufferSourceWrapper(bufferSource, r, g, b, a, depth, false);
+
         if (state.getRenderShape() == RenderShape.MODEL) {
             RenderType type = ItemBlockRenderTypes.getRenderType(state, false);
-            RenderType wrapped = depth ? ModRenderTypes.wrapForDepth(type, false) : ModRenderTypes.wrapForScan(type, false);
-            VertexConsumer consumer = ScanOverlayRenderer.createTintedConsumer(bufferSource.getBuffer(wrapped), bufferSource, r, g, b, a);
-            ScanOverlayRenderer.renderBlockModelAsShell(mc, state, pos, poseStack, consumer, blockFade.keySet());
+            ScanOverlayRenderer.renderBlockModelAsShell(mc, state, pos, poseStack, source.getBuffer(type), blockFade.keySet());
         } else {
-            MultiBufferSource source = requestedType -> ScanOverlayRenderer.createTintedConsumer(
-                    bufferSource.getBuffer(depth ? ModRenderTypes.wrapForDepth(requestedType, false) : ModRenderTypes.wrapForScan(requestedType, false)),
-                    bufferSource, r, g, b, a);
             mc.getBlockRenderer().renderSingleBlock(state, poseStack, source, 15728880, OverlayTexture.pack(0, 10));
         }
     }
@@ -507,12 +492,7 @@ public final class DiscoveryOverlayRenderer {
 
         float yaw = Mth.lerp(partialTick, entity.yRotO, entity.getYRot());
 
-        boolean isEtfLoaded = Services.PLATFORM.isModLoaded("entity_texture_features");
-        if (isEtfLoaded) {
-            EtfCompat.preventRenderLayerTextureModify();
-        }
-
-        MultiBufferSource depthSource = new ScanOverlayRenderer.ScanBufferSourceWrapper(bufferSource, 1.0F, 1.0F, 1.0F, 1.0F, true);
+        MultiBufferSource depthSource = new ScanOverlayRenderer.ScanBufferSourceWrapper(bufferSource, 1.0F, 1.0F, 1.0F, 1.0F, true, true);
         mc.getEntityRenderDispatcher().render(entity, 0.0, 0.0, 0.0, yaw, partialTick, poseStack, depthSource, 15728880);
         bufferSource.endBatch();
 
@@ -520,13 +500,9 @@ public final class DiscoveryOverlayRenderer {
             ModRenderTypes.SCAN_ENTITY_SHADER.getUniform("ColorModulator").set(r, g, b, 1.0F);
         }
 
-        MultiBufferSource colorSource = new ScanOverlayRenderer.ScanBufferSourceWrapper(bufferSource, r, g, b, a, false);
+        MultiBufferSource colorSource = new ScanOverlayRenderer.ScanBufferSourceWrapper(bufferSource, r, g, b, a, false, true);
         mc.getEntityRenderDispatcher().render(entity, 0.0, 0.0, 0.0, yaw, partialTick, poseStack, colorSource, 15728880);
         bufferSource.endBatch();
-
-        if (isEtfLoaded) {
-            EtfCompat.allowRenderLayerTextureModify();
-        }
 
         poseStack.popPose();
     }

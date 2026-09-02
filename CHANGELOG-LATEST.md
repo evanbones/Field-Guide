@@ -1,4 +1,7 @@
-### Added
+### Changed
 
-- Added an option to disable `obtain` unlocks entirely.
-- Added the ability to define category-level unlock criteria.
+- Updated EMF/ETF compatibility.
+
+### Fixed
+
+- Fixed issues with variant textures.

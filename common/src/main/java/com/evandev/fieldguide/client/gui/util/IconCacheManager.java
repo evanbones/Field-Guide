@@ -28,7 +28,7 @@ import java.util.stream.Stream;
 public class IconCacheManager {
     private static final Path CACHE_DIR = Services.PLATFORM.getConfigDirectory().resolve("../fieldguide_cache");
     private static final int RENDER_SIZE = 256;
-    private static final int CACHE_FORMAT = 3;
+    private static final int CACHE_FORMAT = 4;
     private static final Map<String, ResourceLocation> TEXTURE_CACHE = new ConcurrentHashMap<>();
     private static final Set<String> PENDING_GENERATIONS = ConcurrentHashMap.newKeySet();
     private static final Deque<Runnable> MAIN_THREAD_TASKS = new ConcurrentLinkedDeque<>();
@@ -215,14 +215,17 @@ public class IconCacheManager {
         RenderSystem.setShaderFogStart(Float.MAX_VALUE);
         RenderSystem.setShaderFogEnd(Float.MAX_VALUE);
 
-        if (Services.PLATFORM.isModLoaded("entity_model_features")) {
+        boolean emfLoaded = Services.PLATFORM.isModLoaded("entity_model_features");
+        if (emfLoaded) {
             EmfCompat.setInGui(true);
         }
 
-        renderAction.run();
-
-        if (Services.PLATFORM.isModLoaded("entity_model_features")) {
-            EmfCompat.setInGui(false);
+        try {
+            renderAction.run();
+        } finally {
+            if (emfLoaded) {
+                EmfCompat.setInGui(false);
+            }
         }
 
         RenderSystem.setShaderFogStart(oldFogStart);
