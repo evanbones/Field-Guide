@@ -78,7 +78,7 @@ public class LootTableHelper {
                     tag.putInt("FieldGuideMax", drop.maxCount);
                     formattedDrops.add(stack);
                 }
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 Constants.LOG.error("Failed to parse loot table {}", tableId, e);
             }
         }

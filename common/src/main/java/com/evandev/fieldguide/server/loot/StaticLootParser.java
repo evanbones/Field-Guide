@@ -89,7 +89,7 @@ public class StaticLootParser {
                     if (function.getClass().getName().startsWith("net.minecraft.")) {
                         try {
                             stack = function.apply(stack, context);
-                        } catch (Exception ignored) {
+                        } catch (Throwable ignored) {
                         }
                     }
                 }
