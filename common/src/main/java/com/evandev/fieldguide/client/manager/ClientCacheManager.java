@@ -137,6 +137,16 @@ public class ClientCacheManager {
         }
     }
 
+    public static void clearDiskCache() {
+        try {
+            Path sessionDir = getSessionDir();
+            Files.deleteIfExists(sessionDir.resolve("drops.nbt"));
+            Files.deleteIfExists(sessionDir.resolve("biomes.nbt"));
+        } catch (IOException e) {
+            Constants.LOG.error("Failed to delete cache files", e);
+        }
+    }
+
     public static void onWorldUnload() {
         currentSessionKey = null;
     }

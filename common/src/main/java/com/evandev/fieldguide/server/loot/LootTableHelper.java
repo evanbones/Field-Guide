@@ -139,18 +139,34 @@ public class LootTableHelper {
             return false;
         }
 
-        ResourceLocation targetRl = new ResourceLocation(targetStr);
-        String targetNs = targetRl.getNamespace();
-
-        if (targetNs.equals("entity") || targetNs.equals("item") || targetNs.equals("block")) {
-            ResourceLocation prefixedEntryId = EntryResolver.getEntryId(coreEntry, true);
-            return targetRl.equals(prefixedEntryId);
+        if (targetStr.indexOf('#') > 0) {
+            return false;
         }
 
-        ResourceLocation rawEntryId = EntryResolver.getRawId(EntryResolver.getEntryId(coreEntry));
-        if (rawEntryId == null) return false;
-        ResourceLocation rawTargetId = EntryResolver.getRawId(targetRl);
-        return rawEntryId.equals(rawTargetId);
+        try {
+            if (targetStr.startsWith("entity:") || targetStr.startsWith("block:") || targetStr.startsWith("item:")) {
+                int firstColon = targetStr.indexOf(':');
+                int secondColon = targetStr.indexOf(':', firstColon + 1);
+                if (secondColon != -1) {
+                    targetStr = targetStr.substring(0, secondColon) + "/" + targetStr.substring(secondColon + 1);
+                }
+            }
+
+            ResourceLocation targetRl = new ResourceLocation(targetStr);
+            String targetNs = targetRl.getNamespace();
+
+            if (targetNs.equals("entity") || targetNs.equals("item") || targetNs.equals("block")) {
+                ResourceLocation prefixedEntryId = EntryResolver.getEntryId(coreEntry, true);
+                return targetRl.equals(prefixedEntryId);
+            }
+
+            ResourceLocation rawEntryId = EntryResolver.getRawId(EntryResolver.getEntryId(coreEntry));
+            if (rawEntryId == null) return false;
+            ResourceLocation rawTargetId = EntryResolver.getRawId(targetRl);
+            return rawEntryId.equals(rawTargetId);
+        } catch (Exception ignored) {
+            return false;
+        }
     }
 
     public static void applyConfigModifications(Object entry, List<ItemStack> distinctDrops) {

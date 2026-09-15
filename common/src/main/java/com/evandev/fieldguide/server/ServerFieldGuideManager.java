@@ -63,7 +63,9 @@ public class ServerFieldGuideManager extends SimplePreparableReloadListener<Serv
     private List<String> lootAdditions = new ArrayList<>();
     private List<String> lootRemovals = new ArrayList<>();
     private List<String> prefixedBiomeAdditions = new ArrayList<>();
+    private List<String> prefixedBiomeRemovals = new ArrayList<>();
     private List<String> prefixedLootAdditions = new ArrayList<>();
+    private List<String> prefixedLootRemovals = new ArrayList<>();
 
     public static ServerFieldGuideManager getInstance() {
         return INSTANCE;
@@ -207,29 +209,46 @@ public class ServerFieldGuideManager extends SimplePreparableReloadListener<Serv
 
     private void calculatePrefixedLists() {
         this.prefixedBiomeAdditions = prefixList(biomeAdditions);
+        this.prefixedBiomeRemovals = prefixList(biomeRemovals);
         this.prefixedLootAdditions = prefixList(lootAdditions);
+        this.prefixedLootRemovals = prefixList(lootRemovals);
     }
 
     private List<String> prefixList(List<String> original) {
-        return original.stream().map(s -> {
+        Set<String> set = new LinkedHashSet<>(original);
+        for (String s : original) {
             String[] parts = s.split("\\|", 2);
             if (parts.length == 2) {
                 try {
-                    ResourceLocation entryLoc = new ResourceLocation(parts[0]);
+                    String target = parts[0];
+                    String variantSuffix = "";
+                    int hashIdx = target.indexOf('#');
+                    if (hashIdx > 0) {
+                        variantSuffix = target.substring(hashIdx);
+                        target = target.substring(0, hashIdx);
+                    }
+                    if (target.startsWith("entity:") || target.startsWith("block:") || target.startsWith("item:")) {
+                        int firstColon = target.indexOf(':');
+                        int secondColon = target.indexOf(':', firstColon + 1);
+                        if (secondColon != -1) {
+                            target = target.substring(0, secondColon) + "/" + target.substring(secondColon + 1);
+                        }
+                    }
+                    ResourceLocation entryLoc = new ResourceLocation(target);
                     ResourceLocation canonical = findCanonicalEntryId(entryLoc);
                     if (canonical != null) {
-                        return canonical + "|" + parts[1];
+                        set.add(canonical + variantSuffix + "|" + parts[1]);
                     }
                     Optional<Object> entry = EntryResolutionHelper.resolveSingleEntry(entryLoc, null, null);
                     if (entry.isPresent()) {
                         ResourceLocation autoId = AutoPopulateRegistry.getEntryId(entry.get(), true);
-                        if (autoId != null) return autoId + "|" + parts[1];
+                        if (autoId != null) set.add(autoId + variantSuffix + "|" + parts[1]);
                     }
                 } catch (Exception ignored) {
                 }
             }
-            return s;
-        }).toList();
+        }
+        return new ArrayList<>(set);
     }
 
     public void syncToPlayer(ServerPlayer player) {
@@ -272,7 +291,6 @@ public class ServerFieldGuideManager extends SimplePreparableReloadListener<Serv
                         continue;
                     }
 
-                    // Fallback to synthesize missing explicit GuideEntry wrappers for standard objects
                     GuideEntry existing = allEntries.get(id);
                     if (existing != null) {
                         chunkCat.addEntryId(id);
@@ -293,9 +311,9 @@ public class ServerFieldGuideManager extends SimplePreparableReloadListener<Serv
         Services.NETWORK.sendToPlayer(new SyncCategoriesPacket(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), variants, true, false), player);
 
         sendChunked(player, prefixedBiomeAdditions, (chunk) -> new SyncCategoriesPacket(Collections.emptyList(), Collections.emptyList(), chunk, Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap(), false, false));
-        sendChunked(player, biomeRemovals, (chunk) -> new SyncCategoriesPacket(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), chunk, Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap(), false, false));
+        sendChunked(player, prefixedBiomeRemovals, (chunk) -> new SyncCategoriesPacket(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), chunk, Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap(), false, false));
         sendChunked(player, prefixedLootAdditions, (chunk) -> new SyncCategoriesPacket(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), chunk, Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap(), false, false));
-        sendChunked(player, lootRemovals, (chunk) -> new SyncCategoriesPacket(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), chunk, Collections.emptyMap(), Collections.emptyMap(), false, false));
+        sendChunked(player, prefixedLootRemovals, (chunk) -> new SyncCategoriesPacket(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), chunk, Collections.emptyMap(), Collections.emptyMap(), false, false));
 
         if (!redirects.isEmpty()) {
             int maxModifiersChunkSize = 500;

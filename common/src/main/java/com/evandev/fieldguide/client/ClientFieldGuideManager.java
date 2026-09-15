@@ -45,6 +45,7 @@ public class ClientFieldGuideManager implements ResourceManagerReloadListener {
 
     public static void clearCache() {
         ClientLootManager.getInstance().clear();
+        ClientCacheManager.clearDiskCache();
         ClientCategoryManager.getInstance().getResolvedCategoryEntries().clear();
         EntryRenderHelper.clearCache();
         ClientCategoryManager.getInstance().resolveAllEntries();

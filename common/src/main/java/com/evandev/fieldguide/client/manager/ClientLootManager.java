@@ -6,10 +6,13 @@ import com.evandev.fieldguide.compat.cobblemon.ClientFieldGuideCobblemonCompat;
 import com.evandev.fieldguide.entry.EntryResolver;
 import com.evandev.fieldguide.network.RequestLootPacket;
 import com.evandev.fieldguide.platform.Services;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 import java.util.*;
 
@@ -129,6 +132,35 @@ public class ClientLootManager {
             rawDrops.addAll(ClientFieldGuideCobblemonCompat.getCobblemonDrops(entry));
         }
 
+        List<ItemStack> distinct = distinctLoot(rawDrops);
+
+        ClientCategoryManager categoryManager = ClientCategoryManager.getInstance();
+        List<ResourceLocation> removals = categoryManager.getLootRemovals(entry, variantId);
+        List<ResourceLocation> additions = categoryManager.getLootAdditions(entry, variantId);
+
+        if (!additions.isEmpty()) {
+            for (ResourceLocation itemLoc : additions) {
+                if (removals.contains(itemLoc)) continue;
+                Item item = BuiltInRegistries.ITEM.get(itemLoc);
+                if (item != Items.AIR) {
+                    ItemStack stack = new ItemStack(item);
+                    CompoundTag tag = stack.getOrCreateTag();
+                    tag.putFloat("FieldGuideDropChance", 100.0f);
+                    if (distinct.stream().noneMatch(s -> isSameLootItem(s, stack))) {
+                        distinct.add(stack);
+                    }
+                }
+            }
+        }
+
+        if (!removals.isEmpty()) {
+            distinct.removeIf(stack -> removals.contains(BuiltInRegistries.ITEM.getKey(stack.getItem())));
+        }
+
+        return distinct;
+    }
+
+    private List<ItemStack> distinctLoot(List<ItemStack> rawDrops) {
         List<ItemStack> distinct = new ArrayList<>();
         for (ItemStack stack : rawDrops) {
             if (distinct.stream().noneMatch(s -> isSameLootItem(s, stack))) {
