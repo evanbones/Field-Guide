@@ -6,8 +6,118 @@
       "value": "minecraft:nether_star"
     },
     {
-      "entry": "minecraft:sheep",
+      "entry": "minecraft:sheep#white",
       "value": "minecraft:white_wool"
+    },
+    {
+      "entry": "minecraft:sheep#orange",
+      "value": "minecraft:orange_wool"
+    },
+    {
+      "entry": "minecraft:sheep#magenta",
+      "value": "minecraft:magenta_wool"
+    },
+    {
+      "entry": "minecraft:sheep#light_blue",
+      "value": "minecraft:light_blue_wool"
+    },
+    {
+      "entry": "minecraft:sheep#yellow",
+      "value": "minecraft:yellow_wool"
+    },
+    {
+      "entry": "minecraft:sheep#lime",
+      "value": "minecraft:lime_wool"
+    },
+    {
+      "entry": "minecraft:sheep#pink",
+      "value": "minecraft:pink_wool"
+    },
+    {
+      "entry": "minecraft:sheep#gray",
+      "value": "minecraft:gray_wool"
+    },
+    {
+      "entry": "minecraft:sheep#light_gray",
+      "value": "minecraft:light_gray_wool"
+    },
+    {
+      "entry": "minecraft:sheep#cyan",
+      "value": "minecraft:cyan_wool"
+    },
+    {
+      "entry": "minecraft:sheep#purple",
+      "value": "minecraft:purple_wool"
+    },
+    {
+      "entry": "minecraft:sheep#blue",
+      "value": "minecraft:blue_wool"
+    },
+    {
+      "entry": "minecraft:sheep#brown",
+      "value": "minecraft:brown_wool"
+    },
+    {
+      "entry": "minecraft:sheep#green",
+      "value": "minecraft:green_wool"
+    },
+    {
+      "entry": "minecraft:sheep#red",
+      "value": "minecraft:red_wool"
+    },
+    {
+      "entry": "minecraft:sheep#black",
+      "value": "minecraft:black_wool"
+    },
+    {
+      "entry": "minecraft:frog#temperate",
+      "value": "minecraft:ochre_froglight"
+    },
+    {
+      "entry": "minecraft:frog#warm",
+      "value": "minecraft:pearlescent_froglight"
+    },
+    {
+      "entry": "minecraft:frog#cold",
+      "value": "minecraft:verdant_froglight"
+    },
+    {
+      "entry": "minecraft:mooshroom",
+      "value": "minecraft:red_mushroom"
+    },
+    {
+      "entry": "minecraft:mooshroom#red",
+      "value": "minecraft:red_mushroom"
+    },
+    {
+      "entry": "minecraft:mooshroom#brown",
+      "value": "minecraft:brown_mushroom"
+    }
+  ],
+  "removals": [
+    {
+      "entries": [
+        "minecraft:sheep#orange",
+        "minecraft:sheep#magenta",
+        "minecraft:sheep#light_blue",
+        "minecraft:sheep#yellow",
+        "minecraft:sheep#lime",
+        "minecraft:sheep#pink",
+        "minecraft:sheep#gray",
+        "minecraft:sheep#light_gray",
+        "minecraft:sheep#cyan",
+        "minecraft:sheep#purple",
+        "minecraft:sheep#blue",
+        "minecraft:sheep#brown",
+        "minecraft:sheep#green",
+        "minecraft:sheep#red",
+        "minecraft:sheep#black"
+      ],
+      "value": "minecraft:white_wool"
+    },
+    {
+      "entry": "minecraft:mooshroom#brown",
+      "value": "minecraft:red_mushroom"
     }
   ]
 }

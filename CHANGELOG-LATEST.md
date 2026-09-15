@@ -1,9 +1,8 @@
-### Changed
+### Added
 
-- Immersive Overlays and Item Descriptions are now optional dependencies.
-    - They're still marked as required on Modrinth and CurseForge so they're automatically downloaded.
-- Right-clicking the search box now clears the search query.
+- Added better default variant loot displays for sheep, frogs, and mooshrooms.
 
 ### Fixed
 
-- Fixed issues with custom descriptions not saving with "unlock all variants" enabled.
+- Fixed issues variant loot additions and removals.
+- Fixed rare service loading crash.

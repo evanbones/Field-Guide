@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.17.0] - 2026-09-14
+
+### Added
+
+- Added better default variant loot displays for sheep, frogs, and mooshrooms.
+
+### Fixed
+
+- Fixed issues variant loot additions and removals.
+- Fixed rare service loading crash.
+
 ## [1.16.0] - 2026-09-01
 
 ### Changed

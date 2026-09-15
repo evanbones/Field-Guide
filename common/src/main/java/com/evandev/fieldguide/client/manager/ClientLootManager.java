@@ -10,7 +10,9 @@ import com.evandev.fieldguide.network.RequestLootPacket;
 import com.evandev.fieldguide.platform.Services;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 import java.util.*;
 
@@ -112,10 +114,8 @@ public class ClientLootManager {
                         else requestLoot(id);
                     }
                 }
-                return distinctLoot(rawDrops);
             }
-        }
-        if (entry instanceof GuideEntry ge && ge.isComposite()) {
+        } else if (entry instanceof GuideEntry ge && ge.isComposite()) {
             Set<Object> uniqueComponents = new HashSet<>();
             if (ge.displayId() != null) {
                 uniqueComponents.addAll(EntryResolver.resolveAllRegistryObjects(ge.displayId()));
@@ -150,12 +150,30 @@ public class ClientLootManager {
             rawDrops.addAll(ClientFieldGuideCobblemonCompat.getCobblemonDrops(entry));
         }
 
-        List<ItemStack> distinct = new ArrayList<>();
-        for (ItemStack stack : rawDrops) {
-            if (distinct.stream().noneMatch(s -> isSameLootItem(s, stack))) {
-                distinct.add(stack);
+        List<ItemStack> distinct = distinctLoot(rawDrops);
+
+        ClientCategoryManager categoryManager = ClientCategoryManager.getInstance();
+        List<ResourceLocation> removals = categoryManager.getLootRemovals(entry, variantId);
+        List<ResourceLocation> additions = categoryManager.getLootAdditions(entry, variantId);
+
+        if (!additions.isEmpty()) {
+            for (ResourceLocation itemLoc : additions) {
+                if (removals.contains(itemLoc)) continue;
+                Item item = BuiltInRegistries.ITEM.get(itemLoc);
+                if (item != Items.AIR) {
+                    ItemStack stack = new ItemStack(item);
+                    stack.set(ModDataComponents.DROP_CHANCE.get(), 100.0f);
+                    if (distinct.stream().noneMatch(s -> isSameLootItem(s, stack))) {
+                        distinct.add(stack);
+                    }
+                }
             }
         }
+
+        if (!removals.isEmpty()) {
+            distinct.removeIf(stack -> removals.contains(BuiltInRegistries.ITEM.getKey(stack.getItem())));
+        }
+
         return distinct;
     }
 

@@ -36,22 +36,47 @@ If a mod registers both a block and an entity with the same ID, you can use a ty
 }
 ```
 
-**Example: Targeting Specific Variants**
+**Example: Targeting Specific Variants (Biome Modifiers)**
 
-If you want to isolate specific biomes or drops to a specific variant (like a Desert Villager only showing the Desert biome), use the `#` symbol.
+If you want to isolate specific biomes to a specific variant (like a Desert Villager only showing the Desert biome), use the `#` symbol:
 
 ```json
 {
   "additions": [
     {
-      "entry": "minecraft:villager#minecraft:desert",
+      "entry": "minecraft:villager#desert",
       "value": "minecraft:desert"
     }
   ],
   "removals": [
     {
-      "entry": "minecraft:villager#minecraft:desert",
+      "entry": "minecraft:villager#desert",
       "value": "minecraft:plains"
+    }
+  ]
+}
+```
+
+**Example: Targeting Specific Variants (Loot Modifiers)**
+
+You can also target specific variants for loot additions and removals. For example, adding Red Wool and removing White Wool specifically for Red Sheep, or adding Cactus drops to Desert Villagers:
+
+```json
+{
+  "additions": [
+    {
+      "entry": "minecraft:sheep#red",
+      "value": "minecraft:red_wool"
+    },
+    {
+      "entry": "minecraft:villager#desert",
+      "value": "minecraft:cactus"
+    }
+  ],
+  "removals": [
+    {
+      "entry": "minecraft:sheep#red",
+      "value": "minecraft:white_wool"
     }
   ]
 }

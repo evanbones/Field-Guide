@@ -90,43 +90,62 @@ public class ClientCategoryManager {
             this.indexedBiomeRemovals.clear();
             this.lootAdditions.clear();
             this.lootRemovals.clear();
+            this.indexedLootAdditions.clear();
+            this.indexedLootRemovals.clear();
         }
 
         if (!biomeAdditions.isEmpty()) {
             this.biomeAdditions.addAll(biomeAdditions);
             for (String addition : biomeAdditions) {
-                String[] parts = addition.split("\\|", 2);
-                if (parts.length == 2) {
-                    this.indexedBiomeAdditions.computeIfAbsent(parts[0], k -> new ArrayList<>()).add(ResourceLocation.parse(parts[1]));
-                }
+                indexModifier(this.indexedBiomeAdditions, addition);
             }
         }
         if (!biomeRemovals.isEmpty()) {
             this.biomeRemovals.addAll(biomeRemovals);
             for (String removal : biomeRemovals) {
-                String[] parts = removal.split("\\|", 2);
-                if (parts.length == 2) {
-                    this.indexedBiomeRemovals.computeIfAbsent(parts[0], k -> new ArrayList<>()).add(ResourceLocation.parse(parts[1]));
-                }
+                indexModifier(this.indexedBiomeRemovals, removal);
             }
         }
         if (!lootAdditions.isEmpty()) {
             this.lootAdditions.addAll(lootAdditions);
             for (String addition : lootAdditions) {
-                String[] parts = addition.split("\\|", 2);
-                if (parts.length == 2) {
-                    this.indexedLootAdditions.computeIfAbsent(parts[0], k -> new ArrayList<>()).add(ResourceLocation.parse(parts[1]));
-                }
+                indexModifier(this.indexedLootAdditions, addition);
             }
         }
         if (!lootRemovals.isEmpty()) {
             this.lootRemovals.addAll(lootRemovals);
             for (String removal : lootRemovals) {
-                String[] parts = removal.split("\\|", 2);
-                if (parts.length == 2) {
-                    this.indexedLootRemovals.computeIfAbsent(parts[0], k -> new ArrayList<>()).add(ResourceLocation.parse(parts[1]));
-                }
+                indexModifier(this.indexedLootRemovals, removal);
             }
+        }
+    }
+
+    private void indexModifier(Map<String, List<ResourceLocation>> index, String line) {
+        String[] parts = line.split("\\|", 2);
+        if (parts.length == 2) {
+            try {
+                ResourceLocation valueLoc = ResourceLocation.parse(parts[1]);
+                String targetKey = parts[0];
+                index.computeIfAbsent(targetKey, k -> new ArrayList<>()).add(valueLoc);
+                if (targetKey.contains("#")) {
+                    int hash = targetKey.indexOf('#');
+                    String base = targetKey.substring(0, hash);
+                    String var = targetKey.substring(hash + 1);
+                    if (base.startsWith("entity:") || base.startsWith("block:") || base.startsWith("item:")) {
+                        String rawBase = base.substring(base.indexOf(':') + 1).replace('/', ':');
+                        index.computeIfAbsent(rawBase + "#" + var, k -> new ArrayList<>()).add(valueLoc);
+                    } else {
+                        index.computeIfAbsent("entity:" + base.replace(':', '/') + "#" + var, k -> new ArrayList<>()).add(valueLoc);
+                    }
+                } else {
+                    if (targetKey.startsWith("entity:") || targetKey.startsWith("block:") || targetKey.startsWith("item:")) {
+                        String rawBase = targetKey.substring(targetKey.indexOf(':') + 1).replace('/', ':');
+                        index.computeIfAbsent(rawBase, k -> new ArrayList<>()).add(valueLoc);
+                    } else {
+                        index.computeIfAbsent("entity:" + targetKey.replace(':', '/'), k -> new ArrayList<>()).add(valueLoc);
+                    }
+                }
+            } catch (Exception ignored) {}
         }
     }
 
@@ -221,57 +240,91 @@ public class ClientCategoryManager {
         return lootRemovals;
     }
 
-    public List<ResourceLocation> getBiomeAdditions(Object entry, String variantId) {
-        String key = AutoPopulateRegistry.getEntryKey(entry);
-        String baseId = Objects.requireNonNull(AutoPopulateRegistry.getEntryId(entry, false)).toString();
-        List<ResourceLocation> additions = new ArrayList<>();
+    private List<String> getLookupKeys(Object entry, String variantId) {
+        Set<String> baseKeys = new LinkedHashSet<>();
 
-        if (variantId != null && !variantId.isEmpty()) {
-            if (indexedBiomeAdditions.containsKey(key + "#" + variantId))
-                additions.addAll(indexedBiomeAdditions.get(key + "#" + variantId));
-            if (indexedBiomeAdditions.containsKey(baseId + "#" + variantId))
-                additions.addAll(indexedBiomeAdditions.get(baseId + "#" + variantId));
+        ResourceLocation entryId = EntryResolver.getEntryId(entry);
+        if (entryId != null) {
+            baseKeys.add(entryId.toString());
+            ResourceLocation rawId = EntryResolver.getRawId(entryId);
+            if (rawId != null) {
+                baseKeys.add(rawId.toString());
+                baseKeys.add("entity:" + rawId.getNamespace() + "/" + rawId.getPath());
+                baseKeys.add("entity:" + rawId.getNamespace() + ":" + rawId.getPath());
+            }
         }
 
-        if (indexedBiomeAdditions.containsKey(key)) additions.addAll(indexedBiomeAdditions.get(key));
-        if (indexedBiomeAdditions.containsKey(baseId)) additions.addAll(indexedBiomeAdditions.get(baseId));
+        String key = AutoPopulateRegistry.getEntryKey(entry);
+        if (!key.isEmpty()) {
+            baseKeys.add(key);
+            if (key.contains("/")) {
+                baseKeys.add(key.replaceFirst("/", ":"));
+            }
+        }
 
+        ResourceLocation rawLoc = AutoPopulateRegistry.getEntryId(entry, false);
+        if (rawLoc != null) {
+            baseKeys.add(rawLoc.toString());
+            ResourceLocation rawId = EntryResolver.getRawId(rawLoc);
+            if (rawId != null) baseKeys.add(rawId.toString());
+        }
+
+        List<String> keys = new ArrayList<>();
+        if (variantId != null && !variantId.isEmpty()) {
+            String variantPath = variantId.contains(":") ? variantId.substring(variantId.indexOf(':') + 1) : variantId;
+            for (String base : baseKeys) {
+                keys.add(base + "#" + variantId);
+                if (!variantPath.equals(variantId)) {
+                    keys.add(base + "#" + variantPath);
+                }
+            }
+        }
+
+        keys.addAll(baseKeys);
+        return keys;
+    }
+
+    public List<ResourceLocation> getBiomeAdditions(Object entry, String variantId) {
+        List<ResourceLocation> additions = new ArrayList<>();
+        for (String lookupKey : getLookupKeys(entry, variantId)) {
+            List<ResourceLocation> list = indexedBiomeAdditions.get(lookupKey);
+            if (list != null) additions.addAll(list);
+        }
         return additions;
     }
 
     public List<ResourceLocation> getBiomeRemovals(Object entry, String variantId) {
-        String key = AutoPopulateRegistry.getEntryKey(entry);
-        String baseId = Objects.requireNonNull(AutoPopulateRegistry.getEntryId(entry, false)).toString();
         List<ResourceLocation> removals = new ArrayList<>();
-
-        if (variantId != null && !variantId.isEmpty()) {
-            if (indexedBiomeRemovals.containsKey(key + "#" + variantId))
-                removals.addAll(indexedBiomeRemovals.get(key + "#" + variantId));
-            if (indexedBiomeRemovals.containsKey(baseId + "#" + variantId))
-                removals.addAll(indexedBiomeRemovals.get(baseId + "#" + variantId));
+        for (String lookupKey : getLookupKeys(entry, variantId)) {
+            List<ResourceLocation> list = indexedBiomeRemovals.get(lookupKey);
+            if (list != null) removals.addAll(list);
         }
-
-        if (indexedBiomeRemovals.containsKey(key)) removals.addAll(indexedBiomeRemovals.get(key));
-        if (indexedBiomeRemovals.containsKey(baseId)) removals.addAll(indexedBiomeRemovals.get(baseId));
-
         return removals;
     }
 
     public List<ResourceLocation> getLootAdditions(Object entry) {
-        String key = AutoPopulateRegistry.getEntryKey(entry);
-        String baseId = AutoPopulateRegistry.getEntryId(entry, false).toString();
+        return getLootAdditions(entry, null);
+    }
+
+    public List<ResourceLocation> getLootAdditions(Object entry, String variantId) {
         List<ResourceLocation> additions = new ArrayList<>();
-        if (indexedLootAdditions.containsKey(key)) additions.addAll(indexedLootAdditions.get(key));
-        if (indexedLootAdditions.containsKey(baseId)) additions.addAll(indexedLootAdditions.get(baseId));
+        for (String lookupKey : getLookupKeys(entry, variantId)) {
+            List<ResourceLocation> list = indexedLootAdditions.get(lookupKey);
+            if (list != null) additions.addAll(list);
+        }
         return additions;
     }
 
     public List<ResourceLocation> getLootRemovals(Object entry) {
-        String key = AutoPopulateRegistry.getEntryKey(entry);
-        String baseId = AutoPopulateRegistry.getEntryId(entry, false).toString();
+        return getLootRemovals(entry, null);
+    }
+
+    public List<ResourceLocation> getLootRemovals(Object entry, String variantId) {
         List<ResourceLocation> removals = new ArrayList<>();
-        if (indexedLootRemovals.containsKey(key)) removals.addAll(indexedLootRemovals.get(key));
-        if (indexedLootRemovals.containsKey(baseId)) removals.addAll(indexedLootRemovals.get(baseId));
+        for (String lookupKey : getLookupKeys(entry, variantId)) {
+            List<ResourceLocation> list = indexedLootRemovals.get(lookupKey);
+            if (list != null) removals.addAll(list);
+        }
         return removals;
     }
 
