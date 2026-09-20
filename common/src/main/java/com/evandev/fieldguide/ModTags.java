@@ -31,6 +31,9 @@ public class ModTags {
 
     public static class EntityTypes {
         public static final TagKey<EntityType<?>> BLACKLISTED = tag("blacklisted");
+        public static final TagKey<EntityType<?>> HOSTILE = tag("hostile");
+        public static final TagKey<EntityType<?>> NEUTRAL = tag("neutral");
+        public static final TagKey<EntityType<?>> PASSIVE = tag("passive");
 
         private static TagKey<EntityType<?>> tag(String name) {
             return TagKey.create(Registries.ENTITY_TYPE, ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, name));

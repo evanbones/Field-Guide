@@ -1,6 +1,7 @@
 package com.evandev.fieldguide.client.attribute;
 
 import com.evandev.fieldguide.Constants;
+import com.evandev.fieldguide.ModTags;
 import com.evandev.fieldguide.api.attribute.AttributeProvider;
 import com.evandev.fieldguide.api.attribute.GuideAttribute;
 import com.evandev.fieldguide.client.ClientFieldGuideManager;
@@ -26,7 +27,16 @@ public class DefaultAttributeProvider implements AttributeProvider {
             ResourceLocation icon;
             Component typeComponent;
 
-            if (living instanceof NeutralMob) {
+            if (living.getType().is(ModTags.EntityTypes.NEUTRAL)) {
+                icon = Constants.NEUTRAL_ICON;
+                typeComponent = Component.translatable("fieldguide.alignment.neutral");
+            } else if (living.getType().is(ModTags.EntityTypes.HOSTILE)) {
+                icon = Constants.HOSTILE_ICON;
+                typeComponent = Component.translatable("fieldguide.alignment.hostile");
+            } else if (living.getType().is(ModTags.EntityTypes.PASSIVE)) {
+                icon = Constants.PASSIVE_ICON;
+                typeComponent = Component.translatable("fieldguide.alignment.passive");
+            } else if (living instanceof NeutralMob) {
                 icon = Constants.NEUTRAL_ICON;
                 typeComponent = Component.translatable("fieldguide.alignment.neutral");
             } else if (living.getType().getCategory() == MobCategory.MONSTER) {

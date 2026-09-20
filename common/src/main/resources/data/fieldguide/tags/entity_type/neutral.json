@@ -1,0 +1,27 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:bee",
+    "minecraft:dolphin",
+    "minecraft:drowned",
+    "minecraft:fox",
+    "minecraft:goat",
+    "minecraft:iron_golem",
+    "minecraft:llama",
+    "minecraft:panda",
+    "minecraft:piglin",
+    "minecraft:polar_bear",
+    "minecraft:pufferfish",
+    "minecraft:trader_llama",
+    "minecraft:wolf",
+    "minecraft:zombified_piglin",
+    {
+      "id": "minecraft:nautilus",
+      "required": false
+    },
+    {
+      "id": "minecraft:zombie_nautilus",
+      "required": false
+    }
+  ]
+}

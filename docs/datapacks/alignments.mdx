@@ -1,0 +1,35 @@
+---
+title: Mob Alignments
+hide_meta: true
+---
+
+Field Guide displays an alignment attribute (Hostile, Neutral, or Passive) for living entities in the entry details view.
+
+By default, Field Guide's built-in tags match the mob classifications from **Item Descriptions** (which sources from the Minecraft Wiki).
+
+### Datapack Entity Tags
+
+You can override or define mob alignments using standard Minecraft entity type tags:
+
+* **Hostile:** `data/fieldguide/tags/entity_type/hostile.json` (`#fieldguide:hostile`)
+* **Neutral:** `data/fieldguide/tags/entity_type/neutral.json` (`#fieldguide:neutral`)
+* **Passive:** `data/fieldguide/tags/entity_type/passive.json` (`#fieldguide:passive`)
+
+#### Example: Making a Mob Neutral
+
+`data/<namespace>/tags/entity_type/neutral.json`:
+
+```json
+{
+  "replace": false,
+  "values": [
+    "my_mod:custom_mob"
+  ]
+}
+```
+
+### Alignment Determination Order
+
+1. **Resource Pack Visual Override:** `alignment_icon` defined in `assets/<namespace>/fieldguide/entries/<entry_id>.json`.
+2. **Datapack Entity Tags:** `#fieldguide:neutral`, `#fieldguide:hostile`, or `#fieldguide:passive`.
+3. Fallback entity category heuristics
