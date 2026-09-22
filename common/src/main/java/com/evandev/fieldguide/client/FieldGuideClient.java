@@ -15,7 +15,6 @@ import com.evandev.fieldguide.config.ClientConfig;
 import com.evandev.fieldguide.config.ServerConfig;
 import com.evandev.fieldguide.item.ModItems;
 import com.evandev.fieldguide.mixin.accessor.MobAccessor;
-import com.evandev.fieldguide.platform.Services;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.KeyMapping;
@@ -53,7 +52,7 @@ public class FieldGuideClient {
     }
 
     public static void playMobCry(Entity entity) {
-        if (Services.PLATFORM.isModLoaded("cobblemon") && FieldGuideCobblemonCompat.isPokemon(entity)) {
+        if (FieldGuideCobblemonCompat.isPokemon(entity)) {
             ClientFieldGuideCobblemonCompat.playPokemonCry(entity);
             return;
         }

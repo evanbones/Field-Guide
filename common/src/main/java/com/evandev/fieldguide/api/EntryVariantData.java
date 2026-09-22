@@ -21,13 +21,6 @@ public record EntryVariantData(
         @Nullable ResourceLocation icon,
         List<String> components
 ) {
-    public enum DisplayType {
-        STRUCTURE,
-        ENTITY,
-        BLOCK,
-        ITEM
-    }
-
     public static final StreamCodec<RegistryFriendlyByteBuf, EntryVariantData> STREAM_CODEC = StreamCodec.of(
             (buf, data) -> {
                 buf.writeUtf(data.variantId());
@@ -56,4 +49,28 @@ public record EntryVariantData(
                     buf.readList(FriendlyByteBuf::readUtf)
             )
     );
+
+    public boolean containsComponent(String targetId) {
+        if (targetId == null) return false;
+        if (displayId != null && targetId.equals(displayId.toString())) return true;
+        if (components != null) {
+            for (String comp : components) {
+                int pipe = comp.indexOf('|');
+                String id = pipe >= 0 ? comp.substring(0, pipe) : comp;
+                if (targetId.equals(id)) return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean containsComponent(ResourceLocation targetId) {
+        return targetId != null && containsComponent(targetId.toString());
+    }
+
+    public enum DisplayType {
+        STRUCTURE,
+        ENTITY,
+        BLOCK,
+        ITEM
+    }
 }

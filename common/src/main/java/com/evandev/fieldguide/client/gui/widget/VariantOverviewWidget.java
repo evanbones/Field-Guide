@@ -105,7 +105,7 @@ public class VariantOverviewWidget extends AbstractWidget {
         }
 
         for (VariantDef variant : variants) {
-            if (Services.PLATFORM.isModLoaded("cobblemon") && FieldGuideCobblemonCompat.isPokemon(originalRenderedEntity)) {
+            if (FieldGuideCobblemonCompat.isPokemon(originalRenderedEntity)) {
                 ResourceLocation id = ClientFieldGuideManager.getEntryId(entry);
                 if (id != null) {
                     variantEntityCache.put(variant.id(), ClientFieldGuideCobblemonCompat.getDummyVariant(id, variant.id(), Minecraft.getInstance().level));

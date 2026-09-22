@@ -13,6 +13,7 @@ import com.evandev.fieldguide.client.progress.ProgressManager;
 import com.evandev.fieldguide.client.scan.FieldGuideScanner;
 import com.evandev.fieldguide.client.search.SearchManager;
 import com.evandev.fieldguide.compat.cobblemon.ClientFieldGuideCobblemonCompat;
+import com.evandev.fieldguide.compat.cobblemon.FieldGuideCobblemonCompat;
 import com.evandev.fieldguide.config.ModConfig;
 import com.evandev.fieldguide.config.ServerConfig;
 import com.evandev.fieldguide.entry.EntryResolver;
@@ -48,7 +49,6 @@ public class ClientFieldGuideManager implements ResourceManagerReloadListener {
         ClientCacheManager.clearDiskCache();
         ClientCategoryManager.getInstance().getResolvedCategoryEntries().clear();
         EntryRenderHelper.clearCache();
-        ClientCategoryManager.getInstance().resolveAllEntries();
     }
 
     public static ResourceLocation getEntryId(Object entry) {
@@ -66,8 +66,7 @@ public class ClientFieldGuideManager implements ResourceManagerReloadListener {
     public static boolean isVariantUnlocked(Object entry, String variantId) {
         ResourceLocation id = getEntryId(entry);
         if (id == null) return false;
-        String fullId = id + "#" + variantId;
-        return ProgressManager.getInstance().getUnlockedEntries().contains(fullId);
+        return EntryResolver.isUnlocked(ProgressManager.getInstance().getUnlockedEntries(), id, null, variantId);
     }
 
     public static boolean isNew(Object entry) {
@@ -100,6 +99,10 @@ public class ClientFieldGuideManager implements ResourceManagerReloadListener {
 
     public static Component getEntryName(Object entry) {
         return ClientTextManager.getInstance().getEntryName(entry);
+    }
+
+    public static Component getEntryName(Object entry, String variantId) {
+        return ClientTextManager.getInstance().getEntryName(entry, variantId);
     }
 
     public static String getDefaultName(Object entry) {
@@ -299,7 +302,7 @@ public class ClientFieldGuideManager implements ResourceManagerReloadListener {
             biomes.addAll(diskBiomes);
         } else {
             Object coreEntry = EntryResolver.resolveCoreEntry(entry);
-            boolean isCobblemon = entryId.getNamespace().equals("cobblemon");
+            boolean isCobblemon = FieldGuideCobblemonCompat.isCobblemonId(entryId);
             if (!(coreEntry instanceof EntityType<?>) && !(coreEntry instanceof Block) && !isCobblemon) {
                 return Collections.emptyList();
             }
@@ -309,7 +312,7 @@ public class ClientFieldGuideManager implements ResourceManagerReloadListener {
                 biomes.addAll(visual.spawnBiomes);
             }
 
-            if (isCobblemon && Services.PLATFORM.isModLoaded("cobblemon")) {
+            if (isCobblemon) {
                 biomes.addAll(ClientFieldGuideCobblemonCompat.getCobblemonBiomes(entry));
             }
         }

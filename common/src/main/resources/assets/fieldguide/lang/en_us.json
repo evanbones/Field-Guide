@@ -343,6 +343,8 @@
   "fieldguide.block.minecraft/chorus_plant.description": "A plant-like feature that generates in the highlands of the outer End islands. They are formed in tall, coral-like patterns.",
 
   "fieldguide.atmospheric.aspen_sapling.description": "Home to the aspen parkland, these golden towering trees seems to watch from all sides. Don't worry though, they're harmless since the watchful logs are no different from regular logs. I think...",
+  "fieldguide.atmospheric.aspen_sapling.aspen.description": "Home to the aspen parkland, these golden towering trees seems to watch from all sides. Don't worry though, they're harmless since the watchful logs are no different from regular logs. I think...",
+  "fieldguide.atmospheric.aspen_sapling.green_aspen.description": "Home to the aspen parkland, these lime green towering trees seems to watch from all sides. Don't worry though, they're harmless since the watchful logs are no different from regular logs. I think...",
   "fieldguide.atmospheric.green_aspen_sapling.description": "Home to the aspen parkland, these lime green towering trees seems to watch from all sides. Don't worry though, they're harmless since the watchful logs are no different from regular logs. I think...",
   "fieldguide.atmospheric.currant_seedling.description": "A thin and low hanging tree, found in the kousa jungle. Currants grow off the leaves and can be picked, but the only way to plant this tree is to have currants fall from the leaves onto the ground.",
   "fieldguide.atmospheric.laurel_sapling.description": "Found in laurel forests, these short branching trees are rarely found with oranges. The saplings can be planted on sand, alongside grass, and grown as a thicker variant with four saplings.",
@@ -355,8 +357,11 @@
 
   "fieldguide.environmental.pine_sapling.description": "These trees are found in colder biomes. They are very tall, thin, and sometimes have knots. May rarely grow with a pinecone block.",
   "fieldguide.environmental.willow_sapling.description": "In swamp biomes, willow trees are found. Vines hang off the leaves and are sometimes naturally seen growing in shallow water. Can grow into a larger variant.",
-  "fieldguide.environmental.cheerful_plum_sapling.description": "Cheerful plum trees are found in blossom biomes, and have very similar variants with two other plum trees. They are large and branch out diagonally with bulky canopies.",
   "fieldguide.environmental.plum_sapling.description": "Plum trees are found in blossom biomes, and have very similar variants with two other plum trees. They are large and branch out diagonally with bulky canopies.",
+  "fieldguide.environmental.plum_sapling.plum.description": "Plum trees are found in blossom biomes, and have very similar variants with two other plum trees. They are large and branch out diagonally with bulky canopies.",
+  "fieldguide.environmental.plum_sapling.cheerful_plum.description": "Cheerful plum trees are found in blossom biomes, and have very similar variants with two other plum trees. They are large and branch out diagonally with bulky canopies.",
+  "fieldguide.environmental.plum_sapling.moody_plum.description": "Moody plum trees are found in blossom biomes, and have very similar variants with two other plum trees. They are large and branch out diagonally with bulky canopies.",
+  "fieldguide.environmental.cheerful_plum_sapling.description": "Cheerful plum trees are found in blossom biomes, and have very similar variants with two other plum trees. They are large and branch out diagonally with bulky canopies.",
   "fieldguide.environmental.moody_plum_sapling.description": "Moody plum trees are found in blossom biomes, and have very similar variants with two other plum trees. They are large and branch out diagonally with bulky canopies.",
   "fieldguide.environmental.pink_wisteria_sapling.description": "Found in the rare flower forest, pink wisterias are normally woody vines that grow up and branch out into three branch segments. Those segments hold colorful droopy leaves.",
   "fieldguide.environmental.purple_wisteria_sapling.description": "Found in the rare flower forest, purple wisterias are normally woody vines that grow up and branch out into three branch segments. Those segments hold colorful droopy leaves.",

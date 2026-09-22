@@ -4,7 +4,9 @@ import com.evandev.fieldguide.ModDataComponents;
 import com.evandev.fieldguide.api.AutoPopulateRegistry;
 import com.evandev.fieldguide.api.EntryVariantData;
 import com.evandev.fieldguide.api.GuideEntry;
+import com.evandev.fieldguide.client.ClientFieldGuideManager;
 import com.evandev.fieldguide.compat.cobblemon.ClientFieldGuideCobblemonCompat;
+import com.evandev.fieldguide.config.ServerConfig;
 import com.evandev.fieldguide.entry.EntryResolver;
 import com.evandev.fieldguide.network.RequestLootPacket;
 import com.evandev.fieldguide.platform.Services;
@@ -97,7 +99,11 @@ public class ClientLootManager {
 
     public List<ItemStack> getDrops(Object entry, String variantId) {
         List<ItemStack> rawDrops = new ArrayList<>();
-        if (entry instanceof GuideEntry ge && ge.hasVisualVariants() && variantId != null && !variantId.isEmpty()) {
+        boolean variantUnlocked = variantId == null || variantId.isEmpty()
+                || ServerConfig.get().unlockAllVariants
+                || ClientFieldGuideManager.isVariantUnlocked(entry, variantId);
+
+        if (entry instanceof GuideEntry ge && ge.hasVisualVariants() && variantId != null && !variantId.isEmpty() && variantUnlocked) {
             EntryVariantData variant = ge.visualVariants().stream()
                     .filter(v -> v.variantId().equals(variantId)).findFirst().orElse(null);
             if (variant != null) {
@@ -153,8 +159,9 @@ public class ClientLootManager {
         List<ItemStack> distinct = distinctLoot(rawDrops);
 
         ClientCategoryManager categoryManager = ClientCategoryManager.getInstance();
-        List<ResourceLocation> removals = categoryManager.getLootRemovals(entry, variantId);
-        List<ResourceLocation> additions = categoryManager.getLootAdditions(entry, variantId);
+        String effectiveVariantId = variantUnlocked ? variantId : null;
+        List<ResourceLocation> removals = categoryManager.getLootRemovals(entry, effectiveVariantId);
+        List<ResourceLocation> additions = categoryManager.getLootAdditions(entry, effectiveVariantId);
 
         if (!additions.isEmpty()) {
             for (ResourceLocation itemLoc : additions) {
@@ -207,5 +214,4 @@ public class ClientLootManager {
 
         return ItemStack.isSameItemSameComponents(copyA, copyB);
     }
-
 }

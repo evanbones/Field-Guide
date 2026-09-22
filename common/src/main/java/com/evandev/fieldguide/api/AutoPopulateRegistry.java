@@ -5,6 +5,7 @@ import com.evandev.fieldguide.ModTags;
 import com.evandev.fieldguide.compat.cobblemon.FieldGuideCobblemonCompat;
 import com.evandev.fieldguide.entry.EntryValidator;
 import com.evandev.fieldguide.platform.Services;
+import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -83,22 +84,34 @@ public class AutoPopulateRegistry {
                 ResourceLocation tagLocation = ResourceLocation.parse(tagPath);
 
                 TagKey<Block> blockTagKey = TagKey.create(Registries.BLOCK, tagLocation);
-                BuiltInRegistries.BLOCK.forEach(block -> BuiltInRegistries.BLOCK.getResourceKey(block)
-                        .flatMap(BuiltInRegistries.BLOCK::getHolder)
-                        .filter(h -> h.is(blockTagKey) && EntryValidator.isValidBlock(block, categoryId))
-                        .ifPresent(h -> results.put(BuiltInRegistries.BLOCK.getKey(block), block)));
+                BuiltInRegistries.BLOCK.getTag(blockTagKey).ifPresent(tag -> {
+                    for (Holder<Block> holder : tag) {
+                        Block block = holder.value();
+                        if (EntryValidator.isValidBlock(block, categoryId)) {
+                            results.put(BuiltInRegistries.BLOCK.getKey(block), block);
+                        }
+                    }
+                });
 
                 TagKey<Item> itemTagKey = TagKey.create(Registries.ITEM, tagLocation);
-                BuiltInRegistries.ITEM.forEach(item -> BuiltInRegistries.ITEM.getResourceKey(item)
-                        .flatMap(BuiltInRegistries.ITEM::getHolder)
-                        .filter(h -> h.is(itemTagKey) && EntryValidator.isValidItem(item, categoryId))
-                        .ifPresent(h -> results.putIfAbsent(BuiltInRegistries.ITEM.getKey(item), item)));
+                BuiltInRegistries.ITEM.getTag(itemTagKey).ifPresent(tag -> {
+                    for (Holder<Item> holder : tag) {
+                        Item item = holder.value();
+                        if (EntryValidator.isValidItem(item, categoryId)) {
+                            results.putIfAbsent(BuiltInRegistries.ITEM.getKey(item), item);
+                        }
+                    }
+                });
 
                 TagKey<EntityType<?>> entityTagKey = TagKey.create(Registries.ENTITY_TYPE, tagLocation);
-                BuiltInRegistries.ENTITY_TYPE.forEach(type -> BuiltInRegistries.ENTITY_TYPE.getResourceKey(type)
-                        .flatMap(BuiltInRegistries.ENTITY_TYPE::getHolder)
-                        .filter(h -> h.is(entityTagKey) && EntryValidator.isValidEntity(type, categoryId))
-                        .ifPresent(h -> results.putIfAbsent(BuiltInRegistries.ENTITY_TYPE.getKey(type), type)));
+                BuiltInRegistries.ENTITY_TYPE.getTag(entityTagKey).ifPresent(tag -> {
+                    for (Holder<EntityType<?>> holder : tag) {
+                        EntityType<?> type = holder.value();
+                        if (EntryValidator.isValidEntity(type, categoryId)) {
+                            results.putIfAbsent(BuiltInRegistries.ENTITY_TYPE.getKey(type), type);
+                        }
+                    }
+                });
 
                 List<Object> sortedResults = new ArrayList<>(results.values());
                 sortedResults.sort(Comparator.comparing(o -> getEntryId(o).toString()));

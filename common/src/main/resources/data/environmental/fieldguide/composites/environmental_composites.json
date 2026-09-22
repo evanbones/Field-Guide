@@ -18,27 +18,48 @@
       ]
     },
     {
-      "id": "environmental:cheerful_plum_sapling",
-      "structure_nbt": "environmental:cheerful_plum",
-      "components": [
-        "environmental:plum_log",
-        "environmental:cheerful_plum_leaves"
-      ]
-    },
-    {
       "id": "environmental:plum_sapling",
-      "structure_nbt": "environmental:plum",
+      "display": "environmental:plum_sapling",
       "components": [
+        "environmental:plum_sapling",
+        "environmental:cheerful_plum_sapling",
+        "environmental:moody_plum_sapling",
         "environmental:plum_log",
-        "environmental:plum_leaves"
-      ]
-    },
-    {
-      "id": "environmental:moody_plum_sapling",
-      "structure_nbt": "environmental:moody_plum",
-      "components": [
-        "environmental:plum_log",
+        "environmental:plum_leaves",
+        "environmental:cheerful_plum_leaves",
         "environmental:moody_plum_leaves"
+      ],
+      "visual_variants": [
+        {
+          "variant_id": "plum",
+          "display_name": "Neutral",
+          "structure_nbt": "environmental:plum",
+          "components": [
+            "environmental:plum_sapling",
+            "environmental:plum_log",
+            "environmental:plum_leaves"
+          ]
+        },
+        {
+          "variant_id": "cheerful_plum",
+          "display_name": "Cheerful",
+          "structure_nbt": "environmental:cheerful_plum",
+          "components": [
+            "environmental:cheerful_plum_sapling",
+            "environmental:plum_log",
+            "environmental:cheerful_plum_leaves"
+          ]
+        },
+        {
+          "variant_id": "moody_plum",
+          "display_name": "Moody",
+          "structure_nbt": "environmental:moody_plum",
+          "components": [
+            "environmental:moody_plum_sapling",
+            "environmental:plum_log",
+            "environmental:moody_plum_leaves"
+          ]
+        }
       ]
     },
     {

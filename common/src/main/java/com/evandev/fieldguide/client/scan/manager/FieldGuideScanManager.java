@@ -6,6 +6,7 @@ import com.evandev.fieldguide.api.GuideEntry;
 import com.evandev.fieldguide.client.ClientFieldGuideManager;
 import com.evandev.fieldguide.client.FieldGuideClient;
 import com.evandev.fieldguide.client.progress.ProgressManager;
+import com.evandev.fieldguide.client.scan.util.ScanContextHelper;
 import com.evandev.fieldguide.compat.cobblemon.FieldGuideCobblemonCompat;
 import com.evandev.fieldguide.config.ClientConfig;
 import com.evandev.fieldguide.config.ServerConfig;
@@ -24,10 +25,12 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.BlockHitResult;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.Objects;
+import java.util.*;
 
 public class FieldGuideScanManager {
     public static final int FADE_DURATION = 10;
@@ -41,28 +44,77 @@ public class FieldGuideScanManager {
     }
 
     public static boolean needsVariantScan(Object entryForTarget, ResourceLocation scannedRawId) {
+        return needsVariantScan(entryForTarget, scannedRawId, null, null);
+    }
+
+    public static boolean needsVariantScan(Object entryForTarget, ResourceLocation scannedRawId, @Nullable Level level, @Nullable BlockPos pos) {
         if (!ProgressManager.getInstance().isUnlocked(entryForTarget)) return true;
         if (ServerConfig.get().unlockAllVariants) return false;
         if (entryForTarget instanceof GuideEntry ge && ge.hasVisualVariants()) {
-            String variantId = resolveVisualVariantId(ge, scannedRawId);
+            String variantId = resolveVisualVariantId(ge, scannedRawId, level, pos);
             return !variantId.isEmpty() && !ClientFieldGuideManager.isVariantUnlocked(ge, variantId);
         }
         return false;
     }
 
-    static String resolveVisualVariantId(GuideEntry entry, ResourceLocation scannedId) {
+    public static String resolveVisualVariantId(GuideEntry entry, ResourceLocation scannedId, @Nullable Level level, @Nullable BlockPos pos) {
         if (entry.visualVariants() == null || scannedId == null) return "";
         String target = scannedId.toString();
+
+        List<EntryVariantData> matchingVariants = new ArrayList<>();
         for (EntryVariantData vd : entry.visualVariants()) {
             if (target.equals(vd.variantId())) return vd.variantId();
-            if (vd.displayId() != null && target.equals(vd.displayId().toString())) return vd.variantId();
-            for (String comp : vd.components()) {
-                int pipe = comp.indexOf('|');
-                String id = pipe >= 0 ? comp.substring(0, pipe) : comp;
-                if (target.equals(id)) return vd.variantId();
+            if (vd.containsComponent(target)) {
+                matchingVariants.add(vd);
             }
         }
-        return "";
+
+        if (matchingVariants.isEmpty()) return "";
+        if (matchingVariants.size() == 1) return matchingVariants.getFirst().variantId();
+
+        // If multiple variants share this component, disambiguate using nearby blocks
+        if (level != null && pos != null) {
+            Map<EntryVariantData, Integer> scores = new HashMap<>();
+
+            BlockPos canopyPos = ScanContextHelper.traceTreeCanopy(level, pos, 32, upId -> {
+                for (EntryVariantData vd : matchingVariants) {
+                    if (vd.containsComponent(upId)) return true;
+                }
+                return false;
+            });
+
+            ScanContextHelper.sampleNearbyBlocks(level, pos, canopyPos, (p, state) -> {
+                ResourceLocation nearbyBlockId = BuiltInRegistries.BLOCK.getKey(state.getBlock());
+                String nearbyStr = nearbyBlockId.toString();
+
+                for (EntryVariantData vd : matchingVariants) {
+                    if (vd.containsComponent(nearbyStr) && !nearbyStr.equals(target)) {
+                        scores.put(vd, scores.getOrDefault(vd, 0) + 1);
+                    }
+                }
+            });
+
+            EntryVariantData best = null;
+            int maxScore = 0;
+            for (Map.Entry<EntryVariantData, Integer> entryScore : scores.entrySet()) {
+                if (entryScore.getValue() > maxScore) {
+                    maxScore = entryScore.getValue();
+                    best = entryScore.getKey();
+                }
+            }
+            if (best != null) {
+                return best.variantId();
+            }
+        }
+
+        // If still ambiguous, prioritize any variant that has not yet been unlocked
+        for (EntryVariantData vd : matchingVariants) {
+            if (!ClientFieldGuideManager.isVariantUnlocked(entry, vd.variantId())) {
+                return vd.variantId();
+            }
+        }
+
+        return matchingVariants.getFirst().variantId();
     }
 
     public void onClientTick(Minecraft minecraft) {
@@ -190,7 +242,7 @@ public class FieldGuideScanManager {
             BlockPos posContext = (foundTarget instanceof Block) ? blockHit.getBlockPos() : ((Entity) foundTarget).blockPosition();
             Object baseTarget = foundTarget;
             if (foundTarget instanceof Entity entity) {
-                baseTarget = (Services.PLATFORM.isModLoaded("cobblemon") && FieldGuideCobblemonCompat.isPokemon(entity))
+                baseTarget = FieldGuideCobblemonCompat.isPokemon(entity)
                         ? FieldGuideCobblemonCompat.getPokemonEntryId(entity)
                         : entity.getType();
             }
@@ -269,17 +321,20 @@ public class FieldGuideScanManager {
 
             boolean compositeVariants = targetKey instanceof GuideEntry ge && ge.hasVisualVariants();
 
+            BlockPos targetBlockPos = (foundTarget instanceof Block) ? state.getScanningPos() : (foundTarget instanceof Entity entity ? entity.blockPosition() : null);
+            int targetEntityId = (foundTarget instanceof Entity) ? ((Entity) foundTarget).getId() : 0;
+
             if (foundTarget instanceof Entity entity) {
                 if (entity instanceof ItemEntity itemEntity) {
                     var item = itemEntity.getItem().getItem();
                     scannedTargetId = ClientFieldGuideManager.getEntryId(item);
                     if (compositeVariants) {
-                        variantId = resolveVisualVariantId((GuideEntry) targetKey, BuiltInRegistries.ITEM.getKey(item));
+                        variantId = resolveVisualVariantId((GuideEntry) targetKey, BuiltInRegistries.ITEM.getKey(item), minecraft.level, targetBlockPos);
                     }
                 } else {
                     scannedTargetId = ClientFieldGuideManager.getEntryId(entity.getType());
                     if (compositeVariants) {
-                        variantId = resolveVisualVariantId((GuideEntry) targetKey, BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()));
+                        variantId = resolveVisualVariantId((GuideEntry) targetKey, BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()), minecraft.level, targetBlockPos);
                     } else if (entity instanceof Mob mob) {
                         variantId = FieldGuideVariantManager.getTrackedVariantId(mob);
                         if (!variantId.isEmpty()) {
@@ -290,13 +345,11 @@ public class FieldGuideScanManager {
             } else if (foundTarget instanceof Block block) {
                 scannedTargetId = ClientFieldGuideManager.getEntryId(block);
                 if (compositeVariants) {
-                    variantId = resolveVisualVariantId((GuideEntry) targetKey, BuiltInRegistries.BLOCK.getKey(block));
+                    variantId = resolveVisualVariantId((GuideEntry) targetKey, BuiltInRegistries.BLOCK.getKey(block), minecraft.level, targetBlockPos);
                 }
             } else {
                 scannedTargetId = ClientFieldGuideManager.getEntryId(foundTarget);
             }
-            BlockPos targetBlockPos = (foundTarget instanceof Block) ? state.getScanningPos() : null;
-            int targetEntityId = (foundTarget instanceof Entity) ? ((Entity) foundTarget).getId() : 0;
 
             Services.NETWORK.sendToServer(new ScanUnlockPacket(entryId, variantId, scannedTargetId, targetBlockPos, targetEntityId));
         }

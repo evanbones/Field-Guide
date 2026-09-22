@@ -4,6 +4,7 @@ import com.evandev.fieldguide.Constants;
 import com.evandev.fieldguide.api.EntryVariantData;
 import com.evandev.fieldguide.api.GuideEntry;
 import com.evandev.fieldguide.client.progress.ProgressManager;
+import com.evandev.fieldguide.compat.cobblemon.FieldGuideCobblemonCompat;
 import com.evandev.fieldguide.compat.itemdescriptions.ItemDescriptionsCompat;
 import com.evandev.fieldguide.config.ServerConfig;
 import com.evandev.fieldguide.entry.EntryResolver;
@@ -97,12 +98,8 @@ public class ClientTextManager {
         String custom = ProgressManager.getInstance().getCustomDescription(entry, variantId);
         if (custom != null) return custom;
 
-        if (id.getNamespace().equals("fieldguide") && id.getPath().startsWith("cobblemon/")) {
-            String species = id.getPath().substring("cobblemon/".length());
-            int underscore = species.lastIndexOf('_');
-            if (underscore != -1) species = species.substring(0, underscore);
-
-            String descKey = "cobblemon.species." + species + ".desc";
+        if (FieldGuideCobblemonCompat.isCobblemonId(id)) {
+            String descKey = FieldGuideCobblemonCompat.getSpeciesDescriptionKey(id);
             if (I18n.exists(descKey)) return I18n.get(descKey);
         }
 
@@ -172,12 +169,8 @@ public class ClientTextManager {
         ResourceLocation prefixedId = EntryResolver.getEntryId(entry, true);
 
         if (id != null && prefixedId != null) {
-            if (id.getNamespace().equals("fieldguide") && id.getPath().startsWith("cobblemon/")) {
-                String species = id.getPath().substring("cobblemon/".length());
-                int underscore = species.lastIndexOf('_');
-                if (underscore != -1) species = species.substring(0, underscore);
-
-                String nameKey = "cobblemon.species." + species + ".name";
+            if (FieldGuideCobblemonCompat.isCobblemonId(id)) {
+                String nameKey = FieldGuideCobblemonCompat.getSpeciesTranslationKey(id);
                 if (I18n.exists(nameKey)) {
                     return Component.translatable(nameKey);
                 }

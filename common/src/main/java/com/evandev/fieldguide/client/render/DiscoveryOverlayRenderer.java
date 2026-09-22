@@ -388,7 +388,7 @@ public final class DiscoveryOverlayRenderer {
                 return false;
             }
             ResourceLocation rawId = BuiltInRegistries.BLOCK.getKey(block);
-            if (!FieldGuideScanManager.needsVariantScan(entry, rawId)) {
+            if (!FieldGuideScanManager.needsVariantScan(entry, rawId, mc.level, pos)) {
                 return false;
             }
             ResourceLocation entryId = ClientFieldGuideManager.getEntryId(entry);
@@ -411,7 +411,7 @@ public final class DiscoveryOverlayRenderer {
             ResourceLocation id = entity instanceof ItemEntity itemEntity
                     ? BuiltInRegistries.ITEM.getKey(itemEntity.getItem().getItem())
                     : BuiltInRegistries.ENTITY_TYPE.getKey(type);
-            if (!FieldGuideScanManager.needsVariantScan(entry, id)) {
+            if (!FieldGuideScanManager.needsVariantScan(entry, id, mc.level, entity.blockPosition())) {
                 return false;
             }
             ResourceLocation entryId = ClientFieldGuideManager.getEntryId(entry);

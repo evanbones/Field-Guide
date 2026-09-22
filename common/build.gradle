@@ -24,7 +24,7 @@ dependencies {
     
     compileOnly "maven.modrinth:entitytexturefeatures:${etf_version}-neoforge-1.21"
     compileOnly "maven.modrinth:entity-model-features:${emf_version}-neoforge-1.21"
-    compileOnly "maven.modrinth:reliable-remover:${reliable_remover_version}-neoforge-1.21.1"
+    compileOnly "maven.modrinth:reliable-remover:${reliable_remover_version}-neoforge"
     compileOnly "maven.modrinth:exposure:${exposure_neoforge_version}"
     compileOnly "maven.modrinth:mixed-litter:${mixed_litter_version}"
     compileOnly "com.cobblemon:neoforge:${cobblemon_version}"

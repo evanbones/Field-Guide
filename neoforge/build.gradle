@@ -59,7 +59,7 @@ dependencies {
     compileOnly "maven.modrinth:entity-model-features:${emf_version}-neoforge-1.21"
 
     // Reliable Remover
-    compileOnly "maven.modrinth:reliable-remover:${reliable_remover_version}-neoforge-1.21.1"
+    compileOnly "maven.modrinth:reliable-remover:${reliable_remover_version}-neoforge"
 
     // Exposure
     compileOnly "maven.modrinth:exposure:${exposure_neoforge_version}"

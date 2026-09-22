@@ -35,10 +35,38 @@
     },
     {
       "id": "atmospheric:aspen_sapling",
-      "structure_nbt": "atmospheric:aspen",
+      "display": "atmospheric:aspen_sapling",
       "components": [
+        "atmospheric:aspen_sapling",
+        "atmospheric:green_aspen_sapling",
         "atmospheric:aspen_log",
-        "atmospheric:aspen_leaves"
+        "atmospheric:watchful_aspen_log",
+        "atmospheric:aspen_leaves",
+        "atmospheric:green_aspen_leaves"
+      ],
+      "visual_variants": [
+        {
+          "variant_id": "aspen",
+          "display_name": "Golden",
+          "structure_nbt": "atmospheric:aspen",
+          "components": [
+            "atmospheric:aspen_sapling",
+            "atmospheric:aspen_log",
+            "atmospheric:watchful_aspen_log",
+            "atmospheric:aspen_leaves"
+          ]
+        },
+        {
+          "variant_id": "green_aspen",
+          "display_name": "Green",
+          "structure_nbt": "atmospheric:green_aspen",
+          "components": [
+            "atmospheric:green_aspen_sapling",
+            "atmospheric:aspen_log",
+            "atmospheric:watchful_aspen_log",
+            "atmospheric:green_aspen_leaves"
+          ]
+        }
       ]
     },
     {
@@ -55,14 +83,6 @@
       "components": [
         "atmospheric:grimwood_log",
         "atmospheric:grimwood_leaves"
-      ]
-    },
-    {
-      "id": "atmospheric:green_aspen_sapling",
-      "structure_nbt": "atmospheric:green_aspen",
-      "components": [
-        "atmospheric:aspen_log",
-        "atmospheric:green_aspen_leaves"
       ]
     },
     {

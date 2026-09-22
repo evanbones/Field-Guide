@@ -34,7 +34,7 @@ dependencies {
     modCompileOnly "maven.modrinth:entity-model-features:${emf_version}-fabric-1.21"
 
     // Reliable Remover
-    modCompileOnly "maven.modrinth:reliable-remover:${reliable_remover_version}-fabric-1.21.1"
+    modCompileOnly "maven.modrinth:reliable-remover:${reliable_remover_version}-fabric"
 
     // Exposure
     modImplementation "maven.modrinth:exposure:${exposure_fabric_version}"

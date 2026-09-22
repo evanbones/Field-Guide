@@ -49,7 +49,7 @@ public class ScanVerifier {
                 return false;
             }
 
-            if (Services.PLATFORM.isModLoaded("cobblemon") && FieldGuideCobblemonCompat.isPokemon(entity)) {
+            if (FieldGuideCobblemonCompat.isPokemon(entity)) {
                 ResourceLocation pokemonEntryId = FieldGuideCobblemonCompat.getPokemonEntryId(entity);
                 if (targetBelongsToEntry(pokemonEntryId, entryId)) return true;
                 return FieldGuideCobblemonCompat.getSpeciesName(pokemonEntryId).equals(FieldGuideCobblemonCompat.getSpeciesName(entryId));

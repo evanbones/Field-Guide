@@ -95,6 +95,12 @@ public record GuideEntry(
         return visualVariants != null && visualVariants.size() > 1;
     }
 
+    public boolean containsComponent(ResourceLocation componentId) {
+        if (componentId == null) return false;
+        if (displayId != null && displayId.equals(componentId)) return true;
+        return childEntries != null && childEntries.contains(componentId);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

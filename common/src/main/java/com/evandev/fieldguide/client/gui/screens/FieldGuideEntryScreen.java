@@ -17,15 +17,14 @@ import com.evandev.fieldguide.client.ClientFieldGuideManager;
 import com.evandev.fieldguide.client.FieldGuideClient;
 import com.evandev.fieldguide.client.data.EntryVisual;
 import com.evandev.fieldguide.client.gui.util.Bounds;
+import com.evandev.fieldguide.client.gui.util.EntryAttributesRenderer;
+import com.evandev.fieldguide.client.gui.util.EntryBiomeWidgetHelper;
 import com.evandev.fieldguide.client.gui.util.EntryRenderHelper;
-import com.evandev.fieldguide.client.gui.widget.FieldGuideSearchBox;
-import com.evandev.fieldguide.client.gui.widget.FriendMoonWidget;
-import com.evandev.fieldguide.client.gui.widget.PageTurnButton;
-import com.evandev.fieldguide.client.gui.widget.PaginatedGridWidget;
-import com.evandev.fieldguide.client.gui.widget.VariantOverviewWidget;
+import com.evandev.fieldguide.client.gui.widget.*;
 import com.evandev.fieldguide.client.manager.ClientTextManager;
 import com.evandev.fieldguide.client.progress.ProgressManager;
 import com.evandev.fieldguide.compat.cobblemon.ClientFieldGuideCobblemonCompat;
+import com.evandev.fieldguide.compat.cobblemon.FieldGuideCobblemonCompat;
 import com.evandev.fieldguide.compat.exposure.ClientExposureCompat;
 import com.evandev.fieldguide.compat.nomansland.NoMansLandCompat;
 import com.evandev.fieldguide.compat.scholar.ScholarCompat;
@@ -61,7 +60,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.BufferedReader;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -91,8 +89,6 @@ public class FieldGuideEntryScreen extends BookScreen {
     private float hoverScale = 1.0f;
     private long lastRenderTime = 0;
 
-    private AbstractWidget nameWidget;
-    private AbstractWidget variantWidget;
     private AbstractWidget descriptionWidget;
     private List<GuideAttribute> activeAttributes = new ArrayList<>();
 
@@ -130,8 +126,7 @@ public class FieldGuideEntryScreen extends BookScreen {
     }
 
     private boolean isCobblemon(Object entry) {
-        ResourceLocation id = ClientFieldGuideManager.getEntryId(entry);
-        return id != null && id.getNamespace().equals("fieldguide") && id.getPath().startsWith("cobblemon/");
+        return FieldGuideCobblemonCompat.isCobblemonEntry(entry);
     }
 
     public void setInitialVariant(String variantId) {
@@ -308,9 +303,9 @@ public class FieldGuideEntryScreen extends BookScreen {
         if (unlocked) {
             String initialName = ClientFieldGuideManager.getEntryName(entry).getString();
             if (!ServerConfig.get().disableEditingNames) {
-                this.nameWidget = ScholarCompat.createTextField(this.font, textX, titleY, textAreaWidth, LINE_HEIGHT, initialName, ClientConfig.get().getTextTitleColorInt(), textAreaWidth, FieldGuideLimits.MAX_ENTRY_NAME_LENGTH,
+                AbstractWidget nameWidget = ScholarCompat.createTextField(this.font, textX, titleY, textAreaWidth, LINE_HEIGHT, initialName, ClientConfig.get().getTextTitleColorInt(), textAreaWidth, FieldGuideLimits.MAX_ENTRY_NAME_LENGTH,
                         newName -> ClientFieldGuideManager.setCustomName(entry, newName), false);
-                this.addRenderableWidget(this.nameWidget);
+                this.addRenderableWidget(nameWidget);
             }
 
             int currentY = titleY + LINE_HEIGHT + 2;
@@ -324,14 +319,14 @@ public class FieldGuideEntryScreen extends BookScreen {
                         : FieldGuideVariantManager.getVariantDisplayName(variant).getString();
                 String initialVariantName = customVariantName != null ? customVariantName : defaultVariantName;
 
-                this.variantWidget = ScholarCompat.createTextField(this.font, textX, currentY, textAreaWidth, LINE_HEIGHT, initialVariantName, ClientConfig.get().getTextMutedColorInt(), textAreaWidth, FieldGuideLimits.MAX_ENTRY_NAME_LENGTH,
+                AbstractWidget variantWidget = ScholarCompat.createTextField(this.font, textX, currentY, textAreaWidth, LINE_HEIGHT, initialVariantName, ClientConfig.get().getTextMutedColorInt(), textAreaWidth, FieldGuideLimits.MAX_ENTRY_NAME_LENGTH,
                         newName -> {
                             ResourceLocation entryId = ClientFieldGuideManager.getEntryId(entry);
                             if (entryId != null) {
                                 ProgressManager.getInstance().setCustomVariantName(entryId, variantId, newName);
                             }
                         }, false);
-                this.addRenderableWidget(this.variantWidget);
+                this.addRenderableWidget(variantWidget);
                 currentY += LINE_HEIGHT;
             }
 
@@ -704,7 +699,7 @@ public class FieldGuideEntryScreen extends BookScreen {
                     EntryRenderHelper.renderBlock(guiGraphics, block, xPos, yPos, 40.0F, unlocked, true, 1.0f);
                 }
             }
-        } else if (entry instanceof GuideEntry ge && ge.isVirtual() && ge.virtualData() != null && ge.virtualData().virtualType().equals("cobblemon")) {
+        } else if (entry instanceof GuideEntry ge && FieldGuideCobblemonCompat.isCobblemonEntry(ge)) {
             if (!hideEntity) {
                 EntryRenderHelper.renderCobblemon(guiGraphics, ge, xPos, yPos, 112, 112, unlocked, true, 1.0f);
             }
@@ -845,60 +840,19 @@ public class FieldGuideEntryScreen extends BookScreen {
         if (ServerConfig.get().disableBiomeDisplay || !Services.PLATFORM.isModLoaded("immersiveoverlays")) return;
 
         if (unlocked && !spawnBiomes.isEmpty()) {
-            int itemSize = 20;
-            this.addRenderableWidget(new PaginatedGridWidget<>(this.rightPageBounds.left() + 2, this.rightPageBounds.bottom() - 33, this.rightPageBounds.width() - 4, itemSize, 5, itemSize, 0, new ArrayList<>(spawnBiomes), (graphics, item, x, y, mouseX, mouseY) -> {
-                var resourceManager = Minecraft.getInstance().getResourceManager();
-
-                ResourceLocation baseTexture = ResourceLocation.fromNamespaceAndPath(item.getNamespace(), "textures/immersiveoverlays/" + item.getPath() + ".png");
-                ResourceLocation txtFile = ResourceLocation.fromNamespaceAndPath(item.getNamespace(), "textures/immersiveoverlays/" + item.getPath() + ".txt");
-
-                ResourceLocation renderTexture = baseTexture;
-
-                if (resourceManager.getResource(txtFile).isPresent()) {
-                    try (BufferedReader reader = resourceManager.getResource(txtFile).get().openAsReader()) {
-                        String redirectStr = reader.readLine();
-                        if (redirectStr != null && !redirectStr.trim().isEmpty()) {
-                            ResourceLocation redirectLoc = ResourceLocation.parse(redirectStr.trim());
-                            renderTexture = ResourceLocation.fromNamespaceAndPath(redirectLoc.getNamespace(), "textures/immersiveoverlays/" + redirectLoc.getPath() + ".png");
-                        }
-                    } catch (Exception e) {
-                        Constants.LOG.error("Failed to read Immersive Overlay redirect file for biome {}", item, e);
-                    }
-                }
-
-                boolean mouseOver = Bounds.isMouseOver(mouseX, mouseY, x, y, itemSize, itemSize) && (this.variantOverviewWidget == null || !this.variantOverviewWidget.isMouseOver(mouseX, mouseY));
-                int backgroundOffset = mouseOver ? itemSize : 0;
-                graphics.blit(Constants.WIDGETS_TEXTURE, x, y, 20, 64 + backgroundOffset, itemSize, itemSize);
-                int offset = (itemSize - 16) / 2;
-
-                if (resourceManager.getResource(renderTexture).isPresent()) {
-                    graphics.blit(renderTexture, x + offset, y + offset, 0, 0, 16, 16, 16, 16);
-                } else if (resourceManager.getResource(baseTexture).isPresent()) {
-                    graphics.blit(baseTexture, x + offset, y + offset, 0, 0, 16, 16, 16, 16);
-                } else {
-                    ResourceLocation plainsTexture = ResourceLocation.withDefaultNamespace("textures/immersiveoverlays/plains.png");
-                    if (resourceManager.getResource(plainsTexture).isPresent()) {
-                        graphics.blit(plainsTexture, x + offset, y + offset, 0, 0, 16, 16, 16, 16);
-                    }
-                }
-
-                if (Bounds.isMouseOver(mouseX, mouseY, x + offset, y + offset, 16, 16)) {
-                    graphics.renderTooltip(this.font, Component.translatable("biome." + item.getNamespace() + "." + item.getPath()), mouseX, mouseY);
-                }
-            }, item -> {
-                if (this.minecraft != null) this.minecraft.setScreen(new FieldGuideCategoryScreen("=!" + item, this));
-            }));
+            this.addRenderableWidget(EntryBiomeWidgetHelper.createBiomeGridWidget(
+                    this.rightPageBounds,
+                    this.spawnBiomes,
+                    this.font,
+                    () -> this.variantOverviewWidget,
+                    this
+            ));
         }
     }
 
     private void setupDropWidget(boolean unlocked) {
         if (ServerConfig.get().disableLootDisplay) return;
-
         List<ItemStack> drops = loadedDrops;
-
-        if (unlocked && drops.isEmpty() && isCobblemon(entry)) {
-            drops = ClientFieldGuideCobblemonCompat.getCobblemonDrops(entry);
-        }
 
         if (!drops.isEmpty()) {
             int dropItemSize = 20;
@@ -986,14 +940,6 @@ public class FieldGuideEntryScreen extends BookScreen {
     private void renderDynamicAttributes(GuiGraphics guiGraphics, int mouseX, int mouseY) {
         if (activeAttributes.isEmpty()) return;
 
-        RenderSystem.setShaderColor(1, 1, 1, 1);
-
-        int iconSize = 9;
-        int iconSpacing = 2;
-        int gap = 1;
-        int horizontalPadding = 4;
-        int barHeight = 15;
-
         int titleHeight = 24;
         int titleWithVariantHeight = 35;
 
@@ -1004,29 +950,8 @@ public class FieldGuideEntryScreen extends BookScreen {
             currentY += titleHeight;
         }
 
-        int drawX = this.rightPageBounds.left() + 6 - horizontalPadding;
-        int iconYOffset = 3;
-        int textYOffset = 4;
-
-        for (GuideAttribute attr : activeAttributes) {
-            RenderSystem.setShaderTexture(0, attr.icon());
-            guiGraphics.blit(attr.icon(), drawX + horizontalPadding, currentY + iconYOffset + (iconSize - attr.height()) / 2, attr.u(), attr.v(), attr.width(), attr.height(), attr.textureWidth(), attr.textureHeight());
-            int textWidth = 0;
-            if (attr.value() != null) {
-                textWidth = font.width(attr.value());
-                guiGraphics.drawString(this.font, attr.value(), drawX + horizontalPadding + attr.width() + iconSpacing, currentY + textYOffset, ClientConfig.get().getTextColorInt(), false);
-                textWidth += iconSpacing;
-            }
-            Bounds attrBounds = new Bounds(drawX, currentY, attr.width() + horizontalPadding * 2 + textWidth, barHeight);
-
-            drawX += attrBounds.width();
-            guiGraphics.blit(Constants.ATTRIBUTES_SEPARATOR, drawX, currentY, 0, 0, 1, 15, 1, 15);
-            drawX += gap;
-
-            if (attrBounds.contains(mouseX, mouseY)) {
-                this.setTooltipForNextRenderPass(attr.tooltip());
-            }
-        }
+        int drawX = this.rightPageBounds.left() + 6 - 4;
+        EntryAttributesRenderer.renderAttributes(guiGraphics, this.font, activeAttributes, currentY, drawX, mouseX, mouseY, this::setTooltipForNextRenderPass);
     }
 
     private Tooltip createCopyTooltip(boolean canCopy) {

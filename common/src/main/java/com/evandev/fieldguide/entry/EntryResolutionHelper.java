@@ -1,8 +1,7 @@
 package com.evandev.fieldguide.entry;
 
-import com.evandev.fieldguide.Constants;
 import com.evandev.fieldguide.api.*;
-import com.evandev.fieldguide.platform.Services;
+import com.evandev.fieldguide.compat.cobblemon.FieldGuideCobblemonCompat;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
@@ -111,19 +110,39 @@ public class EntryResolutionHelper {
         return resolved;
     }
 
+    private static boolean matchesId(ResourceLocation id, ResourceLocation rawId, ResourceLocation candidate) {
+        if (candidate == null) return false;
+        return id.equals(candidate) || (rawId != null && rawId.equals(EntryResolver.getRawId(candidate)));
+    }
+
     private static CompositeDefinition findCompositeFor(ResourceLocation id, List<CompositeDefinition> composites) {
         if (id == null) return null;
         ResourceLocation rawId = EntryResolver.getRawId(id);
-        for (CompositeDefinition def : composites) {
+        for (int i = composites.size() - 1; i >= 0; i--) {
+            CompositeDefinition def = composites.get(i);
             ResourceLocation mainId = def.displayId() != null ? def.displayId() : def.id();
-            ResourceLocation rawMainId = EntryResolver.getRawId(mainId);
-            if (id.equals(mainId) || (rawId != null && rawId.equals(rawMainId))) {
+            if (matchesId(id, rawId, mainId)) {
                 return def;
             }
             if (def.components() != null) {
                 for (ResourceLocation comp : def.components()) {
-                    if (id.equals(comp) || (rawId != null && rawId.equals(EntryResolver.getRawId(comp)))) {
+                    if (matchesId(id, rawId, comp)) {
                         return def;
+                    }
+                }
+            }
+            if (def.visualVariants() != null) {
+                for (EntryVariantData variant : def.visualVariants()) {
+                    if (matchesId(id, rawId, variant.displayId())) {
+                        return def;
+                    }
+                    if (variant.components() != null) {
+                        for (String compStr : variant.components()) {
+                            ResourceLocation compLoc = ResourceLocation.tryParse(compStr);
+                            if (matchesId(id, rawId, compLoc)) {
+                                return def;
+                            }
+                        }
                     }
                 }
             }
@@ -161,6 +180,21 @@ public class EntryResolutionHelper {
                     resolveSingleEntryWithHint(compId, categoryId, hint).ifPresent(resolved -> components.add(compId));
                 }
             }
+            if (def.visualVariants() != null) {
+                for (EntryVariantData variant : def.visualVariants()) {
+                    if (variant.displayId() != null && !components.contains(variant.displayId())) {
+                        resolveSingleEntryWithHint(variant.displayId(), categoryId, hint).ifPresent(resolved -> components.add(variant.displayId()));
+                    }
+                    if (variant.components() != null) {
+                        for (String compStr : variant.components()) {
+                            ResourceLocation compLoc = ResourceLocation.tryParse(compStr);
+                            if (compLoc != null && !components.contains(compLoc)) {
+                                resolveSingleEntryWithHint(compLoc, categoryId, hint).ifPresent(resolved -> components.add(compLoc));
+                            }
+                        }
+                    }
+                }
+            }
 
             boolean hasStructure = def.structureNbt() != null || (def.stackedBlocks() != null && !def.stackedBlocks().isEmpty());
             StructureData structureData = hasStructure ? new StructureData(def.structureNbt(), def.stackedBlocks()) : null;
@@ -173,7 +207,7 @@ public class EntryResolutionHelper {
     }
 
     public static Optional<Object> resolveSingleEntry(ResourceLocation id, ResourceLocation categoryId, String strategyHint) {
-        if (Services.PLATFORM.isModLoaded("cobblemon") && id.getNamespace().equals(Constants.MOD_ID) && id.getPath().startsWith("cobblemon/")) {
+        if (FieldGuideCobblemonCompat.isCobblemonId(id)) {
             return Optional.of(new GuideEntry(id, null, null, EntryKind.NORMAL, true, false, null, null, null, null, new VirtualData("cobblemon"), EntryUnlockData.DEFAULT, null, null));
         }
 

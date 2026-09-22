@@ -7,10 +7,10 @@ import com.evandev.fieldguide.api.GuideEntry;
 import com.evandev.fieldguide.client.ClientFieldGuideManager;
 import com.evandev.fieldguide.client.manager.ClientCategoryManager;
 import com.evandev.fieldguide.client.progress.ProgressManager;
+import com.evandev.fieldguide.client.scan.util.ScanContextHelper;
 import com.evandev.fieldguide.compat.cobblemon.FieldGuideCobblemonCompat;
 import com.evandev.fieldguide.config.ServerConfig;
 import com.evandev.fieldguide.entry.EntryResolver;
-import com.evandev.fieldguide.platform.Services;
 import com.evandev.fieldguide.util.ScanRayTraceUtil;
 import com.evandev.fieldguide.variant.FieldGuideVariantManager;
 import net.minecraft.client.Minecraft;
@@ -29,7 +29,10 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.*;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public class FieldGuideRaytracer {
     private static final FieldGuideRaytracer INSTANCE = new FieldGuideRaytracer();
@@ -87,7 +90,7 @@ public class FieldGuideRaytracer {
             Object actualTargetKey = type;
             if (hitEntity instanceof ItemEntity itemEntity) {
                 actualTargetKey = itemEntity.getItem().getItem();
-            } else if (Services.PLATFORM.isModLoaded("cobblemon") && FieldGuideCobblemonCompat.isPokemon(hitEntity)) {
+            } else if (FieldGuideCobblemonCompat.isPokemon(hitEntity)) {
                 actualTargetKey = FieldGuideCobblemonCompat.getPokemonEntryId(hitEntity);
             } else if (redirectId != null) {
                 Object redirected = EntryResolver.resolveRegistryObject(redirectId, EntryResolver.RegistryType.ENTITY, EntryResolver.RegistryType.BLOCK);
@@ -139,7 +142,7 @@ public class FieldGuideRaytracer {
                     ResourceLocation scannedRawId = (hitEntity instanceof ItemEntity ie)
                             ? BuiltInRegistries.ITEM.getKey(ie.getItem().getItem())
                             : BuiltInRegistries.ENTITY_TYPE.getKey(hitEntity.getType());
-                    needsScan = FieldGuideScanManager.needsVariantScan(ge, scannedRawId);
+                    needsScan = FieldGuideScanManager.needsVariantScan(ge, scannedRawId, minecraft.level, hitEntity.blockPosition());
                 } else {
                     needsScan = !ProgressManager.getInstance().isUnlocked(entryForTarget);
                     if (hitEntity instanceof Mob mob && !ServerConfig.get().unlockAllVariants) {
@@ -167,7 +170,7 @@ public class FieldGuideRaytracer {
 
                 entryForTarget = getContextAwareEntry(actualTargetKey, minecraft, blockHit.getBlockPos());
                 Category cat = ClientFieldGuideManager.getInstance().getCategoryForEntry(entryForTarget);
-                if (entryForTarget != null && cat != null && FieldGuideScanManager.needsVariantScan(entryForTarget, originalId)) {
+                if (entryForTarget != null && cat != null && FieldGuideScanManager.needsVariantScan(entryForTarget, originalId, minecraft.level, blockHit.getBlockPos())) {
                     foundTarget = block;
                 }
             }
@@ -187,7 +190,7 @@ public class FieldGuideRaytracer {
 
                 entryForTarget = getContextAwareEntry(actualTargetKey, minecraft, firstBlockHit.getBlockPos());
                 Category cat = ClientFieldGuideManager.getInstance().getCategoryForEntry(entryForTarget);
-                if (entryForTarget != null && cat != null && FieldGuideScanManager.needsVariantScan(entryForTarget, originalId)) {
+                if (entryForTarget != null && cat != null && FieldGuideScanManager.needsVariantScan(entryForTarget, originalId, minecraft.level, firstBlockHit.getBlockPos())) {
                     foundTarget = block;
                     blockHit = firstBlockHit;
                     hitDistSq = eyePos.distanceToSqr(firstBlockHit.getLocation());
@@ -219,30 +222,31 @@ public class FieldGuideRaytracer {
         Object bestMatch = null;
         int maxScore = 0;
 
-        int radius = 4;
+        BlockPos canopyPos = ScanContextHelper.traceTreeCanopy(minecraft.level, hitPos, 32, upId -> {
+            for (Object entry : possibleEntries) {
+                if (entry instanceof GuideEntry composite && composite.containsComponent(upId)) {
+                    return true;
+                }
+            }
+            return false;
+        });
+
         Map<Object, Integer> scoreMap = new HashMap<>();
 
-        for (int dx = -radius; dx <= radius; dx++) {
-            for (int dy = -radius; dy <= radius; dy++) {
-                for (int dz = -radius; dz <= radius; dz++) {
-                    BlockPos pos = hitPos.offset(dx, dy, dz);
-                    BlockState state = minecraft.level.getBlockState(pos);
-                    ResourceLocation blockId = BuiltInRegistries.BLOCK.getKey(state.getBlock());
+        ScanContextHelper.sampleNearbyBlocks(minecraft.level, hitPos, canopyPos, (pos, state) -> {
+            ResourceLocation blockId = BuiltInRegistries.BLOCK.getKey(state.getBlock());
+            if (state.getBlock().equals(actualTargetKey)) return;
 
-                    if (state.getBlock().equals(actualTargetKey)) continue;
-
-                    for (Object entry : possibleEntries) {
-                        if (entry instanceof GuideEntry composite && composite.isComposite()) {
-                            if (composite.childEntries() != null && composite.childEntries().contains(blockId)) {
-                                scoreMap.put(entry, scoreMap.getOrDefault(entry, 0) + 1);
-                            } else if (composite.displayId() != null && composite.displayId().equals(blockId)) {
-                                scoreMap.put(entry, scoreMap.getOrDefault(entry, 0) + 2);
-                            }
-                        }
+            for (Object entry : possibleEntries) {
+                if (entry instanceof GuideEntry composite && composite.isComposite()) {
+                    if (composite.displayId() != null && composite.displayId().equals(blockId)) {
+                        scoreMap.put(entry, scoreMap.getOrDefault(entry, 0) + 2);
+                    } else if (composite.childEntries() != null && composite.childEntries().contains(blockId)) {
+                        scoreMap.put(entry, scoreMap.getOrDefault(entry, 0) + 1);
                     }
                 }
             }
-        }
+        });
 
         for (Map.Entry<Object, Integer> entryScore : scoreMap.entrySet()) {
             if (entryScore.getValue() > maxScore) {
@@ -251,16 +255,12 @@ public class FieldGuideRaytracer {
             }
         }
 
-        ResourceLocation targetId = actualTargetKey instanceof Block b ? BuiltInRegistries.BLOCK.getKey(b) :
-                actualTargetKey instanceof EntityType t ? BuiltInRegistries.ENTITY_TYPE.getKey(t) :
-                        actualTargetKey instanceof net.minecraft.world.item.Item it ? BuiltInRegistries.ITEM.getKey(it) :
-                                actualTargetKey instanceof ResourceLocation rl ? rl : null;
+        ResourceLocation targetId = AutoPopulateRegistry.getEntryId(actualTargetKey);
 
         if (maxScore == 0) {
             if (targetId != null) {
                 for (Object entry : possibleEntries) {
-                    if (entry instanceof GuideEntry composite && composite.hasVisualVariants()
-                            && composite.childEntries() != null && composite.childEntries().contains(targetId)) {
+                    if (entry instanceof GuideEntry composite && composite.hasVisualVariants() && composite.containsComponent(targetId)) {
                         return entry;
                     }
                 }

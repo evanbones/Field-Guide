@@ -1,15 +1,17 @@
 package com.evandev.fieldguide.client.gui.toasts;
 
 import com.evandev.fieldguide.Constants;
+import com.evandev.fieldguide.api.EntryVariantData;
 import com.evandev.fieldguide.api.GuideEntry;
 import com.evandev.fieldguide.api.variant.VariantDef;
 import com.evandev.fieldguide.api.variant.VariantProvider;
 import com.evandev.fieldguide.client.ClientFieldGuideManager;
 import com.evandev.fieldguide.client.gui.util.EntryRenderHelper;
+import com.evandev.fieldguide.client.progress.ProgressManager;
 import com.evandev.fieldguide.compat.cobblemon.ClientFieldGuideCobblemonCompat;
+import com.evandev.fieldguide.compat.cobblemon.FieldGuideCobblemonCompat;
 import com.evandev.fieldguide.config.ClientConfig;
 import com.evandev.fieldguide.entry.EntryResolver;
-import com.evandev.fieldguide.platform.Services;
 import com.evandev.fieldguide.variant.FieldGuideVariantManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -42,7 +44,9 @@ public class FieldGuideToast implements Toast {
     public @NotNull Visibility render(GuiGraphics guiGraphics, @NotNull ToastComponent toastComponent, long timeSinceLastVisible) {
         guiGraphics.blit(Constants.TOAST_TEXTURE, 0, 0, 0, 0, this.width(), this.height(), 160, 32);
 
-        Component name = ClientFieldGuideManager.getEntryName(entry);
+        Component name = (this.variantId != null && !this.variantId.isEmpty())
+                ? ClientFieldGuideManager.getEntryName(entry, this.variantId)
+                : ClientFieldGuideManager.getEntryName(entry);
         Component discovered = Component.translatable("fieldguide.toast.discovered");
 
         guiGraphics.drawString(toastComponent.getMinecraft().font, name, 30, 7, ClientConfig.get().getTextTitleColorInt(), false);
@@ -52,11 +56,41 @@ public class FieldGuideToast implements Toast {
         int iconY = 17;
         Object coreEntry = EntryResolver.resolveCoreEntry(this.entry);
 
-        boolean isCobblemon = this.entry instanceof GuideEntry ge && ge.isVirtual() && ge.virtualData() != null && "cobblemon".equals(ge.virtualData().virtualType());
+        boolean isCobblemon = FieldGuideCobblemonCompat.isCobblemonEntry(this.entry);
         boolean isTutorial = this.entry instanceof GuideEntry ge && ge.isVirtual() && ge.virtualData() != null && "tutorial".equals(ge.virtualData().virtualType());
 
+        EntryVariantData visualVariant = null;
+        if (this.entry instanceof GuideEntry ge && ge.hasVisualVariants()) {
+            if (this.variantId != null && !this.variantId.isEmpty()) {
+                for (EntryVariantData vd : ge.visualVariants()) {
+                    if (vd.variantId().equals(this.variantId)) {
+                        visualVariant = vd;
+                        break;
+                    }
+                }
+            }
+            if (visualVariant == null) {
+                String selected = ProgressManager.getInstance().getSelectedVariant(ge.id());
+                if (selected != null) {
+                    for (EntryVariantData vd : ge.visualVariants()) {
+                        if (vd.variantId().equals(selected)) {
+                            visualVariant = vd;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (visualVariant == null && !ge.visualVariants().isEmpty()) {
+                visualVariant = ge.visualVariants().getFirst();
+            }
+        }
+
         if (!entityInitialized) {
-            if (Services.PLATFORM.isModLoaded("cobblemon") && isCobblemon) {
+            if (visualVariant != null && visualVariant.displayType() == EntryVariantData.DisplayType.ENTITY) {
+                if (Minecraft.getInstance().level != null) {
+                    cachedEntity = EntryRenderHelper.createVariantEntity(Minecraft.getInstance().level, visualVariant.displayId(), visualVariant.nbt());
+                }
+            } else if (isCobblemon) {
                 ResourceLocation id = ((GuideEntry) this.entry).id();
                 if (variantId != null) {
                     cachedEntity = ClientFieldGuideCobblemonCompat.getDummyVariant(id, variantId, Minecraft.getInstance().level);
@@ -82,7 +116,9 @@ public class FieldGuideToast implements Toast {
             entityInitialized = true;
         }
 
-        if (this.entry instanceof GuideEntry ge && ge.isStructure() && coreEntry instanceof Block block) {
+        if (this.entry instanceof GuideEntry ge && ge.hasVisualVariants() && visualVariant != null) {
+            EntryRenderHelper.renderVisualVariant(guiGraphics, ge, visualVariant, cachedEntity, iconX, iconY, 24, true, false, 1.0F);
+        } else if (this.entry instanceof GuideEntry ge && ge.isStructure() && ge.structureData() != null && coreEntry instanceof Block) {
             EntryRenderHelper.renderStructure(guiGraphics, ge, iconX, iconY, 24, true, false, 1.0F);
         } else if (isCobblemon && cachedEntity instanceof LivingEntity) {
             EntryRenderHelper.renderCobblemon(guiGraphics, (GuideEntry) this.entry, iconX, iconY, 24, 24, true, false, 1.0F, false);

@@ -2,6 +2,7 @@ package com.evandev.fieldguide.network;
 
 import com.evandev.fieldguide.Constants;
 import com.evandev.fieldguide.ModDataComponents;
+import com.evandev.fieldguide.compat.cobblemon.FieldGuideCobblemonCompat;
 import com.evandev.fieldguide.entry.EntryResolutionHelper;
 import com.evandev.fieldguide.item.ModItems;
 import com.evandev.fieldguide.server.progress.FieldGuideProgressManager;
@@ -71,11 +72,8 @@ public record CopyPagePacket(ResourceLocation entryId) implements CustomPacketPa
         }
 
         if (nameComponent == null) {
-            if (entryId.getNamespace().equals("fieldguide") && entryId.getPath().startsWith("cobblemon/")) {
-                String species = entryId.getPath().substring("cobblemon/".length());
-                int underscore = species.lastIndexOf('_');
-                if (underscore != -1) species = species.substring(0, underscore);
-                nameComponent = Component.translatable("cobblemon.species." + species + ".name");
+            if (FieldGuideCobblemonCompat.isCobblemonId(entryId)) {
+                nameComponent = Component.translatable(FieldGuideCobblemonCompat.getSpeciesTranslationKey(entryId));
             } else {
                 nameComponent = Component.translatable(getTranslationKey(entryId));
             }

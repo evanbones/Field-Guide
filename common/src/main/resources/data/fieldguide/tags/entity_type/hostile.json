@@ -5,7 +5,6 @@
     "minecraft:bogged",
     "minecraft:breeze",
     "minecraft:cave_spider",
-    "minecraft:creaking",
     "minecraft:creeper",
     "minecraft:elder_guardian",
     "minecraft:ender_dragon",
@@ -17,7 +16,6 @@
     "minecraft:hoglin",
     "minecraft:husk",
     "minecraft:illusioner",
-    "minecraft:killer_bunny",
     "minecraft:magma_cube",
     "minecraft:phantom",
     "minecraft:piglin_brute",
@@ -44,6 +42,14 @@
     },
     {
       "id": "vanillabackport:parched",
+      "required": false
+    },
+    {
+      "id": "minecraft:creaking",
+      "required": false
+    },
+    {
+      "id": "minecraft:killer_bunny",
       "required": false
     }
   ]

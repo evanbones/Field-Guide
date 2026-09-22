@@ -155,7 +155,7 @@ public class EntryRenderHelper {
 
     public static void renderEntityNormalized(GuiGraphics guiGraphics, Entity entity, int x, int y, int maxWidth, int maxHeight, boolean unlocked, boolean isPage, float bounceScale, String explicitVariantId) {
         ResourceLocation baseId = AutoPopulateRegistry.getEntryId(entity.getType());
-        boolean isCobblemon = Services.PLATFORM.isModLoaded("cobblemon") && FieldGuideCobblemonCompat.isPokemon(entity);
+        boolean isCobblemon = FieldGuideCobblemonCompat.isPokemon(entity);
         if (isCobblemon) {
             baseId = FieldGuideCobblemonCompat.getPokemonEntryId(entity);
         }
@@ -194,7 +194,7 @@ public class EntryRenderHelper {
         }
 
         ResourceLocation baseId = AutoPopulateRegistry.getEntryId(entity.getType());
-        boolean isCobblemon = Services.PLATFORM.isModLoaded("cobblemon") && FieldGuideCobblemonCompat.isPokemon(entity);
+        boolean isCobblemon = FieldGuideCobblemonCompat.isPokemon(entity);
         if (isCobblemon) {
             baseId = FieldGuideCobblemonCompat.getPokemonEntryId(entity);
         }

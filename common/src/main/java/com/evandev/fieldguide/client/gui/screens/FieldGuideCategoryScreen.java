@@ -17,6 +17,7 @@ import com.evandev.fieldguide.client.gui.widget.FieldGuideSearchBox;
 import com.evandev.fieldguide.client.gui.widget.PageTurnButton;
 import com.evandev.fieldguide.client.progress.ProgressManager;
 import com.evandev.fieldguide.compat.cobblemon.ClientFieldGuideCobblemonCompat;
+import com.evandev.fieldguide.compat.cobblemon.FieldGuideCobblemonCompat;
 import com.evandev.fieldguide.compat.exposure.ClientExposureCompat;
 import com.evandev.fieldguide.config.ClientConfig;
 import com.evandev.fieldguide.config.ServerConfig;
@@ -374,7 +375,7 @@ public class FieldGuideCategoryScreen extends BookScreen {
 
         EntryVisual visual = ClientFieldGuideManager.getInstance().getEntryVisual(entry);
         Object coreEntry = EntryResolver.resolveCoreEntry(entry);
-        boolean isCobblemon = entry instanceof GuideEntry ge && ge.isVirtual() && ge.virtualData() != null && "cobblemon".equals(ge.virtualData().virtualType());
+        boolean isCobblemon = FieldGuideCobblemonCompat.isCobblemonEntry(entry);
 
         if (coreEntry instanceof EntityType<?> || isCobblemon) {
             Entity entity = getCachedEntity(entry);
@@ -510,10 +511,6 @@ public class FieldGuideCategoryScreen extends BookScreen {
                     } else {
                         for (Object entry : currentEntries) {
                             List<ItemStack> drops = ClientFieldGuideManager.getInstance().getDrops(entry);
-
-                            if (drops.isEmpty() && entry instanceof GuideEntry ge && ge.isVirtual() && ge.virtualData() != null && "cobblemon".equals(ge.virtualData().virtualType())) {
-                                drops = ClientFieldGuideCobblemonCompat.getCobblemonDrops(entry);
-                            }
 
                             for (ItemStack stack : drops) {
                                 if (stack.getHoverName().getString().toLowerCase(Locale.ROOT).equals(dropQuery)) {
@@ -753,7 +750,7 @@ public class FieldGuideCategoryScreen extends BookScreen {
         if (entity == null) {
             if (this.minecraft == null || this.minecraft.level == null) return null;
 
-            if (entry instanceof GuideEntry ge && ge.isVirtual() && ge.virtualData() != null && "cobblemon".equals(ge.virtualData().virtualType())) {
+            if (FieldGuideCobblemonCompat.isCobblemonEntry(entry)) {
                 entity = ClientFieldGuideCobblemonCompat.getDummyPokemon(id, this.minecraft.level);
             } else {
                 Object coreEntry = EntryResolver.resolveCoreEntry(entry);
@@ -809,7 +806,7 @@ public class FieldGuideCategoryScreen extends BookScreen {
             Object coreEntry = EntryResolver.resolveCoreEntry(entry);
             Entity dummy = getCachedEntity(entry);
 
-            boolean isCobblemon = entry instanceof GuideEntry ge && ge.isVirtual() && ge.virtualData() != null && "cobblemon".equals(ge.virtualData().virtualType());
+            boolean isCobblemon = FieldGuideCobblemonCompat.isCobblemonEntry(entry);
 
             if (dummy != null && (coreEntry instanceof EntityType<?> || isCobblemon)) {
                 List<VariantDef> variants = FieldGuideVariantManager.getVariants(dummy);
@@ -865,7 +862,7 @@ public class FieldGuideCategoryScreen extends BookScreen {
 
     private void renderEntryInGrid(GuiGraphics guiGraphics, Object entry, int x, int y, boolean unlocked) {
         Object coreEntry = EntryResolver.resolveCoreEntry(entry);
-        boolean isCobblemon = entry instanceof GuideEntry ge && ge.isVirtual() && ge.virtualData() != null && "cobblemon".equals(ge.virtualData().virtualType());
+        boolean isCobblemon = FieldGuideCobblemonCompat.isCobblemonEntry(entry);
         boolean isTutorial = entry instanceof GuideEntry ge && ge.isVirtual() && ge.virtualData() != null && "tutorial".equals(ge.virtualData().virtualType());
 
         if (unlocked && Services.PLATFORM.isModLoaded("exposure") && ClientConfig.get().exposureShowPhotographsInGrid) {
