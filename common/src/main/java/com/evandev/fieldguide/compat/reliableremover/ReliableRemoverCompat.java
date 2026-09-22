@@ -6,10 +6,14 @@ import net.minecraft.world.level.block.Block;
 
 public class ReliableRemoverCompat {
     public static boolean isHidden(ItemStack stack) {
-        return ReliableRemoverAPI.isItemHidden(stack);
+        if (stack == null || stack.isEmpty()) return false;
+        return ReliableRemoverAPI.isItemHidden(stack) || ReliableRemoverAPI.isCreativeBlocked(stack);
     }
 
     public static boolean isHidden(Block block) {
-        return ReliableRemoverAPI.isItemHidden(new ItemStack(block));
+        if (block == null) return false;
+        ItemStack stack = new ItemStack(block);
+        if (stack.isEmpty()) return false;
+        return isHidden(stack);
     }
 }
