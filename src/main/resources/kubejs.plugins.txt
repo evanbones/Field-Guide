@@ -1,0 +1,1 @@
+com.evandev.fieldguide.neoforge.compat.kubejs.FieldGuideKubeJSPlugin

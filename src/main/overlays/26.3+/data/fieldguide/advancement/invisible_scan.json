@@ -1,0 +1,39 @@
+{
+  "parent": "fieldguide:first_discovery",
+  "display": {
+    "icon": {
+      "id": "minecraft:potion",
+      "components": {
+        "minecraft:potion_contents": {
+          "potion": "minecraft:invisibility"
+        }
+      }
+    },
+    "title": {
+      "translate": "advancements.fieldguide.invisible_scan.title"
+    },
+    "description": {
+      "translate": "advancements.fieldguide.invisible_scan.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "scan": {
+      "trigger": "fieldguide:scan_entity",
+      "conditions": {
+        "entity": {
+          "type": "minecraft:entity_properties",
+          "entity": "this",
+          "predicate": {
+            "effects": {
+              "minecraft:invisibility": {}
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,52 @@
+{
+    "schemaVersion": 1,
+    "id": "${mod_id}",
+    "version": "${version}",
+    "name": "${mod_name}",
+    "description": "${description}",
+    "authors": [
+        "${mod_author}"
+    ],
+    "contact": {
+        "homepage": "https://github.com/evanbones/FieldGuide",
+        "sources": "https://github.com/evanbones/FieldGuide"
+    },
+    "license": "${license}",
+    "icon": "${mod_id}.png",
+    "environment": "*",
+    "entrypoints": {
+        "main": [
+            "com.evandev.fieldguide.fabric.FieldGuideMod"
+        ],
+        "modmenu": [
+            "com.evandev.fieldguide.fabric.compat.ModMenuIntegration"
+        ],
+        "client": [
+            "com.evandev.fieldguide.fabric.FieldGuideFabricClient"
+        ],
+        "rrv_client": [
+            "com.evandev.fieldguide.compat.rrv.FieldGuideRrvPlugin"
+        ]
+    },
+    "mixins": [
+        "${mod_id}.mixins.json",
+        "${mod_id}.fabric.mixins.json"
+    ],
+    "depends": {
+        "fabricloader": ">=${fabric_loader_version}",
+        "fabric-api": "*",
+        "minecraft": "${minecraft}",
+        "java": ">=${java_version}"
+    },
+    "suggests": {
+        "yet_another_config_lib_v3": ">=${yacl_version}",
+        "item_descriptions": "*",
+        "immersiveoverlays": "*",
+        "rrv": "*"
+    },
+    "breaks": {
+        "entity_texture_features": "<7.2",
+        "entity_model_features": "<3.3"
+    }
+}
+  

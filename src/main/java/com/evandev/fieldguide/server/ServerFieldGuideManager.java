@@ -1,0 +1,608 @@
+package com.evandev.fieldguide.server;
+
+import com.evandev.fieldguide.Constants;
+import com.evandev.fieldguide.api.*;
+import com.evandev.fieldguide.api.variant.DatapackVariantDefinition;
+import com.evandev.fieldguide.compat.cobblemon.FieldGuideCobblemonCompat;
+import com.evandev.fieldguide.config.ModConfig;
+import com.evandev.fieldguide.config.ServerConfig;
+import com.evandev.fieldguide.entry.EntryResolutionHelper;
+import com.evandev.fieldguide.entry.EntryResolver;
+import com.evandev.fieldguide.network.ExportContentPacket;
+import com.evandev.fieldguide.network.SyncCategoriesPacket;
+import com.evandev.fieldguide.network.SyncConfigPacket;
+import com.evandev.fieldguide.network.SyncLootPacket;
+import com.evandev.fieldguide.platform.Services;
+import com.evandev.fieldguide.server.loot.LootTableHelper;
+import com.evandev.fieldguide.server.loot.StaticLootParser;
+import com.evandev.fieldguide.util.BiomeSpawns;
+import com.evandev.fieldguide.util.RegistryCompat;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
+import net.minecraft.tags.TagKey;
+import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.biome.Biome;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
+public class ServerFieldGuideManager extends SimplePreparableReloadListener<ServerFieldGuideManager.ReloadData> {
+    private static final ServerFieldGuideManager INSTANCE = new ServerFieldGuideManager();
+    private final Map<ResourceLocation, List<Object>> resolvedCategoryEntries = new HashMap<>();
+    private final Map<ResourceLocation, EntryUnlockData> entryUnlockDataMap = new HashMap<>();
+    private final Map<ResourceLocation, Set<ResourceLocation>> triggerOnMap = new HashMap<>();
+    private final Map<ResourceLocation, Optional<ResourceLocation>> canonicalIdCache = new ConcurrentHashMap<>();
+
+    private Map<ResourceLocation, Category> categories = new LinkedHashMap<>();
+    private Map<ResourceLocation, GuideEntry> allEntries = new HashMap<>();
+
+    private List<CompositeDefinition> composites = new ArrayList<>();
+    private Map<ResourceLocation, List<ItemStack>> serverLootCache = new HashMap<>();
+    private Map<ResourceLocation, ResourceLocation> redirects = new HashMap<>();
+    private Map<ResourceLocation, DatapackVariantDefinition> variants = new HashMap<>();
+
+    private List<String> biomeAdditions = new ArrayList<>();
+    private List<String> biomeRemovals = new ArrayList<>();
+    private List<String> lootAdditions = new ArrayList<>();
+    private List<String> lootRemovals = new ArrayList<>();
+    private List<String> prefixedBiomeAdditions = new ArrayList<>();
+    private List<String> prefixedBiomeRemovals = new ArrayList<>();
+    private List<String> prefixedLootAdditions = new ArrayList<>();
+    private List<String> prefixedLootRemovals = new ArrayList<>();
+
+    public static ServerFieldGuideManager getInstance() {
+        return INSTANCE;
+    }
+
+    public ResourceLocation resolveCanonicalEntryId(ResourceLocation entryId) {
+        ResourceLocation canonical = findCanonicalEntryId(entryId);
+        return canonical != null ? canonical : entryId;
+    }
+
+    public ResourceLocation findCanonicalEntryId(ResourceLocation entryId) {
+        if (entryId == null) return null;
+        return canonicalIdCache.computeIfAbsent(entryId, id -> Optional.ofNullable(
+                EntryResolver.findCanonicalEntryId(resolvedCategoryEntries, id))).orElse(null);
+    }
+
+    public EntryUnlockData getUnlockData(ResourceLocation entryId) {
+        ResourceLocation canonicalId = resolveCanonicalEntryId(entryId);
+        if (canonicalId != null && entryUnlockDataMap.containsKey(canonicalId)) {
+            EntryUnlockData mapData = entryUnlockDataMap.get(canonicalId);
+            if (mapData != null && !EntryUnlockData.DEFAULT.equals(mapData)) {
+                return mapData;
+            }
+        }
+
+        EntryUnlockData mapData = entryUnlockDataMap.get(entryId);
+        if (mapData != null && !EntryUnlockData.DEFAULT.equals(mapData)) {
+            return mapData;
+        }
+
+        ResourceLocation rawId = EntryResolver.getRawId(entryId);
+        if (rawId != null && !rawId.equals(entryId)) {
+            EntryUnlockData rawMapData = entryUnlockDataMap.get(rawId);
+            if (rawMapData != null && !EntryUnlockData.DEFAULT.equals(rawMapData)) {
+                return rawMapData;
+            }
+        }
+
+        if (isKillToUnlock(entryId)) {
+            return new EntryUnlockData(false, Collections.emptyList(), List.of(EntryUnlockData.UnlockTrigger.KILL), Collections.emptyList());
+        }
+
+        if (isEatToUnlock(entryId)) {
+            return new EntryUnlockData(false, Collections.emptyList(), List.of(EntryUnlockData.UnlockTrigger.EAT), Collections.emptyList());
+        }
+
+        if ("item".equals(entryId.getNamespace()) && BuiltInRegistries.ITEM.containsKey(EntryResolver.getRawId(entryId))) {
+            return new EntryUnlockData(false, Collections.emptyList(), List.of(EntryUnlockData.UnlockTrigger.OBTAIN), Collections.emptyList());
+        }
+
+        if ("block".equals(entryId.getNamespace()) && BuiltInRegistries.BLOCK.containsKey(EntryResolver.getRawId(entryId))) {
+            return new EntryUnlockData(false, Collections.emptyList(), List.of(EntryUnlockData.UnlockTrigger.SCAN), Collections.emptyList());
+        }
+
+        return EntryUnlockData.DEFAULT;
+    }
+
+    public Map<ResourceLocation, Category> getCategories() {
+        return categories;
+    }
+
+    public Map<ResourceLocation, ResourceLocation> getRedirects() {
+        return redirects;
+    }
+
+    public List<String> getBiomeAdditions() {
+        return biomeAdditions;
+    }
+
+    public List<String> getBiomeRemovals() {
+        return biomeRemovals;
+    }
+
+    public List<String> getLootAdditions() {
+        return lootAdditions;
+    }
+
+    public List<String> getLootRemovals() {
+        return lootRemovals;
+    }
+
+    public boolean hasEntry(ResourceLocation entryId) {
+        return EntryResolver.hasEntry(resolvedCategoryEntries, entryId, findCanonicalEntryId(entryId));
+    }
+
+    public GuideEntry getResolvedEntry(ResourceLocation entryId) {
+        ResourceLocation canonicalId = resolveCanonicalEntryId(entryId);
+        for (List<Object> entries : resolvedCategoryEntries.values()) {
+            for (Object entry : entries) {
+                if (entry instanceof GuideEntry ge) {
+                    ResourceLocation id = EntryResolver.getEntryId(ge);
+                    if (entryId.equals(id) || (canonicalId != null && canonicalId.equals(id))) {
+                        return ge;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public Map<ResourceLocation, List<Object>> getResolvedEntries() {
+        return this.resolvedCategoryEntries;
+    }
+
+    public boolean isKillToUnlock(ResourceLocation entryId) {
+        TagKey<EntityType<?>> killToUnlockTag = TagKey.create(Registries.ENTITY_TYPE, ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "kill_to_unlock"));
+
+        return BuiltInRegistries.ENTITY_TYPE.getOptional(EntryResolver.getRawId(entryId))
+                .flatMap(BuiltInRegistries.ENTITY_TYPE::getResourceKey)
+                //? if <26.1 {
+                .flatMap(BuiltInRegistries.ENTITY_TYPE::getHolder)
+                //?} else {
+                /*.flatMap(BuiltInRegistries.ENTITY_TYPE::get)
+                *///?}
+                .map(h -> h.is(killToUnlockTag))
+                .orElse(false);
+    }
+
+    public boolean isEatToUnlock(ResourceLocation entryId) {
+        if ("entity".equals(entryId.getNamespace())) return false;
+        TagKey<Item> eatToUnlockTag = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "eat_to_unlock"));
+
+        return BuiltInRegistries.ITEM.getOptional(EntryResolver.getRawId(entryId))
+                //? if <26.1 {
+                .map(item -> item.components().has(DataComponents.FOOD) || BuiltInRegistries.ITEM.getHolderOrThrow(BuiltInRegistries.ITEM.getResourceKey(item).get()).is(eatToUnlockTag))
+                //?} else {
+                /*.map(item -> item.components().has(DataComponents.FOOD) || BuiltInRegistries.ITEM.getOrThrow(BuiltInRegistries.ITEM.getResourceKey(item).get()).is(eatToUnlockTag))
+                *///?}
+                .orElse(false);
+    }
+
+    public Set<ResourceLocation> getEntriesTriggeredBy(ResourceLocation triggerId) {
+        return triggerOnMap.getOrDefault(triggerId, Collections.emptySet());
+    }
+
+    public ResourceLocation getCategoryForEntryId(ResourceLocation entryId) {
+        return EntryResolver.getCategoryForEntryId(resolvedCategoryEntries, entryId, findCanonicalEntryId(entryId));
+    }
+
+    public Set<ResourceLocation> getAllEntryIds() {
+        return EntryResolver.getAllEntryIds(resolvedCategoryEntries);
+    }
+
+    public Set<ResourceLocation> getEntryIdsForCategory(ResourceLocation categoryId) {
+        return EntryResolver.getEntryIdsForCategory(resolvedCategoryEntries, categoryId);
+    }
+
+    public List<CompositeDefinition> getComposites() {
+        return composites;
+    }
+
+    public Map<ResourceLocation, DatapackVariantDefinition> getVariants() {
+        return variants;
+    }
+
+    public List<Object> getEntriesForTarget(Object target) {
+        return EntryResolver.getEntriesForTarget(resolvedCategoryEntries, target);
+    }
+
+    public boolean isTargetInEntry(ResourceLocation targetId, ResourceLocation entryId) {
+        return EntryResolver.isTargetInEntry(resolvedCategoryEntries, targetId, entryId);
+    }
+
+    private void calculatePrefixedLists() {
+        this.prefixedBiomeAdditions = prefixList(biomeAdditions);
+        this.prefixedBiomeRemovals = prefixList(biomeRemovals);
+        this.prefixedLootAdditions = prefixList(lootAdditions);
+        this.prefixedLootRemovals = prefixList(lootRemovals);
+    }
+
+    private List<String> prefixList(List<String> original) {
+        Set<String> set = new LinkedHashSet<>(original);
+        for (String s : original) {
+            String[] parts = s.split("\\|", 2);
+            if (parts.length == 2) {
+                try {
+                    String target = parts[0];
+                    String variantSuffix = "";
+                    int hashIdx = target.indexOf('#');
+                    if (hashIdx > 0) {
+                        variantSuffix = target.substring(hashIdx);
+                        target = target.substring(0, hashIdx);
+                    }
+                    if (target.startsWith("entity:") || target.startsWith("block:") || target.startsWith("item:")) {
+                        int firstColon = target.indexOf(':');
+                        int secondColon = target.indexOf(':', firstColon + 1);
+                        if (secondColon != -1) {
+                            target = target.substring(0, secondColon) + "/" + target.substring(secondColon + 1);
+                        }
+                    }
+                    ResourceLocation entryLoc = ResourceLocation.parse(target);
+                    ResourceLocation canonical = findCanonicalEntryId(entryLoc);
+                    if (canonical != null) {
+                        set.add(canonical + variantSuffix + "|" + parts[1]);
+                    }
+                    Optional<Object> entry = EntryResolutionHelper.resolveSingleEntry(entryLoc, null, null);
+                    if (entry.isPresent()) {
+                        ResourceLocation autoId = AutoPopulateRegistry.getEntryId(entry.get(), true);
+                        if (autoId != null) set.add(autoId + variantSuffix + "|" + parts[1]);
+                    }
+                } catch (Exception ignored) {
+                }
+            }
+        }
+        return new ArrayList<>(set);
+    }
+
+    public void syncToPlayer(ServerPlayer player) {
+        Services.NETWORK.sendToPlayer(new SyncConfigPacket(ServerConfig.get()), player);
+
+        List<Category> flattenedCategories = new ArrayList<>();
+        List<GuideEntry> flattenedEntries = new ArrayList<>();
+        int maxEntriesPerChunk = 100;
+
+        for (Category rawCat : categories.values()) {
+            List<Object> resolved = resolvedCategoryEntries.get(rawCat.getId());
+
+            if (resolved == null || resolved.isEmpty()) {
+                Category flatCat = new Category(rawCat.getId());
+                flatCat.setSortIndex(rawCat.getSortIndex());
+                flatCat.setIcon(rawCat.getIcon());
+                flatCat.setGroupByQueries(rawCat.getGroupByQueries());
+                flattenedCategories.add(flatCat);
+                continue;
+            }
+
+            int index = 0;
+            while (index < resolved.size()) {
+                Category chunkCat = new Category(rawCat.getId());
+                chunkCat.setSortIndex(rawCat.getSortIndex());
+                chunkCat.setIcon(rawCat.getIcon());
+
+                if (index == 0) {
+                    chunkCat.setGroupByQueries(rawCat.getGroupByQueries());
+                }
+
+                int endIndex = Math.min(index + maxEntriesPerChunk, resolved.size());
+                for (int j = index; j < endIndex; j++) {
+                    Object obj = resolved.get(j);
+                    ResourceLocation id = AutoPopulateRegistry.getEntryId(obj, true);
+
+                    if (obj instanceof GuideEntry ge) {
+                        chunkCat.addEntryId(ge.id());
+                        if (!flattenedEntries.contains(ge)) flattenedEntries.add(ge);
+                        continue;
+                    }
+
+                    GuideEntry existing = allEntries.get(id);
+                    if (existing != null) {
+                        chunkCat.addEntryId(id);
+                        if (!flattenedEntries.contains(existing)) flattenedEntries.add(existing);
+                    } else {
+                        EntryUnlockData unlockData = getUnlockData(id);
+
+                        GuideEntry synthesized = new GuideEntry(id, id, null, EntryKind.NORMAL, false, false, null, null, null, null, null, unlockData, null, null);
+                        chunkCat.addEntryId(id);
+                        if (!flattenedEntries.contains(synthesized)) flattenedEntries.add(synthesized);
+                    }
+                }
+                flattenedCategories.add(chunkCat);
+                index += maxEntriesPerChunk;
+            }
+        }
+
+        Services.NETWORK.sendToPlayer(new SyncCategoriesPacket(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), variants, true, false), player);
+
+        sendChunked(player, prefixedBiomeAdditions, (chunk) -> new SyncCategoriesPacket(Collections.emptyList(), Collections.emptyList(), chunk, Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap(), false, false));
+        sendChunked(player, prefixedBiomeRemovals, (chunk) -> new SyncCategoriesPacket(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), chunk, Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap(), false, false));
+        sendChunked(player, prefixedLootAdditions, (chunk) -> new SyncCategoriesPacket(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), chunk, Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap(), false, false));
+        sendChunked(player, prefixedLootRemovals, (chunk) -> new SyncCategoriesPacket(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), chunk, Collections.emptyMap(), Collections.emptyMap(), false, false));
+
+        if (!redirects.isEmpty()) {
+            int maxModifiersChunkSize = 500;
+            Map<ResourceLocation, ResourceLocation> redChunk = new HashMap<>();
+            int count = 0;
+            for (Map.Entry<ResourceLocation, ResourceLocation> entry : redirects.entrySet()) {
+                redChunk.put(entry.getKey(), entry.getValue());
+                count++;
+                if (count >= maxModifiersChunkSize) {
+                    Services.NETWORK.sendToPlayer(new SyncCategoriesPacket(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), redChunk, Collections.emptyMap(), false, false), player);
+                    redChunk = new HashMap<>();
+                    count = 0;
+                }
+            }
+            if (!redChunk.isEmpty()) {
+                Services.NETWORK.sendToPlayer(new SyncCategoriesPacket(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), redChunk, Collections.emptyMap(), false, false), player);
+            }
+        }
+
+        if (flattenedCategories.isEmpty()) {
+            Services.NETWORK.sendToPlayer(new SyncCategoriesPacket(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap(), false, true), player);
+        } else {
+            for (int i = 0; i < flattenedCategories.size(); i++) {
+                List<Category> catChunk = Collections.singletonList(flattenedCategories.get(i));
+                List<GuideEntry> entryChunk = new ArrayList<>();
+                for (ResourceLocation entryId : flattenedCategories.get(i).getEntryIds()) {
+                    flattenedEntries.stream().filter(e -> e.id().equals(entryId)).findFirst().ifPresent(entryChunk::add);
+                }
+
+                boolean isLast = (i == flattenedCategories.size() - 1);
+                Services.NETWORK.sendToPlayer(new SyncCategoriesPacket(catChunk, entryChunk, Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap(), false, isLast), player);
+            }
+        }
+
+        syncLootToPlayer(player);
+    }
+
+    public void syncLootToPlayer(ServerPlayer player) {
+        if (serverLootCache.isEmpty()) return;
+
+        int maxLootChunkSize = 100;
+        Map<ResourceLocation, List<ItemStack>> chunk = new HashMap<>();
+        int count = 0;
+
+        for (Map.Entry<ResourceLocation, List<ItemStack>> entry : serverLootCache.entrySet()) {
+            chunk.put(entry.getKey(), entry.getValue());
+            count++;
+
+            if (count >= maxLootChunkSize) {
+                Services.NETWORK.sendToPlayer(new SyncLootPacket(chunk, false), player);
+                chunk = new HashMap<>();
+                count = 0;
+            }
+        }
+
+        if (!chunk.isEmpty()) {
+            Services.NETWORK.sendToPlayer(new SyncLootPacket(chunk, false), player);
+        }
+    }
+
+    public void syncLootToPlayer(ServerPlayer player, ResourceLocation entryId) {
+        if (serverLootCache.containsKey(entryId)) {
+            Services.NETWORK.sendToPlayer(new SyncLootPacket(Map.of(entryId, serverLootCache.get(entryId)), false), player);
+        }
+    }
+
+    private <T> void sendChunked(ServerPlayer player, List<T> list, java.util.function.Function<List<T>, ? extends CustomPacketPayload> packetFactory) {
+        int maxChunkSize = 500;
+        for (int i = 0; i < list.size(); i += maxChunkSize) {
+            List<T> chunk = list.subList(i, Math.min(i + maxChunkSize, list.size()));
+            Services.NETWORK.sendToPlayer(packetFactory.apply(chunk), player);
+        }
+    }
+
+    private void resolveAllCategories() {
+        resolvedCategoryEntries.clear();
+        canonicalIdCache.clear();
+        Set<String> allCompositeComponents = new HashSet<>();
+
+        for (Category cat : categories.values()) {
+            List<Object> entries = EntryResolutionHelper.resolveCategoryEntries(cat, allEntries, composites, redirects);
+            for (Object entry : entries) {
+                if (entry instanceof GuideEntry ge && ge.isComposite()) {
+                    if (ge.childEntries() != null) {
+                        for (ResourceLocation comp : ge.childEntries()) {
+                            allCompositeComponents.add(comp.toString());
+                        }
+                    }
+                }
+            }
+            resolvedCategoryEntries.put(cat.getId(), entries);
+        }
+
+        for (List<Object> entries : resolvedCategoryEntries.values()) {
+            entries.removeIf(entry -> {
+                if (entry instanceof GuideEntry ge && ge.isComposite()) return false;
+                return allCompositeComponents.contains(AutoPopulateRegistry.getEntryKey(entry));
+            });
+        }
+
+        for (Category cat : categories.values()) {
+            for (ResourceLocation entryId : cat.getEntryIds()) {
+                GuideEntry autoDef = allEntries.get(entryId);
+                if (autoDef != null && autoDef.isAutoPopulate() && autoDef.strategy() != null) {
+                    EntryUnlockData autoUnlock = autoDef.unlockData();
+                    if (autoUnlock != null && !EntryUnlockData.DEFAULT.equals(autoUnlock)) {
+                        for (Object obj : AutoPopulateRegistry.getEntries(autoDef.strategy(), cat.getId())) {
+                            ResourceLocation keyLoc = AutoPopulateRegistry.getEntryId(obj, true);
+                            if (keyLoc != null && !this.entryUnlockDataMap.containsKey(keyLoc)) {
+                                this.entryUnlockDataMap.put(keyLoc, autoUnlock);
+                                for (ResourceLocation triggerId : autoUnlock.triggerOn()) {
+                                    this.triggerOnMap.computeIfAbsent(triggerId, k -> new HashSet<>()).add(keyLoc);
+                                }
+                            }
+                            ResourceLocation rawKeyLoc = AutoPopulateRegistry.getEntryId(obj, false);
+                            if (rawKeyLoc != null && !this.entryUnlockDataMap.containsKey(rawKeyLoc)) {
+                                this.entryUnlockDataMap.put(rawKeyLoc, autoUnlock);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public void onServerStarted(MinecraftServer server) {
+        resolveAllCategories();
+        StaticLootParser.clearCache();
+        this.serverLootCache = LootTableHelper.generateLootMap(server.overworld());
+        expandBiomeTags(server);
+        expandItemTags(server);
+        generateAutoBiomeAdditions(server);
+        calculatePrefixedLists();
+    }
+
+    public void reload(MinecraftServer server) {
+        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+            Services.NETWORK.sendToPlayer(new ExportContentPacket("reload_cache"), player);
+        }
+
+        resolveAllCategories();
+        StaticLootParser.clearCache();
+        this.serverLootCache = LootTableHelper.generateLootMap(server.overworld());
+        expandBiomeTags(server);
+        expandItemTags(server);
+        generateAutoBiomeAdditions(server);
+        calculatePrefixedLists();
+
+        syncToAll(server);
+    }
+
+    public Category getCategoryForEntry(Object entry) {
+        for (Map.Entry<ResourceLocation, List<Object>> cat : resolvedCategoryEntries.entrySet()) {
+            if (cat.getValue().contains(entry)) return categories.get(cat.getKey());
+        }
+        return null;
+    }
+
+    @Override
+    protected @NotNull ReloadData prepare(@NotNull ResourceManager resourceManager, @NotNull ProfilerFiller profiler) {
+        ReloadData data = FieldGuideDatapackLoader.load(resourceManager);
+
+        if (Services.PLATFORM.isModLoaded("cobblemon")) {
+            FieldGuideCobblemonCompat.populateCache(resourceManager);
+        }
+
+        return data;
+    }
+
+    private void generateAutoBiomeAdditions(MinecraftServer server) {
+        Registry<Biome> biomeRegistry = RegistryCompat.registry(server.registryAccess(), Registries.BIOME);
+        Set<String> additionsSet = new LinkedHashSet<>(this.biomeAdditions);
+
+        for (var biomeEntry : biomeRegistry.entrySet()) {
+            try {
+                ResourceLocation biomeId = RegistryCompat.id(biomeEntry.getKey());
+                Biome biome = biomeEntry.getValue();
+
+                for (MobCategory cat : MobCategory.values()) {
+                    for (EntityType<?> spawnType : BiomeSpawns.types(biome, cat)) {
+                        ResourceLocation entityId = BuiltInRegistries.ENTITY_TYPE.getKey(spawnType);
+                        additionsSet.add(entityId + "|" + biomeId);
+                    }
+                }
+            } catch (IllegalStateException e) {
+                Constants.LOG.warn("Skipping unbound biome in registry: {}", RegistryCompat.id(biomeEntry.getKey()));
+            }
+        }
+
+        this.biomeAdditions = new ArrayList<>(additionsSet);
+    }
+
+    private void expandBiomeTags(MinecraftServer server) {
+        Registry<Biome> biomeRegistry = RegistryCompat.registry(server.registryAccess(), Registries.BIOME);
+        this.biomeAdditions = expandTagsForList(this.biomeAdditions, biomeRegistry, Registries.BIOME);
+        this.biomeRemovals = expandTagsForList(this.biomeRemovals, biomeRegistry, Registries.BIOME);
+    }
+
+    private void expandItemTags(MinecraftServer server) {
+        this.lootAdditions = expandTagsForList(this.lootAdditions, BuiltInRegistries.ITEM, Registries.ITEM);
+        this.lootRemovals = expandTagsForList(this.lootRemovals, BuiltInRegistries.ITEM, Registries.ITEM);
+    }
+
+    private <T> List<String> expandTagsForList(List<String> list, Registry<T> registry, ResourceKey<? extends Registry<T>> registryKey) {
+        Set<String> expanded = new LinkedHashSet<>();
+
+        for (String item : list) {
+            String[] parts = item.split("\\|", 2);
+            if (parts.length == 2 && parts[1].startsWith("#")) {
+                String tagPath = parts[1].substring(1);
+                try {
+                    TagKey<T> tagKey = TagKey.create(registryKey, ResourceLocation.parse(tagPath));
+                    registry.getTagOrEmpty(tagKey).forEach(holder -> {
+                        holder.unwrapKey().ifPresent(key -> {
+                            expanded.add(parts[0] + "|" + RegistryCompat.id(key));
+                        });
+                    });
+                } catch (Exception e) {
+                    Constants.LOG.error("Failed to expand tag: {}", parts[1], e);
+                    expanded.add(item);
+                }
+            } else {
+                expanded.add(item);
+            }
+        }
+
+        return new ArrayList<>(expanded);
+    }
+
+    public void syncToAll(MinecraftServer server) {
+        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+            syncToPlayer(player);
+        }
+    }
+
+    @Override
+    protected void apply(@NotNull ReloadData data, @NotNull ResourceManager resourceManager, @NotNull ProfilerFiller profiler) {
+        ModConfig.load();
+        this.categories = data.categories;
+        this.allEntries = data.allEntries;
+        this.composites = data.composites;
+        this.biomeAdditions = data.biomeAdditions;
+        this.biomeRemovals = data.biomeRemovals;
+        this.lootAdditions = data.lootAdditions;
+        this.lootRemovals = data.lootRemovals;
+        this.redirects = data.redirects;
+        this.variants = data.variants;
+        this.entryUnlockDataMap.clear();
+        this.entryUnlockDataMap.putAll(data.entryUnlockData);
+
+        this.triggerOnMap.clear();
+        for (Map.Entry<ResourceLocation, EntryUnlockData> entry : this.entryUnlockDataMap.entrySet()) {
+            ResourceLocation entryId = entry.getKey();
+            for (ResourceLocation triggerId : entry.getValue().triggerOn()) {
+                this.triggerOnMap.computeIfAbsent(triggerId, k -> new HashSet<>()).add(entryId);
+            }
+        }
+    }
+
+    public static class ReloadData {
+        public Map<ResourceLocation, Category> categories = new LinkedHashMap<>();
+        public Map<ResourceLocation, GuideEntry> allEntries = new HashMap<>();
+        public List<CompositeDefinition> composites = new ArrayList<>();
+        public List<String> biomeAdditions = new ArrayList<>();
+        public List<String> biomeRemovals = new ArrayList<>();
+        public List<String> lootAdditions = new ArrayList<>();
+        public List<String> lootRemovals = new ArrayList<>();
+        public Map<ResourceLocation, ResourceLocation> redirects = new HashMap<>();
+        public Map<ResourceLocation, DatapackVariantDefinition> variants = new HashMap<>();
+
+        public Map<ResourceLocation, EntryUnlockData> entryUnlockData = new HashMap<>();
+    }
+}

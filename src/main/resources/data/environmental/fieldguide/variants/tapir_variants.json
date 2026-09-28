@@ -1,0 +1,18 @@
+{
+  "entries": [
+    {
+      "id": "environmental:tapir",
+      "replace": false,
+      "variants": [
+        {
+          "id": "Banded",
+          "nbt": "{BabyPattern: \"1a\"}"
+        },
+        {
+          "id": "Striped",
+          "nbt": "{BabyPattern: \"1b\"}"
+        }
+      ]
+    }
+  ]
+}

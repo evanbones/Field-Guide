@@ -1,0 +1,242 @@
+{
+  "values": [
+    {
+      "id": "minecraft:oak_sapling",
+      "structure_nbt": "minecraft:oak",
+      "components": [
+        "minecraft:oak_log",
+        "minecraft:oak_leaves"
+      ]
+    },
+    {
+      "id": "minecraft:spruce_sapling",
+      "structure_nbt": "minecraft:spruce",
+      "components": [
+        "minecraft:spruce_log",
+        "minecraft:spruce_leaves"
+      ]
+    },
+    {
+      "id": "minecraft:birch_sapling",
+      "structure_nbt": "minecraft:birch",
+      "components": [
+        "minecraft:birch_log",
+        "minecraft:birch_leaves"
+      ]
+    },
+    {
+      "id": "minecraft:jungle_sapling",
+      "structure_nbt": "minecraft:jungle_tree_no_vine",
+      "components": [
+        "minecraft:jungle_log",
+        "minecraft:jungle_leaves"
+      ]
+    },
+    {
+      "id": "minecraft:acacia_sapling",
+      "structure_nbt": "minecraft:acacia",
+      "components": [
+        "minecraft:acacia_log",
+        "minecraft:acacia_leaves"
+      ]
+    },
+    {
+      "id": "minecraft:dark_oak_sapling",
+      "structure_nbt": "minecraft:dark_oak",
+      "components": [
+        "minecraft:dark_oak_log",
+        "minecraft:dark_oak_leaves"
+      ]
+    },
+    {
+      "id": "minecraft:mangrove_propagule",
+      "structure_nbt": "minecraft:mangrove",
+      "components": [
+        "minecraft:mangrove_log",
+        "minecraft:mangrove_leaves",
+        "minecraft:mangrove_roots",
+        "minecraft:muddy_mangrove_roots"
+      ]
+    },
+    {
+      "id": "minecraft:pale_oak_sapling",
+      "structure_nbt": "minecraft:pale_oak",
+      "components": [
+        "minecraft:pale_oak_log",
+        "minecraft:pale_oak_leaves"
+      ]
+    },
+    {
+      "id": "minecraft:cherry_sapling",
+      "structure_nbt": "minecraft:cherry",
+      "components": [
+        "minecraft:cherry_log",
+        "minecraft:cherry_leaves"
+      ]
+    },
+    {
+      "id": "minecraft:azalea_leaves",
+      "structure_nbt": "minecraft:azalea_tree",
+      "components": [
+        "minecraft:oak_log",
+        "minecraft:azalea_leaves",
+        "minecraft:flowering_azalea_leaves"
+      ]
+    },
+    {
+      "id": "fieldguide:huge_crimson_fungus",
+      "display": "minecraft:crimson_stem",
+      "structure_nbt": "minecraft:crimson_fungus",
+      "components": [
+        "minecraft:crimson_stem",
+        "minecraft:nether_wart_block",
+        "minecraft:shroomlight"
+      ]
+    },
+    {
+      "id": "fieldguide:huge_warped_fungus",
+      "display": "minecraft:warped_stem",
+      "structure_nbt": "minecraft:warped_fungus",
+      "components": [
+        "minecraft:warped_stem",
+        "minecraft:warped_wart_block",
+        "minecraft:shroomlight"
+      ]
+    },
+    {
+      "id": "fieldguide:huge_brown_mushroom",
+      "display": "minecraft:brown_mushroom_block",
+      "structure_nbt": "minecraft:huge_brown_mushroom",
+      "components": [
+        "minecraft:brown_mushroom_block",
+        "minecraft:mushroom_stem"
+      ]
+    },
+    {
+      "id": "fieldguide:huge_red_mushroom",
+      "display": "minecraft:red_mushroom_block",
+      "structure_nbt": "minecraft:huge_red_mushroom",
+      "components": [
+        "minecraft:red_mushroom_block",
+        "minecraft:mushroom_stem"
+      ]
+    },
+    {
+      "id": "minecraft:big_dripleaf",
+      "components": [
+        "minecraft:big_dripleaf",
+        "minecraft:big_dripleaf_stem"
+      ]
+    },
+    {
+      "id": "minecraft:vine",
+      "render": [
+        "minecraft:vine|south=true,west=true",
+        "minecraft:vine|south=true,west=true"
+      ]
+    },
+    {
+      "id": "minecraft:cave_vines",
+      "render": [
+        "minecraft:cave_vines",
+        "minecraft:cave_vines_plant|berries=true"
+      ],
+      "components": [
+        "minecraft:cave_vines_plant",
+        "minecraft:cave_vines"
+      ]
+    },
+    {
+      "id": "minecraft:weeping_vines",
+      "render": [
+        "minecraft:weeping_vines",
+        "minecraft:weeping_vines_plant"
+      ],
+      "components": [
+        "minecraft:weeping_vines_plant",
+        "minecraft:weeping_vines"
+      ]
+    },
+    {
+      "id": "minecraft:twisting_vines",
+      "render": [
+        "minecraft:twisting_vines_plant",
+        "minecraft:twisting_vines"
+      ],
+      "components": [
+        "minecraft:twisting_vines",
+        "minecraft:twisting_vines_plant"
+      ]
+    },
+    {
+      "id": "minecraft:chorus_plant",
+      "structure_nbt": "minecraft:chorus_plant",
+      "components": [
+        "minecraft:chorus_plant",
+        "minecraft:chorus_flower"
+      ]
+    },
+    {
+      "id": "minecraft:kelp",
+      "render": [
+        "minecraft:kelp_plant",
+        "minecraft:kelp"
+      ],
+      "components": [
+        "minecraft:kelp",
+        "minecraft:kelp_plant"
+      ]
+    },
+    {
+      "id": "minecraft:bamboo",
+      "render": [
+        "minecraft:bamboo",
+        "minecraft:bamboo|leaves=large"
+      ]
+    },
+    {
+      "id": "minecraft:sugar_cane",
+      "render": [
+        "minecraft:sugar_cane",
+        "minecraft:sugar_cane"
+      ]
+    },
+    {
+      "id": "minecraft:cactus",
+      "render": [
+        "minecraft:cactus",
+        "minecraft:cactus"
+      ]
+    },
+    {
+      "id": "minecraft:torchflower",
+      "components": [
+        "minecraft:torchflower",
+        "minecraft:torchflower_crop"
+      ]
+    },
+    {
+      "id": "minecraft:pitcher_plant",
+      "components": [
+        "minecraft:pitcher_plant",
+        "minecraft:pitcher_crop"
+      ]
+    },
+    {
+      "id": "minecraft:pumpkin",
+      "components": [
+        "minecraft:pumpkin",
+        "minecraft:pumpkin_stem",
+        "minecraft:attached_pumpkin_stem"
+      ]
+    },
+    {
+      "id": "minecraft:melon",
+      "components": [
+        "minecraft:melon",
+        "minecraft:melon_stem",
+        "minecraft:attached_melon_stem"
+      ]
+    }
+  ]
+}

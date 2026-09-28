@@ -1,0 +1,39 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.evandev.fieldguide.mixin",
+  "plugin": "com.moulberry.mixinconstraints.ConstraintsMixinPlugin",
+  "compatibilityLevel": "JAVA_${java_version}",
+  "mixins": [
+    "InventoryMixin",
+    "ItemStackMixin",
+    "accessor.CompositeEntryBaseAccessor",
+    "accessor.CompositeLootItemConditionAccessor",
+    "accessor.EntityAccessor",
+    "accessor.LootItemAccessor",
+    "accessor.LootPoolAccessor",
+    "accessor.LootPoolEntryContainerAccessor",
+    "accessor.LootPoolSingletonContainerAccessor",
+    "accessor.LootTableAccessor",
+    "accessor.MobAccessor",
+    "accessor.NestedLootTableAccessor",
+    "accessor.SequenceFunctionAccessor",
+    "accessor.SetItemCountFunctionAccessor",
+    "accessor.StructureTemplateAccessor",
+    "accessor.TagEntryAccessor",
+    "server.PlayerListMixin"
+  ],
+  "client": [
+    "accessor.RenderSetupAccessor",
+    "accessor.RenderTypeAccessor",
+    "accessor.TextureBindingAccessor",
+    "client.InventoryScreenMixin",
+    "client.LevelRendererMixin",
+    "client.PauseScreenMixin",
+    "client.ScreenMixin"
+  ],
+  "server": [],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

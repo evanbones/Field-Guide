@@ -1,0 +1,68 @@
+{
+  "replace": false,
+  "removals": [
+    {
+      "entry": "minecraft:pig#temperate",
+      "value": [
+        "minecraft:savanna",
+        "minecraft:windswept_forest",
+        "minecraft:bamboo_jungle",
+        "minecraft:old_growth_spruce_taiga",
+        "minecraft:windswept_hills",
+        "minecraft:jungle",
+        "minecraft:savanna_plateau",
+        "minecraft:windswept_gravelly_hills",
+        "minecraft:windswept_savanna",
+        "minecraft:taiga",
+        "minecraft:snowy_taiga",
+        "minecraft:sparse_jungle",
+        "minecraft:old_growth_pine_taiga",
+        "minecraft:eroded_badlands",
+        "minecraft:wooded_badlands"
+      ]
+    },
+    {
+      "entry": "minecraft:pig#warm",
+      "value": [
+        "minecraft:windswept_forest",
+        "minecraft:swamp",
+        "minecraft:sunflower_plains",
+        "minecraft:old_growth_spruce_taiga",
+        "minecraft:windswept_hills",
+        "minecraft:dark_forest",
+        "minecraft:forest",
+        "minecraft:windswept_gravelly_hills",
+        "minecraft:old_growth_birch_forest",
+        "minecraft:taiga",
+        "minecraft:snowy_taiga",
+        "minecraft:birch_forest",
+        "minecraft:old_growth_pine_taiga",
+        "minecraft:flower_forest",
+        "minecraft:plains",
+        "minecraft:cherry_grove"
+      ]
+    },
+    {
+      "entry": "minecraft:pig#cold",
+      "value": [
+        "minecraft:savanna",
+        "minecraft:swamp",
+        "minecraft:sunflower_plains",
+        "minecraft:bamboo_jungle",
+        "minecraft:jungle",
+        "minecraft:dark_forest",
+        "minecraft:savanna_plateau",
+        "minecraft:forest",
+        "minecraft:windswept_savanna",
+        "minecraft:old_growth_birch_forest",
+        "minecraft:sparse_jungle",
+        "minecraft:birch_forest",
+        "minecraft:flower_forest",
+        "minecraft:plains",
+        "minecraft:cherry_grove",
+        "minecraft:eroded_badlands",
+        "minecraft:wooded_badlands"
+      ]
+    }
+  ]
+}

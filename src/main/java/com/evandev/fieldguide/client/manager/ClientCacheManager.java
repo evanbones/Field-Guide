@@ -1,0 +1,214 @@
+package com.evandev.fieldguide.client.manager;
+
+import com.evandev.fieldguide.Constants;
+import com.evandev.fieldguide.platform.Services;
+import com.google.common.hash.Hashing;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+//? if <26.1 {
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtIo;
+import net.minecraft.nbt.Tag;
+//?}
+
+//? if >=26.1 {
+/*import com.mojang.serialization.DataResult;
+import net.minecraft.nbt.*;
+
+import java.util.Optional;
+*///?}
+
+public class ClientCacheManager {
+    private static final Path CACHE_BASE_DIR = Services.PLATFORM.getConfigDirectory().resolve("../fieldguide_cache");
+    private static String currentSessionKey = null;
+
+    public static void init() {
+        try {
+            Files.createDirectories(CACHE_BASE_DIR);
+        } catch (IOException e) {
+            Constants.LOG.error("Failed to create cache directory", e);
+        }
+    }
+
+    private static String getSessionKey() {
+        if (currentSessionKey != null) return currentSessionKey;
+
+        Minecraft mc = Minecraft.getInstance();
+        String rawKey;
+        if (mc.isLocalServer() && mc.getSingleplayerServer() != null) {
+            rawKey = "singleplayer_" + mc.getSingleplayerServer().getWorldData().getLevelName();
+        } else {
+            ServerData serverData = mc.getCurrentServer();
+            rawKey = "multiplayer_" + (serverData != null ? serverData.ip : "unknown");
+        }
+
+        currentSessionKey = Hashing.sha256().hashString(rawKey, StandardCharsets.UTF_8).toString().substring(0, 16);
+        return currentSessionKey;
+    }
+
+    private static Path getSessionDir() {
+        Path sessionDir = CACHE_BASE_DIR.resolve(getSessionKey());
+        try {
+            Files.createDirectories(sessionDir);
+        } catch (IOException ignored) {
+        }
+        return sessionDir;
+    }
+
+    private static HolderLookup.Provider getRegistryAccess() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level != null) {
+            return mc.level.registryAccess();
+        } else if (mc.getConnection() != null) {
+            return mc.getConnection().registryAccess();
+        }
+        throw new IllegalStateException("Registry access is not available yet!");
+    }
+
+    public static void saveAllDrops(Map<ResourceLocation, List<ItemStack>> allDrops) {
+        if (allDrops == null || allDrops.isEmpty()) return;
+
+        HolderLookup.Provider provider = getRegistryAccess();
+        Path dropFile = getSessionDir().resolve("drops.nbt");
+        CompoundTag root = loadNbt(dropFile);
+
+        for (Map.Entry<ResourceLocation, List<ItemStack>> entry : allDrops.entrySet()) {
+            ListTag list = new ListTag();
+            for (ItemStack stack : entry.getValue()) {
+                //? if <26.1 {
+                list.add(stack.saveOptional(provider));
+                //?} else {
+                /*DataResult<Tag> result = ItemStack.OPTIONAL_CODEC.encodeStart(provider.createSerializationContext(NbtOps.INSTANCE), stack);
+                result.ifSuccess(list::add);
+                *///?}
+            }
+            root.put(entry.getKey().toString(), list);
+        }
+        saveNbt(dropFile, root);
+    }
+
+    public static List<ItemStack> loadDrops(ResourceLocation entryId) {
+        Path dropFile = getSessionDir().resolve("drops.nbt");
+        CompoundTag root = loadNbt(dropFile);
+
+        //? if <26.1 {
+        if (root.contains(entryId.toString(), Tag.TAG_LIST)) {
+        //?} else {
+        /*if (root.contains(entryId.toString())) {
+        *///?}
+            HolderLookup.Provider provider = getRegistryAccess();
+            //? if <26.1 {
+            ListTag list = root.getList(entryId.toString(), Tag.TAG_COMPOUND);
+            List<ItemStack> drops = new ArrayList<>();
+            for (int i = 0; i < list.size(); i++) {
+                drops.add(ItemStack.parseOptional(provider, list.getCompound(i)));
+            //?} else {
+            /*Optional<ListTag> listOpt = root.getList(entryId.toString());
+
+            if (listOpt.isPresent()) {
+                ListTag list = listOpt.get();
+                List<ItemStack> drops = new ArrayList<>();
+                for (Tag tag : list) {
+                    DataResult<ItemStack> result = ItemStack.OPTIONAL_CODEC.parse(provider.createSerializationContext(NbtOps.INSTANCE), tag);
+                    result.ifSuccess(drops::add);
+                }
+                return drops;
+            *///?}
+            }
+            //? if <26.1 {
+            return drops;
+            //?}
+        }
+        return null;
+    }
+
+    public static void saveBiomes(ResourceLocation entryId, List<ResourceLocation> biomes) {
+        if (biomes == null) return;
+
+        Path biomeFile = getSessionDir().resolve("biomes.nbt");
+        CompoundTag root = loadNbt(biomeFile);
+        ListTag list = new ListTag();
+        for (ResourceLocation biome : biomes) {
+            CompoundTag tag = new CompoundTag();
+            tag.putString("id", biome.toString());
+            list.add(tag);
+        }
+        root.put(entryId.toString(), list);
+        saveNbt(biomeFile, root);
+    }
+
+    public static List<ResourceLocation> loadBiomes(ResourceLocation entryId) {
+        Path biomeFile = getSessionDir().resolve("biomes.nbt");
+        CompoundTag root = loadNbt(biomeFile);
+        //? if <26.1 {
+        if (root.contains(entryId.toString(), Tag.TAG_LIST)) {
+            ListTag list = root.getList(entryId.toString(), Tag.TAG_COMPOUND);
+            List<ResourceLocation> biomes = new ArrayList<>();
+            for (int i = 0; i < list.size(); i++) {
+                biomes.add(ResourceLocation.parse(list.getCompound(i).getString("id")));
+        //?} else {
+        /*if (root.contains(entryId.toString())) {
+            Optional<ListTag> listOpt = root.getList(entryId.toString());
+
+            if (listOpt.isPresent()) {
+                ListTag list = listOpt.get();
+                List<ResourceLocation> biomes = new ArrayList<>();
+                for (int i = 0; i < list.size(); i++) {
+                    list.getCompound(i).flatMap(compound -> compound.getString("id")).ifPresent(idStr -> biomes.add(ResourceLocation.parse(idStr)));
+                }
+                return biomes;
+        *///?}
+            }
+            //? if <26.1 {
+            return biomes;
+            //?}
+        }
+        return null;
+    }
+
+    private static CompoundTag loadNbt(Path path) {
+        if (Files.exists(path)) {
+            try {
+                return NbtIo.read(path);
+            } catch (IOException e) {
+                Constants.LOG.error("Failed to read NBT cache from {}", path, e);
+            }
+        }
+        return new CompoundTag();
+    }
+
+    private static void saveNbt(Path path, CompoundTag tag) {
+        try {
+            NbtIo.write(tag, path);
+        } catch (IOException e) {
+            Constants.LOG.error("Failed to write NBT cache to {}", path, e);
+        }
+    }
+
+    public static void clearDiskCache() {
+        try {
+            Path sessionDir = getSessionDir();
+            Files.deleteIfExists(sessionDir.resolve("drops.nbt"));
+            Files.deleteIfExists(sessionDir.resolve("biomes.nbt"));
+        } catch (IOException e) {
+            Constants.LOG.error("Failed to delete cache files", e);
+        }
+    }
+
+    public static void onWorldUnload() {
+        currentSessionKey = null;
+    }
+}

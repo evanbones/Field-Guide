@@ -1,0 +1,82 @@
+{
+  "entries": [
+    {
+      "id": "minecraft:cow",
+      "conditions": [
+        {
+          "type": "not",
+          "value": {
+            "type": "mod_loaded",
+            "modid": "mixed_litter"
+          }
+        }
+      ],
+      "variants": [
+        {
+          "id": "temperate",
+          "nbt": "{variant: \"minecraft:temperate\"}"
+        },
+        {
+          "id": "warm",
+          "nbt": "{variant: \"minecraft:warm\"}"
+        },
+        {
+          "id": "cold",
+          "nbt": "{variant: \"minecraft:cold\"}"
+        }
+      ]
+    },
+    {
+      "id": "minecraft:chicken",
+      "conditions": [
+        {
+          "type": "not",
+          "value": {
+            "type": "mod_loaded",
+            "modid": "mixed_litter"
+          }
+        }
+      ],
+      "variants": [
+        {
+          "id": "temperate",
+          "nbt": "{variant: \"minecraft:temperate\"}"
+        },
+        {
+          "id": "warm",
+          "nbt": "{variant: \"minecraft:warm\"}"
+        },
+        {
+          "id": "cold",
+          "nbt": "{variant: \"minecraft:cold\"}"
+        }
+      ]
+    },
+    {
+      "id": "minecraft:pig",
+      "conditions": [
+        {
+          "type": "not",
+          "value": {
+            "type": "mod_loaded",
+            "modid": "mixed_litter"
+          }
+        }
+      ],
+      "variants": [
+        {
+          "id": "temperate",
+          "nbt": "{variant: \"minecraft:temperate\"}"
+        },
+        {
+          "id": "warm",
+          "nbt": "{variant: \"minecraft:warm\"}"
+        },
+        {
+          "id": "cold",
+          "nbt": "{variant: \"minecraft:cold\"}"
+        }
+      ]
+    }
+  ]
+}
