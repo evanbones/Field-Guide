@@ -9,10 +9,13 @@ import java.nio.file.Path;
 
 //? if fabric {
 /*import net.fabricmc.loader.api.FabricLoader;
-*///?} else {
+*///?} else if neoforge {
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLPaths;
-//?}
+//?} else {
+/*import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.loading.FMLPaths;
+*///?}
 
 //? if neoforge && <26.1 {
 import com.evandev.fieldguide.neoforge.compat.mixedlitter.MixedLitterCompat;
@@ -20,7 +23,9 @@ import com.evandev.fieldguide.neoforge.compat.mixedlitter.MixedLitterCompat;
 
 //? if neoforge && <26.2 {
 import com.evandev.fieldguide.neoforge.compat.kubejs.FieldGuideKubeJSHooks;
-//?}
+//?} else if <1.21 {
+/*import com.evandev.fieldguide.compat.kubejs.FieldGuideKubeJSHooks;
+*///?}
 
 public class PlatformHelper {
 
@@ -47,7 +52,7 @@ public class PlatformHelper {
     }
 
     public void onEntryUnlocked(ServerPlayer player, ResourceLocation entryId, String variantId, boolean newlyUnlocked, PlayerFieldGuideProgress progress) {
-        //? if neoforge && <26.2 {
+        //? if (neoforge && <26.2) || <1.21 {
         if (isModLoaded("kubejs")) {
             FieldGuideKubeJSHooks.postEntryUnlocked(player, entryId, variantId, newlyUnlocked, progress);
         }
@@ -55,7 +60,7 @@ public class PlatformHelper {
     }
 
     public void onCategoryCompleted(ServerPlayer player, ResourceLocation categoryId, PlayerFieldGuideProgress progress) {
-        //? if neoforge && <26.2 {
+        //? if (neoforge && <26.2) || <1.21 {
         if (isModLoaded("kubejs")) {
             FieldGuideKubeJSHooks.postCategoryCompleted(player, categoryId, progress);
         }

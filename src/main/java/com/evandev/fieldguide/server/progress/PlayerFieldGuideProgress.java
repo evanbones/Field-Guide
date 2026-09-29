@@ -79,7 +79,7 @@ public class PlayerFieldGuideProgress {
     }
 
     private void tryUnlockDirect(ServerPlayer player, ResourceLocation entryId, String variantId, EntryUnlockData.UnlockTrigger trigger) {
-        if (trigger == EntryUnlockData.UnlockTrigger.OBTAIN && ServerConfig.get().disableObtainUnlocks) return;
+        if (trigger == EntryUnlockData.UnlockTrigger.OBTAIN && ServerConfig.getLocal().disableObtainUnlocks) return;
         if (!ServerFieldGuideManager.getInstance().hasEntry(entryId)) return;
 
         if (isUnlocked(entryId)) {

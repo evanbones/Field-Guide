@@ -34,10 +34,15 @@ import java.util.Optional;
 public record CopyPagePacket(ResourceLocation entryId) implements CustomPacketPayload {
 
     public static final Type<CopyPagePacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "copy_page"));
-    public static final StreamCodec<FriendlyByteBuf, CopyPagePacket> CODEC = StreamCodec.composite(
-            ResourceLocation.STREAM_CODEC, CopyPagePacket::entryId,
-            CopyPagePacket::new
-    );
+    public static final StreamCodec<FriendlyByteBuf, CopyPagePacket> CODEC = StreamCodec.ofMember(CopyPagePacket::encode, CopyPagePacket::new);
+
+    public CopyPagePacket(FriendlyByteBuf buf) {
+        this(buf.readResourceLocation());
+    }
+
+    public void encode(FriendlyByteBuf buf) {
+        buf.writeResourceLocation(entryId);
+    }
 
     @Override
     public @NotNull Type<? extends CustomPacketPayload> type() {
@@ -59,24 +64,20 @@ public record CopyPagePacket(ResourceLocation entryId) implements CustomPacketPa
 
         // Give item
         ItemStack page = new ItemStack(ModItems.PAGE.get());
-        page.set(ModDataComponents.ENTRY_ID.get(), entryId);
-        page.set(ModDataComponents.AUTHOR.get(), player.getScoreboardName());
+        ModDataComponents.set(page, ModDataComponents.ENTRY_ID, entryId);
+        ModDataComponents.set(page, ModDataComponents.AUTHOR, player.getScoreboardName());
 
         Component nameComponent = null;
         Optional<Object> entry = EntryResolutionHelper.resolveSingleEntry(entryId, null, null);
         if (entry.isPresent()) {
             Object obj = entry.get();
-            switch (obj) {
-                case EntityType<?> type -> nameComponent = type.getDescription();
-                case Block block -> nameComponent = block.getName();
-                //? if <26.1 {
-                case Item item -> nameComponent = item.getDescription();
-                //?} else {
-                /*case Item item -> nameComponent = Component.translatable(item.getDescriptionId());
-                *///?}
-                default -> {
-                }
-            }
+            if (obj instanceof EntityType<?> type) nameComponent = type.getDescription();
+            else if (obj instanceof Block block) nameComponent = block.getName();
+            //? if <26.1 {
+            else if (obj instanceof Item item) nameComponent = item.getDescription();
+            //?} else {
+            /*else if (obj instanceof Item item) nameComponent = Component.translatable(item.getDescriptionId());
+            *///?}
         }
 
         if (nameComponent == null) {
@@ -87,11 +88,11 @@ public record CopyPagePacket(ResourceLocation entryId) implements CustomPacketPa
             }
         }
 
-        page.set(ModDataComponents.ENTRY_NAME.get(), nameComponent);
+        ModDataComponents.set(page, ModDataComponents.ENTRY_NAME, nameComponent);
 
         List<String> variants = progress.getUnlockedVariants(idStr);
         if (!variants.isEmpty()) {
-            page.set(ModDataComponents.VARIANTS.get(), variants);
+            ModDataComponents.set(page, ModDataComponents.VARIANTS, variants);
 
             Map<String, String> variantNames = new HashMap<>();
             for (String v : variants) {
@@ -102,21 +103,21 @@ public record CopyPagePacket(ResourceLocation entryId) implements CustomPacketPa
             }
 
             if (!variantNames.isEmpty()) {
-                page.set(ModDataComponents.CUSTOM_VARIANT_NAMES.get(), variantNames);
+                ModDataComponents.set(page, ModDataComponents.CUSTOM_VARIANT_NAMES, variantNames);
             }
         }
 
         String customName = progress.getCustomName(idStr);
-        if (customName != null) page.set(ModDataComponents.CUSTOM_NAME.get(), customName);
+        if (customName != null) ModDataComponents.set(page, ModDataComponents.CUSTOM_NAME, customName);
 
         String customDescription = progress.getCustomDescription(idStr);
-        if (customDescription != null) page.set(ModDataComponents.CUSTOM_DESCRIPTION.get(), customDescription);
+        if (customDescription != null) ModDataComponents.set(page, ModDataComponents.CUSTOM_DESCRIPTION, customDescription);
 
         String photograph = progress.getEntryPhotograph(idStr);
-        if (photograph != null) page.set(ModDataComponents.PHOTOGRAPH.get(), photograph);
+        if (photograph != null) ModDataComponents.set(page, ModDataComponents.PHOTOGRAPH, photograph);
 
-        page.set(ModDataComponents.DISCOVERY_TIME.get(), progress.getDiscoveryTime(idStr));
-        page.set(ModDataComponents.DISCOVERY_GAME_TIME.get(), progress.getDiscoveryGameTime(idStr));
+        ModDataComponents.set(page, ModDataComponents.DISCOVERY_TIME, progress.getDiscoveryTime(idStr));
+        ModDataComponents.set(page, ModDataComponents.DISCOVERY_GAME_TIME, progress.getDiscoveryGameTime(idStr));
 
         if (!player.getInventory().add(page)) {
             //? if <26.3 {

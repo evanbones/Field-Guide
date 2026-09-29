@@ -353,7 +353,11 @@ public class ProgressManager {
                     //?} else {
                     /*CompoundTag tag = TagParser.parseCompoundFully(entryPhotographs.get(key));
                     *///?}
+                    //? if >=1.21 {
                     return ItemStack.OPTIONAL_CODEC.parse(Minecraft.getInstance().level.registryAccess().createSerializationContext(NbtOps.INSTANCE), tag).result().orElse(ItemStack.EMPTY);
+                    //?} else {
+                    /*return ItemStack.of(tag);
+                    *///?}
                 } catch (Exception e) {
                     return ItemStack.EMPTY;
                 }
@@ -373,7 +377,11 @@ public class ProgressManager {
                 entryPhotographs.remove(key);
                 Services.NETWORK.sendToServer(UpdateEntryDataPacket.removePhotograph(id, variantId));
             } else {
+                //? if >=1.21 {
                 Tag tag = ItemStack.CODEC.encodeStart(Minecraft.getInstance().level.registryAccess().createSerializationContext(NbtOps.INSTANCE), stack).getOrThrow();
+                //?} else {
+                /*Tag tag = stack.save(new CompoundTag());
+                *///?}
                 entryPhotographs.put(key, tag.toString());
                 Services.NETWORK.sendToServer(UpdateEntryDataPacket.setPhotograph(id, slot, variantId));
             }

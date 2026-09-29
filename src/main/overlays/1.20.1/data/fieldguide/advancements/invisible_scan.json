@@ -1,0 +1,31 @@
+{
+  "parent": "fieldguide:first_discovery",
+  "display": {
+    "icon": {
+      "item": "minecraft:potion",
+      "nbt": "{Potion:\"minecraft:invisibility\"}"
+    },
+    "title": {
+      "translate": "advancements.fieldguide.invisible_scan.title"
+    },
+    "description": {
+      "translate": "advancements.fieldguide.invisible_scan.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "scan": {
+      "trigger": "fieldguide:scan_entity",
+      "conditions": {
+        "entity": {
+          "effects": {
+            "minecraft:invisibility": {}
+          }
+        }
+      }
+    }
+  }
+}

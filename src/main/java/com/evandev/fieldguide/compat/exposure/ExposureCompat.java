@@ -128,9 +128,9 @@ public class ExposureCompat {
             Object bestMatch;
 
             if (possibleEntries.size() == 1) {
-                bestMatch = possibleEntries.getFirst();
+                bestMatch = possibleEntries.get(0);
             } else {
-                bestMatch = possibleEntries.getFirst();
+                bestMatch = possibleEntries.get(0);
                 int maxScore = -1;
 
                 for (Object entry : possibleEntries) {

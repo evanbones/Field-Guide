@@ -1,0 +1,69 @@
+modLoader = "javafml"
+loaderVersion = "${forge_loader_version_range}"
+license = "${license}"
+issueTrackerURL = "https://github.com/evanbones/FieldGuide/issues"
+
+[[mods]]
+modId = "${mod_id}"
+version = "${version}"
+displayName = "${mod_name}"
+logoFile = "${mod_id}.png"
+credits = "${credits}"
+authors = "${mod_author}"
+description = '''${description}'''
+
+[[dependencies.${mod_id}]]
+modId = "forge"
+mandatory = true
+versionRange = "[${forge_version},)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "minecraft"
+mandatory = true
+versionRange = "${minecraft_version_range}"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "exposure"
+mandatory = false
+versionRange = "[1.9.0,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "entity_texture_features"
+mandatory = false
+versionRange = "[7.2,)"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies.${mod_id}]]
+modId = "entity_model_features"
+mandatory = false
+versionRange = "[3.3,)"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies.${mod_id}]]
+modId = "item_descriptions"
+mandatory = false
+versionRange = "[2.5.4,)"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies.${mod_id}]]
+modId = "immersiveoverlays"
+mandatory = false
+versionRange = "[1.8.3,)"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies.${mod_id}]]
+modId = "yet_another_config_lib_v3"
+mandatory = false
+versionRange = "[${yacl_version},)"
+ordering = "NONE"
+side = "CLIENT"

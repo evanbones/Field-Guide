@@ -56,23 +56,10 @@ import net.minecraft.world.entity.boss.enderdragon.EnderDragonPart;
 *///?}
 
 public class ScanOverlayRenderer {
-    //? if <26.1 {
-    protected static final VertexConsumer DUMMY_CONSUMER = new VertexConsumer() {
-        @Override
-        public @NotNull VertexConsumer addVertex(float x, float y, float z) {
-            return this;
-        }
-    //?} else {
+    //? if >=26.1 {
     /*private static final float VERTICAL_BUFFER = 1.3f;
-    *///?}
 
-    //? if <26.1 {
-        @Override
-        public @NotNull VertexConsumer setColor(int r, int g, int b, int a) {
-            return this;
-        }
-    //?} else {
-    /*public static int getPackedScanLightCoords(float limitY, float r, float g, float b, float a) {
+    public static int getPackedScanLightCoords(float limitY, float r, float g, float b, float a) {
         short encodedLimit = (short) Mth.clamp(limitY * 100.0f, -32000, 32000);
         int r4 = (int) (r * 15);
         int g4 = (int) (g * 15);
@@ -84,26 +71,7 @@ public class ScanOverlayRenderer {
     *///?}
 
     //? if <26.1 {
-        @Override
-        public @NotNull VertexConsumer setUv(float u, float v) {
-            return this;
-        }
-
-        @Override
-        public @NotNull VertexConsumer setUv1(int u, int v) {
-            return this;
-        }
-
-        @Override
-        public @NotNull VertexConsumer setUv2(int u, int v) {
-            return this;
-        }
-
-        @Override
-        public @NotNull VertexConsumer setNormal(float x, float y, float z) {
-            return this;
-        }
-    };
+    protected static final VertexConsumer DUMMY_CONSUMER = new NoopVertexConsumer();
     private static final float VERTICAL_BUFFER = 1.3f;
     private static final Map<RenderType, Boolean> GLINT_CACHE = new IdentityHashMap<>();
     private static Boolean etfLoaded;
@@ -607,13 +575,21 @@ public class ScanOverlayRenderer {
             }
             random.setSeed(seed);
             for (BakedQuad quad : model.getQuads(state, dir, random)) {
-                consumer.putBulkData(pose, quad, 1.0f, 1.0f, 1.0f, 1.0f, 15728880, OverlayTexture.pack(0, 10));
+                putQuad(consumer, pose, quad);
             }
         }
         random.setSeed(seed);
         for (BakedQuad quad : model.getQuads(state, null, random)) {
-            consumer.putBulkData(pose, quad, 1.0f, 1.0f, 1.0f, 1.0f, 15728880, OverlayTexture.pack(0, 10));
+            putQuad(consumer, pose, quad);
         }
+    }
+
+    private static void putQuad(VertexConsumer consumer, PoseStack.Pose pose, BakedQuad quad) {
+        //? if >=1.21 {
+        consumer.putBulkData(pose, quad, 1.0f, 1.0f, 1.0f, 1.0f, 15728880, OverlayTexture.pack(0, 10));
+        //?} else {
+        /*consumer.putBulkData(pose, quad, 1.0f, 1.0f, 1.0f, 15728880, OverlayTexture.pack(0, 10));
+        *///?}
     }
 
     private static void renderEntityOverlay(PoseStack poseStack, float partialTick, Vec3 camPos, MultiBufferSource.BufferSource bufferSource, Entity targetEntity, Entity outOfRangeEntity, FieldGuideScanner scanner, Minecraft mc, float red, float green, float blue, float alpha) {

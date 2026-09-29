@@ -102,7 +102,12 @@ public class PaginatedGridWidget<T> extends AbstractWidget {
     }
 
     @Override
+    //? if >=1.21 {
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+    //?} else {
+    /*public boolean mouseScrolled(double mouseX, double mouseY, double scrollY) {
+        double scrollX = 0;
+    *///?}
         if (this.isHoveredOrFocused()) {
             setPage(currentPage - (int) Math.signum(scrollY));
             return true;

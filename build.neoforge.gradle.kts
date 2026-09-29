@@ -86,7 +86,7 @@ neoForge {
 
 tasks {
     processResources {
-        exclude("**/fabric.mod.json", "**/*.accesswidener", "**/mods.toml", "**/*.fabric.mixins.json")
+        exclude("**/fabric.mod.json", "**/*.accesswidener", "**/mods.toml", "**/*.fabric.mixins.json", "**/*.forge.mixins.json")
         if (optDep("kubejs") == null) exclude("kubejs.plugins.txt", "META-INF/services/dev.latvian.mods.kubejs.plugin.KubeJSPlugin")
     }
 

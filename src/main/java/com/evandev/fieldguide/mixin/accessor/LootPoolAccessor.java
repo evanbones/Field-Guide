@@ -30,12 +30,19 @@ public interface LootPoolAccessor {
     *///?}
 
     @Accessor("entries")
+    //? if >=1.21 {
     List<LootPoolEntryContainer> fieldguide$getEntries();
+    //?} else {
+    /*LootPoolEntryContainer[] fieldguide$getEntries();
+    *///?}
 
-    //? if <26.3 {
+    //? if >=1.21 && <26.3 {
     @Accessor("conditions")
     List<LootItemCondition> fieldguide$getConditions();
-    //?} else {
+    //?} else if <1.21 {
+    /*@Accessor("conditions")
+    LootItemCondition[] fieldguide$getConditions();
+    *///?} else {
     /*@Accessor("condition")
     Optional<Holder<LootItemCondition>> fieldguide$getCondition();
 

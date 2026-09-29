@@ -5,7 +5,6 @@ import com.evandev.fieldguide.client.render.DiscoveryOverlayRenderer;
 import com.evandev.fieldguide.client.render.ScanOverlayRenderer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Camera;
-import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -18,6 +17,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+//? if >=1.21 {
+import net.minecraft.client.DeltaTracker;
+//?}
+
 @Mixin(LevelRenderer.class)
 public class LevelRendererMixin {
 
@@ -25,6 +28,7 @@ public class LevelRendererMixin {
             method = "renderLevel",
             at = @At("RETURN")
     )
+    //? if >=1.21 {
     private void renderScanOverlays(
             DeltaTracker deltaTracker,
             boolean renderBlockOutline,
@@ -39,6 +43,20 @@ public class LevelRendererMixin {
         poseStack.mulPose(frustumMatrix);
 
         float partialTick = deltaTracker.getGameTimeDeltaPartialTick(true);
+    //?} else {
+    /*private void renderScanOverlays(
+            PoseStack poseStack,
+            float partialTick,
+            long finishNanoTime,
+            boolean renderBlockOutline,
+            Camera camera,
+            GameRenderer gameRenderer,
+            LightTexture lightTexture,
+            Matrix4f projectionMatrix,
+            CallbackInfo ci
+    ) {
+        Matrix4f frustumMatrix = poseStack.last().pose();
+    *///?}
 
         ScanOverlayRenderer.render(
                 poseStack,

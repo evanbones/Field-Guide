@@ -98,7 +98,12 @@ public class ScholarWidgetHelper {
         }
 
         @Override
+        //? if >=1.21 {
         public boolean mouseScrolled(double mouseX, double mouseY, double deltaX, double deltaY) {
+        //?} else {
+        /*public boolean mouseScrolled(double mouseX, double mouseY, double deltaY) {
+            double deltaX = 0;
+        *///?}
             if (scrollable && this.isHovered) {
                 int totalLines = getDisplayCache().getLines().size();
                 if (totalLines > maxVisibleLines) {
@@ -106,7 +111,11 @@ public class ScholarWidgetHelper {
                     return true;
                 }
             }
+            //? if >=1.21 {
             return super.mouseScrolled(mouseX, mouseY, deltaX, deltaY);
+            //?} else {
+            /*return super.mouseScrolled(mouseX, mouseY, deltaY);
+            *///?}
         }
 
         @Override

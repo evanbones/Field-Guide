@@ -1,0 +1,23 @@
+{
+  "parent": "fieldguide:first_discovery",
+  "display": {
+    "icon": {
+      "item": "minecraft:diamond_sword"
+    },
+    "title": {
+      "translate": "advancements.fieldguide.quick_review.title"
+    },
+    "description": {
+      "translate": "advancements.fieldguide.quick_review.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "scan_and_kill": {
+      "trigger": "fieldguide:scan_and_kill"
+    }
+  }
+}

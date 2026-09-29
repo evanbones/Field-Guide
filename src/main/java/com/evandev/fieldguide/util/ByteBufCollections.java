@@ -2,6 +2,8 @@ package com.evandev.fieldguide.util;
 
 import io.netty.handler.codec.DecoderException;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -63,5 +65,21 @@ public final class ByteBufCollections {
             keyWriter.accept(buf, key);
             valueWriter.accept(buf, value);
         });
+    }
+
+    public static ItemStack readItem(FriendlyByteBuf buf) {
+        //? if >=1.21 {
+        return ItemStack.OPTIONAL_STREAM_CODEC.decode((RegistryFriendlyByteBuf) buf);
+        //?} else {
+        /*return buf.readItem();
+        *///?}
+    }
+
+    public static void writeItem(FriendlyByteBuf buf, ItemStack stack) {
+        //? if >=1.21 {
+        ItemStack.OPTIONAL_STREAM_CODEC.encode((RegistryFriendlyByteBuf) buf, stack);
+        //?} else {
+        /*buf.writeItem(stack);
+        *///?}
     }
 }

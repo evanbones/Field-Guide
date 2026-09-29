@@ -61,9 +61,11 @@ public class FieldGuideItem extends Item {
     }
 
     @Override
-    //? if <26.1 {
+    //? if >=1.21 && <26.1 {
     public void appendHoverText(@NotNull ItemStack stack, @NotNull TooltipContext context, @NotNull List<Component> tooltipComponents, @NotNull TooltipFlag tooltipFlag) {
-    //?} else {
+    //?} else if <1.21 {
+    /*public void appendHoverText(@NotNull ItemStack stack, @org.jetbrains.annotations.Nullable net.minecraft.world.level.Level level, @NotNull List<Component> tooltipComponents, @NotNull TooltipFlag tooltipFlag) {
+    *///?} else {
     /*public void appendHoverText(@NotNull ItemStack stack, @NotNull TooltipContext context, @NotNull TooltipDisplay display, @NotNull Consumer<Component> tooltip, @NotNull TooltipFlag tooltipFlag) {
     *///?}
         if (ServerConfig.get().enableFieldGuideItem) {
@@ -73,9 +75,11 @@ public class FieldGuideItem extends Item {
             /*tooltip.accept(Component.translatable("item.fieldguide.field_guide.tooltip").withStyle(ChatFormatting.GRAY));
             *///?}
         }
-        //? if <26.1 {
+        //? if >=1.21 && <26.1 {
         super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
-        //?} else {
+        //?} else if <1.21 {
+        /*super.appendHoverText(stack, level, tooltipComponents, tooltipFlag);
+        *///?} else {
         /*super.appendHoverText(stack, context, display, tooltip, tooltipFlag);
         *///?}
     }

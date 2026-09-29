@@ -153,7 +153,7 @@ public class EntryResolver {
             }
         }
 
-        return entries.getFirst();
+        return entries.get(0);
     }
 
     public static List<Object> getEntriesForTarget(Map<ResourceLocation, List<Object>> resolvedEntries, Object target) {

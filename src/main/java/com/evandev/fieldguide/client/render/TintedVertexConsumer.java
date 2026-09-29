@@ -17,6 +17,69 @@ public class TintedVertexConsumer implements VertexConsumer {
         this.tintA = a;
     }
 
+    //? if <1.21 {
+    /*@Override
+    public @NotNull VertexConsumer vertex(double x, double y, double z) {
+        if (errored) return this;
+        try {
+            delegate.vertex(x, y, z);
+        } catch (IllegalStateException e) {
+            errored = true;
+        }
+        return this;
+    }
+
+    @Override
+    public @NotNull VertexConsumer color(int red, int green, int blue, int alpha) {
+        if (errored) return this;
+        delegate.color((int) (255 * tintR), (int) (255 * tintG), (int) (255 * tintB), (int) (alpha * tintA));
+        return this;
+    }
+
+    @Override
+    public @NotNull VertexConsumer uv(float u, float v) {
+        if (errored) return this;
+        delegate.uv(u, v);
+        return this;
+    }
+
+    @Override
+    public @NotNull VertexConsumer overlayCoords(int u, int v) {
+        if (errored) return this;
+        delegate.overlayCoords(u, v);
+        return this;
+    }
+
+    @Override
+    public @NotNull VertexConsumer uv2(int u, int v) {
+        if (errored) return this;
+        delegate.uv2(u, v);
+        return this;
+    }
+
+    @Override
+    public @NotNull VertexConsumer normal(float x, float y, float z) {
+        if (errored) return this;
+        delegate.normal(x, y, z);
+        return this;
+    }
+
+    @Override
+    public void endVertex() {
+        if (errored) return;
+        delegate.endVertex();
+    }
+
+    @Override
+    public void defaultColor(int red, int green, int blue, int alpha) {
+        delegate.defaultColor((int) (255 * tintR), (int) (255 * tintG), (int) (255 * tintB), (int) (alpha * tintA));
+    }
+
+    @Override
+    public void unsetDefaultColor() {
+        delegate.unsetDefaultColor();
+    }
+    *///?} else {
     @Override
     public @NotNull VertexConsumer addVertex(float x, float y, float z) {
         if (errored) return this;
@@ -67,5 +130,6 @@ public class TintedVertexConsumer implements VertexConsumer {
         delegate.setNormal(x, y, z);
         return this;
     }
+    //?}
 }
 //?}

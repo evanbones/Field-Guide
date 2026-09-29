@@ -205,6 +205,9 @@ public class ClientFieldGuideManager implements ResourceManagerReloadListener {
     @Override
     public void onResourceManagerReload(@NotNull ResourceManager resourceManager) {
         ModConfig.load();
+        //? if <1.21 {
+        /*com.evandev.fieldguide.client.gui.util.legacy.LegacySprites.clearCache();
+        *///?}
         ClientVisualManager.getInstance().onResourceManagerReload(resourceManager);
         ClientCategoryManager.getInstance().setNeedsResolution(true);
     }

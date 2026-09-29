@@ -2,7 +2,7 @@ package com.evandev.fieldguide.network;
 
 import com.evandev.fieldguide.Constants;
 import com.evandev.fieldguide.server.ServerFieldGuideManager;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
@@ -14,12 +14,15 @@ public record RequestLootPacket(ResourceLocation entryId) implements CustomPacke
     public static final CustomPacketPayload.Type<RequestLootPacket> TYPE =
             new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "request_loot"));
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, RequestLootPacket> CODEC =
-            StreamCodec.composite(
-                    ResourceLocation.STREAM_CODEC,
-                    RequestLootPacket::entryId,
-                    RequestLootPacket::new
-            );
+    public static final StreamCodec<FriendlyByteBuf, RequestLootPacket> CODEC = StreamCodec.ofMember(RequestLootPacket::encode, RequestLootPacket::new);
+
+    public RequestLootPacket(FriendlyByteBuf buf) {
+        this(buf.readResourceLocation());
+    }
+
+    public void encode(FriendlyByteBuf buf) {
+        buf.writeResourceLocation(entryId);
+    }
 
     @Override
     public @NotNull Type<? extends CustomPacketPayload> type() {

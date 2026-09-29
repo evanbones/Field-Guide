@@ -117,6 +117,12 @@ dependencies {
     // Cobblemon
     optDep("cobblemon")?.let { modCompileOnly("com.cobblemon:fabric:$it") }
 
+    // KubeJS
+    optDep("kubejs")?.let {
+        modCompileOnly("maven.modrinth:kubejs:$it")
+        modCompileOnly("dev.latvian.mods:rhino-fabric:${dep("rhino")}")
+    }
+
     // Serene Seasons
     optDep("serene_seasons")?.let { modCompileOnly("maven.modrinth:serene-seasons:$it") }
 
@@ -130,7 +136,7 @@ dependencies {
     include(implementation("com.moulberry:mixinconstraints:${dep("mixin_constraints")}")!!)
 }
 
-val accessWidener = rootProject.file("src/main/overlays/${if (since(">=26.1")) "26.x" else "1.21.1"}/fieldguide.accesswidener")
+val accessWidener = rootProject.file("src/main/overlays/${if (since(">=26.1")) "26.x" else if (since(">=1.21")) "1.21.1" else "1.20.1"}/fieldguide.accesswidener")
 if (accessWidener.exists()) {
     extensions.configure<net.fabricmc.loom.api.LoomGradleExtensionAPI>("loom") {
         accessWidenerPath.set(accessWidener)
@@ -140,9 +146,11 @@ if (accessWidener.exists()) {
 tasks {
     processResources {
         exclude(
-            "**/neoforge.mods.toml", "**/mods.toml", "**/*.neoforge.mixins.json", "**/accesstransformer.cfg",
-            "kubejs.plugins.txt", "META-INF/services/dev.latvian.mods.kubejs.plugin.KubeJSPlugin"
+            "**/neoforge.mods.toml", "**/mods.toml", "**/*.neoforge.mixins.json", "**/*.forge.mixins.json", "**/accesstransformer.cfg",
+            "META-INF/services/dev.latvian.mods.kubejs.plugin.KubeJSPlugin"
         )
+        if (optDep("kubejs") == null) exclude("kubejs.plugins.txt")
+        if (since("<1.21")) legacyDataLayout()
     }
 
     register<Copy>("buildAndCollect") {
@@ -213,6 +221,7 @@ publishMods {
         if (optDep("emi") != null) optional("emi")
         if (optDep("rrv") != null) optional("rrv")
         optional("modmenu")
+        if (optDep("kubejs") != null) optional("kubejs")
         if (optDep("immersive_overlays") != null) requires("immersive-overlays")
     }
 
@@ -227,6 +236,7 @@ publishMods {
         if (optDep("emi") != null) optional("emi")
         if (optDep("rrv") != null) optional("rrv")
         optional("modmenu")
+        if (optDep("kubejs") != null) optional("kubejs")
         if (optDep("immersive_overlays") != null) requires("immersive-overlays")
         client = true
         server = true

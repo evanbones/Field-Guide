@@ -9,5 +9,9 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(LootItem.class)
 public interface LootItemAccessor {
     @Accessor("item")
+    //? if >=1.21 {
     Holder<Item> fieldguide$getItem();
+    //?} else {
+    /*Item fieldguide$getItem();
+    *///?}
 }

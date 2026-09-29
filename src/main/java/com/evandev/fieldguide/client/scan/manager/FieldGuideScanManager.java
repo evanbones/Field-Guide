@@ -70,7 +70,7 @@ public class FieldGuideScanManager {
         }
 
         if (matchingVariants.isEmpty()) return "";
-        if (matchingVariants.size() == 1) return matchingVariants.getFirst().variantId();
+        if (matchingVariants.size() == 1) return matchingVariants.get(0).variantId();
 
         // If multiple variants share this component, disambiguate using nearby blocks
         if (level != null && pos != null) {
@@ -114,7 +114,7 @@ public class FieldGuideScanManager {
             }
         }
 
-        return matchingVariants.getFirst().variantId();
+        return matchingVariants.get(0).variantId();
     }
 
     public void onClientTick(Minecraft minecraft) {

@@ -26,20 +26,14 @@ public class EntryResolutionHelper {
             if (entry.isAutoPopulate() && entry.strategy() != null) {
                 EntryUnlockData inheritUnlock = entry.unlockData();
                 for (Object obj : AutoPopulateRegistry.getEntries(entry.strategy(), categoryId)) {
-                    if (obj instanceof GuideEntry(
-                            ResourceLocation id, ResourceLocation displayId, ResourceLocation icon, EntryKind kind,
-                            boolean virtual, boolean autoPopulate, String strategy, List<ResourceLocation> childEntries,
-                            StructureData structureData, List<EntryVariantData> visualVariants, VirtualData virtualData,
-                            EntryUnlockData unlockData, ResourceLocation targetEntityType,
-                            net.minecraft.nbt.CompoundTag nbtPredicate
-                    )) {
+                    if (obj instanceof GuideEntry ge) {
                         if (inheritUnlock != null && !EntryUnlockData.DEFAULT.equals(inheritUnlock) &&
-                                (unlockData == null || EntryUnlockData.DEFAULT.equals(unlockData))) {
+                                (ge.unlockData() == null || EntryUnlockData.DEFAULT.equals(ge.unlockData()))) {
                             obj = new GuideEntry(
-                                    id, displayId, icon, kind,
-                                    virtual, autoPopulate, strategy,
-                                    childEntries, structureData, visualVariants,
-                                    virtualData, inheritUnlock, targetEntityType, nbtPredicate
+                                    ge.id(), ge.displayId(), ge.icon(), ge.kind(),
+                                    ge.virtual(), ge.autoPopulate(), ge.strategy(),
+                                    ge.childEntries(), ge.structureData(), ge.visualVariants(),
+                                    ge.virtualData(), inheritUnlock, ge.targetEntityType(), ge.nbtPredicate()
                             );
                         }
                     }

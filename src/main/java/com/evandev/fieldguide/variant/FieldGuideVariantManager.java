@@ -387,9 +387,9 @@ public class FieldGuideVariantManager {
             return null;
         }
 
-        if (matching.size() == 1) return matching.getFirst();
+        if (matching.size() == 1) return matching.get(0);
 
-        CompositeVariantProvider<T> composite = new CompositeVariantProvider<>(matching.getFirst());
+        CompositeVariantProvider<T> composite = new CompositeVariantProvider<>(matching.get(0));
         for (int i = 1; i < matching.size(); i++) {
             composite.addProvider(matching.get(i));
         }

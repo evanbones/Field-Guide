@@ -1,14 +1,18 @@
 package com.evandev.fieldguide.platform;
 
 import com.evandev.fieldguide.Constants;
-import net.minecraft.core.component.DataComponentType;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
 
 import java.util.function.Supplier;
+
+//? if >=1.21 {
+import net.minecraft.core.component.DataComponentType;
+
 import java.util.function.UnaryOperator;
+//?}
 
 //? if <26.2 {
 import net.minecraft.advancements.CriterionTrigger;
@@ -22,15 +26,26 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 *///?} else {
 import net.minecraft.core.registries.Registries;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
-import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 //?}
+
+//? if neoforge {
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.neoforged.neoforge.registries.DeferredRegister;
+//?} else if forge {
+/*import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.registries.DeferredRegister;
+*///?}
+
+//? if <1.21 {
+/*import com.evandev.fieldguide.mixin.accessor.CriteriaTriggersAccessor;
+*///?}
 
 //? if fabric && <26.1 {
 /*import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
@@ -39,16 +54,22 @@ import java.util.Map;
 *///?}
 
 public class RegistryHelper {
-    //? if neoforge {
+    //? if !fabric {
     private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Registries.ITEM, Constants.MOD_ID);
+    private static final Map<ResourceKey<CreativeModeTab>, List<Supplier<? extends ItemLike>>> TAB_ENTRIES = new HashMap<>();
+    //?}
+    //? if neoforge {
     private static final DeferredRegister<DataComponentType<?>> DATA_COMPONENTS = DeferredRegister.create(Registries.DATA_COMPONENT_TYPE, Constants.MOD_ID);
     private static final DeferredRegister<CriterionTrigger<?>> TRIGGER_TYPES = DeferredRegister.create(Registries.TRIGGER_TYPE, Constants.MOD_ID);
-    private static final Map<ResourceKey<CreativeModeTab>, List<Supplier<? extends ItemLike>>> TAB_ENTRIES = new HashMap<>();
+    //?}
 
+    //? if !fabric {
     public static void init(IEventBus bus) {
         ITEMS.register(bus);
+        //? if neoforge {
         DATA_COMPONENTS.register(bus);
         TRIGGER_TYPES.register(bus);
+        //?}
         bus.addListener(RegistryHelper::onBuildCreativeTabs);
     }
 
@@ -76,6 +97,7 @@ public class RegistryHelper {
         //?}
     }
 
+    //? if >=1.21 {
     public <T> Supplier<DataComponentType<T>> registerComponent(String name, UnaryOperator<DataComponentType.Builder<T>> builderOperator) {
         //? if fabric {
         /*return register(BuiltInRegistries.DATA_COMPONENT_TYPE, name, builderOperator.apply(DataComponentType.builder()).build());
@@ -83,9 +105,13 @@ public class RegistryHelper {
         return DATA_COMPONENTS.register(name, () -> builderOperator.apply(DataComponentType.builder()).build());
         //?}
     }
+    //?}
 
     public <T extends CriterionTrigger<?>> Supplier<T> registerCriterion(String name, Supplier<T> trigger) {
-        //? if fabric {
+        //? if <1.21 {
+        /*T registered = CriteriaTriggersAccessor.fieldguide$register(trigger.get());
+        return () -> registered;
+        *///?} else if fabric {
         /*return register(BuiltInRegistries.TRIGGER_TYPES, name, trigger.get());
         *///?} else {
         return TRIGGER_TYPES.register(name, trigger);

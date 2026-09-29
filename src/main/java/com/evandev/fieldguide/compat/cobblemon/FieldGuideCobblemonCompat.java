@@ -46,22 +46,14 @@ public final class FieldGuideCobblemonCompat {
 
     public static boolean isCobblemonEntry(Object entry) {
         if (entry == null || !isLoaded()) return false;
-        switch (entry) {
-            case GuideEntry ge -> {
-                if (ge.isVirtual() && ge.virtualData() != null && MOD_ID.equals(ge.virtualData().virtualType())) {
-                    return true;
-                }
-                return isCobblemonId(ge.id());
+        if (entry instanceof GuideEntry ge) {
+            if (ge.isVirtual() && ge.virtualData() != null && MOD_ID.equals(ge.virtualData().virtualType())) {
+                return true;
             }
-            case ResourceLocation id -> {
-                return isCobblemonId(id);
-            }
-            case Entity entity -> {
-                return isPokemon(entity);
-            }
-            default -> {
-            }
+            return isCobblemonId(ge.id());
         }
+        if (entry instanceof ResourceLocation id) return isCobblemonId(id);
+        if (entry instanceof Entity entity) return isPokemon(entity);
         return false;
     }
 

@@ -173,7 +173,7 @@ public class ClientLootManager {
                 *///?}
                 if (item != Items.AIR) {
                     ItemStack stack = new ItemStack(item);
-                    stack.set(ModDataComponents.DROP_CHANCE.get(), 100.0f);
+                    ModDataComponents.set(stack, ModDataComponents.DROP_CHANCE, 100.0f);
                     if (distinct.stream().noneMatch(s -> isSameLootItem(s, stack))) {
                         distinct.add(stack);
                     }
@@ -208,13 +208,13 @@ public class ClientLootManager {
         ItemStack copyA = a.copy();
         ItemStack copyB = b.copy();
 
-        copyA.remove(ModDataComponents.DROP_CHANCE.get());
-        copyA.remove(ModDataComponents.MIN_DROP.get());
-        copyA.remove(ModDataComponents.MAX_DROP.get());
+        ModDataComponents.remove(copyA, ModDataComponents.DROP_CHANCE);
+        ModDataComponents.remove(copyA, ModDataComponents.MIN_DROP);
+        ModDataComponents.remove(copyA, ModDataComponents.MAX_DROP);
 
-        copyB.remove(ModDataComponents.DROP_CHANCE.get());
-        copyB.remove(ModDataComponents.MIN_DROP.get());
-        copyB.remove(ModDataComponents.MAX_DROP.get());
+        ModDataComponents.remove(copyB, ModDataComponents.DROP_CHANCE);
+        ModDataComponents.remove(copyB, ModDataComponents.MIN_DROP);
+        ModDataComponents.remove(copyB, ModDataComponents.MAX_DROP);
 
         return ItemStack.isSameItemSameComponents(copyA, copyB);
     }

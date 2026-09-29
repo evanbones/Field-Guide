@@ -171,7 +171,7 @@ final class CobblemonCompatImpl {
                                         Item item = BuiltInRegistries.ITEM.get(EntryResolver.getRawId(ResourceLocation.parse(itemStr)));
                                         if (item != Items.AIR) {
                                             ItemStack stack = new ItemStack(item, quantity);
-                                            stack.set(ModDataComponents.DROP_CHANCE.get(), chance);
+                                            ModDataComponents.set(stack, ModDataComponents.DROP_CHANCE, chance);
                                             drops.add(stack);
                                         }
                                     }

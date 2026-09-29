@@ -179,15 +179,19 @@ public abstract class BookScreen extends Screen {
 
     abstract public void onTabClick(Category category);
 
-    //? if <26.1 {
+    //? if >=1.21 && <26.1 {
     public void renderFieldGuideBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         super.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
-    //?} else {
+    //?} else if <1.21 {
+    /*public void renderFieldGuideBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.renderBackground(guiGraphics);
+    *///?} else {
     /*public void extractFieldGuideBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         super.extractBackground(guiGraphics, mouseX, mouseY, partialTick);
     *///?}
     }
 
+    //? if >=1.21 {
     @Override
     //? if <26.1 {
     public void renderBackground(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
@@ -195,6 +199,7 @@ public abstract class BookScreen extends Screen {
     /*public void extractBackground(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
     *///?}
     }
+    //?}
 
     @Override
     public void onClose() {

@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.evandev.fieldguide.mixin",
+  "plugin": "com.moulberry.mixinconstraints.ConstraintsMixinPlugin",
+  "compatibilityLevel": "JAVA_${java_version}",
+  "mixins": [
+  ],
+  "client": [
+  ],
+  "server": [],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

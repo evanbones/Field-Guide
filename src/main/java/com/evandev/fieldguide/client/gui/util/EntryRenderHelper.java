@@ -296,6 +296,9 @@ public class EntryRenderHelper {
     //? if <26.1 {
     private static void renderEntity(Entity entity, Object entrySource, boolean isPage, float yRotation, PoseStack pose, MultiBufferSource.BufferSource output, VariantDef variantDef, VariantProvider<Mob> provider) {
         setupFieldGuideEntityLighting();
+        //? if forge {
+        /*if (Services.PLATFORM.isModLoaded("dawnera")) com.evandev.fieldguide.forge.compat.dawnera.DawnEraCompat.preRender(entity);
+        *///?}
     //?} else {
     /*@SuppressWarnings("unchecked")
     private static <T extends Entity, S extends EntityRenderState> void renderEntity(T entity, Object entrySource, boolean isPage, float yRotation, PoseStack pose, SubmitNodeCollector output, VariantDef variantDef, VariantProvider<Mob> provider) {
@@ -400,7 +403,7 @@ public class EntryRenderHelper {
         entityRenderDispatcher.setRenderHitBoxes(false);
 
         try {
-            float partialTicks = Minecraft.getInstance().getTimer().getGameTimeDeltaTicks();
+            float partialTicks = GuiCompat.frameDeltaTicks();
             entityRenderDispatcher.render(entity, 0, 0, 0, 0.0F, partialTicks, pose, output, LightTexture.FULL_BRIGHT);
         //?} else if <26.2 {
             /*CameraRenderState camera = Minecraft.getInstance().gameRenderer.getGameRenderState().levelRenderState.cameraRenderState;
@@ -829,10 +832,10 @@ public class EntryRenderHelper {
             VertexConsumer consumer = guiGraphics.bufferSource().getBuffer(RenderType.entityCutout(texture));
             Matrix4f matrix = guiGraphics.pose().last().pose();
 
-            consumer.addVertex(matrix, drawX, drawY + scaledHeight, 0).setColor(255, 255, 255, 255).setUv(0.0F, 1.0F).setOverlay(OverlayTexture.NO_OVERLAY).setLight(LightTexture.FULL_BRIGHT).setNormal(0, 0, 1);
-            consumer.addVertex(matrix, drawX + scaledWidth, drawY + scaledHeight, 0).setColor(255, 255, 255, 255).setUv(1.0F, 1.0F).setOverlay(OverlayTexture.NO_OVERLAY).setLight(LightTexture.FULL_BRIGHT).setNormal(0, 0, 1);
-            consumer.addVertex(matrix, drawX + scaledWidth, drawY, 0).setColor(255, 255, 255, 255).setUv(1.0F, 0.0F).setOverlay(OverlayTexture.NO_OVERLAY).setLight(LightTexture.FULL_BRIGHT).setNormal(0, 0, 1);
-            consumer.addVertex(matrix, drawX, drawY, 0).setColor(255, 255, 255, 255).setUv(0.0F, 0.0F).setOverlay(OverlayTexture.NO_OVERLAY).setLight(LightTexture.FULL_BRIGHT).setNormal(0, 0, 1);
+            silhouetteVertex(consumer, matrix, drawX, drawY + scaledHeight, 0.0F, 1.0F);
+            silhouetteVertex(consumer, matrix, drawX + scaledWidth, drawY + scaledHeight, 1.0F, 1.0F);
+            silhouetteVertex(consumer, matrix, drawX + scaledWidth, drawY, 1.0F, 0.0F);
+            silhouetteVertex(consumer, matrix, drawX, drawY, 0.0F, 0.0F);
 
             guiGraphics.flush();
 
@@ -855,4 +858,14 @@ public class EntryRenderHelper {
             *///?}
         }
     }
+
+    //? if <26.1 {
+    private static void silhouetteVertex(VertexConsumer consumer, Matrix4f matrix, float x, float y, float u, float v) {
+        //? if >=1.21 {
+        consumer.addVertex(matrix, x, y, 0).setColor(255, 255, 255, 255).setUv(u, v).setOverlay(OverlayTexture.NO_OVERLAY).setLight(LightTexture.FULL_BRIGHT).setNormal(0, 0, 1);
+        //?} else {
+        /*consumer.vertex(matrix, x, y, 0).color(255, 255, 255, 255).uv(u, v).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(LightTexture.FULL_BRIGHT).normal(0, 0, 1).endVertex();
+        *///?}
+    }
+    //?}
 }

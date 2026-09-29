@@ -388,7 +388,7 @@ public class FieldGuideEntryScreen extends BookScreen {
 
                 if (this.initialVariant == null) {
                     this.initialVariant = ProgressManager.getInstance().getSelectedVariant(entry);
-                    if (this.initialVariant == null) this.initialVariant = this.entityVariants.getFirst().id();
+                    if (this.initialVariant == null) this.initialVariant = this.entityVariants.get(0).id();
                 }
 
                 for (int i = 0; i < this.entityVariants.size(); i++) {
@@ -524,13 +524,26 @@ public class FieldGuideEntryScreen extends BookScreen {
     }
 
     @Override
+    //? if >=1.21 {
     public boolean mouseScrolled(double mouseX, double mouseY, double deltaX, double deltaY) {
+    //?} else {
+    /*public boolean mouseScrolled(double mouseX, double mouseY, double deltaY) {
+        double deltaX = 0;
+    *///?}
         if (this.variantOverviewWidget != null && this.variantOverviewWidget.isVisible()) {
+            //? if >=1.21 {
             this.variantOverviewWidget.mouseScrolled(mouseX, mouseY, deltaX, deltaY);
+            //?} else {
+            /*this.variantOverviewWidget.mouseScrolled(mouseX, mouseY, deltaY);
+            *///?}
             return true;
         }
 
+        //? if >=1.21 {
         if (super.mouseScrolled(mouseX, mouseY, deltaX, deltaY)) return true;
+        //?} else {
+        /*if (super.mouseScrolled(mouseX, mouseY, deltaY)) return true;
+        *///?}
 
         if (deltaY != 0 && !entityVariants.isEmpty() && this.leftPageBounds != null && this.leftPageBounds.contains((int) mouseX, (int) mouseY)) {
             int direction = deltaY > 0 ? -1 : 1;
@@ -907,8 +920,8 @@ public class FieldGuideEntryScreen extends BookScreen {
                 if (mouseOver) {
                     Minecraft mc = Minecraft.getInstance();
                     List<Component> tooltip = new ArrayList<>(Screen.getTooltipFromItem(mc, stack));
-                    if (stack.has(ModDataComponents.DROP_CHANCE.get())) {
-                        float dropChance = stack.get(ModDataComponents.DROP_CHANCE.get());
+                    if (ModDataComponents.has(stack, ModDataComponents.DROP_CHANCE)) {
+                        float dropChance = ModDataComponents.get(stack, ModDataComponents.DROP_CHANCE);
                         tooltip.add(Component.literal(String.format(Locale.ROOT, "%.2f%%", dropChance)).withStyle(ChatFormatting.GRAY));
                     }
                     //? if <26.1 {

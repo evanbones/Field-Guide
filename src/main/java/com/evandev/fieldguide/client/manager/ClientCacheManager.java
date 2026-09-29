@@ -88,9 +88,11 @@ public class ClientCacheManager {
         for (Map.Entry<ResourceLocation, List<ItemStack>> entry : allDrops.entrySet()) {
             ListTag list = new ListTag();
             for (ItemStack stack : entry.getValue()) {
-                //? if <26.1 {
+                //? if >=1.21 && <26.1 {
                 list.add(stack.saveOptional(provider));
-                //?} else {
+                //?} else if <1.21 {
+                /*if (!stack.isEmpty()) list.add(stack.save(new CompoundTag()));
+                *///?} else {
                 /*DataResult<Tag> result = ItemStack.OPTIONAL_CODEC.encodeStart(provider.createSerializationContext(NbtOps.INSTANCE), stack);
                 result.ifSuccess(list::add);
                 *///?}
@@ -114,7 +116,11 @@ public class ClientCacheManager {
             ListTag list = root.getList(entryId.toString(), Tag.TAG_COMPOUND);
             List<ItemStack> drops = new ArrayList<>();
             for (int i = 0; i < list.size(); i++) {
+                //? if >=1.21 {
                 drops.add(ItemStack.parseOptional(provider, list.getCompound(i)));
+                //?} else {
+                /*drops.add(ItemStack.of(list.getCompound(i)));
+                *///?}
             //?} else {
             /*Optional<ListTag> listOpt = root.getList(entryId.toString());
 
@@ -182,7 +188,11 @@ public class ClientCacheManager {
     private static CompoundTag loadNbt(Path path) {
         if (Files.exists(path)) {
             try {
+                //? if >=1.21 {
                 return NbtIo.read(path);
+                //?} else {
+                /*return NbtIo.read(path.toFile());
+                *///?}
             } catch (IOException e) {
                 Constants.LOG.error("Failed to read NBT cache from {}", path, e);
             }
@@ -192,7 +202,11 @@ public class ClientCacheManager {
 
     private static void saveNbt(Path path, CompoundTag tag) {
         try {
+            //? if >=1.21 {
             NbtIo.write(tag, path);
+            //?} else {
+            /*NbtIo.write(tag, path.toFile());
+            *///?}
         } catch (IOException e) {
             Constants.LOG.error("Failed to write NBT cache to {}", path, e);
         }

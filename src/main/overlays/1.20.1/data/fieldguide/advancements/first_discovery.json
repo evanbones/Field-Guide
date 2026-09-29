@@ -1,0 +1,23 @@
+{
+  "parent": "fieldguide:root",
+  "display": {
+    "icon": {
+      "item": "minecraft:spyglass"
+    },
+    "title": {
+      "translate": "advancements.fieldguide.first_discovery.title"
+    },
+    "description": {
+      "translate": "advancements.fieldguide.first_discovery.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "unlock": {
+      "trigger": "fieldguide:entry_unlocked"
+    }
+  }
+}

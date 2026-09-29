@@ -5,12 +5,17 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.resources.ResourceLocation;
 
+import net.minecraft.client.Minecraft;
+
 //? if <26.1 {
 import net.minecraft.client.gui.screens.Screen;
 //?} else {
 /*import com.mojang.blaze3d.platform.InputConstants;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderPipelines;
+*///?}
+
+//? if <1.21 {
+/*import com.evandev.fieldguide.client.gui.util.legacy.LegacySprites;
 *///?}
 
 public final class GuiCompat {
@@ -70,10 +75,22 @@ public final class GuiCompat {
     }
 
     public static void blitSprite(GuiGraphics g, ResourceLocation sprite, int x, int y, int width, int height) {
-        //? if <26.1 {
+        //? if <1.21 {
+        /*LegacySprites.blit(g, sprite, x, y, width, height);
+        *///?} else if <26.1 {
         g.blitSprite(sprite, x, y, width, height);
         //?} else {
         /*g.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, x, y, width, height);
+        *///?}
+    }
+
+    public static float frameDeltaTicks() {
+        //? if <1.21 {
+        /*return Minecraft.getInstance().getDeltaFrameTime();
+        *///?} else if <26.1 {
+        return Minecraft.getInstance().getTimer().getGameTimeDeltaTicks();
+        //?} else {
+        /*return Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaTicks();
         *///?}
     }
 

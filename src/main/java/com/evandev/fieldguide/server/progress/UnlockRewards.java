@@ -24,7 +24,7 @@ class UnlockRewards {
 
     static void grant(ServerPlayer player, ResourceLocation entryId, boolean grantXp) {
         try {
-            ServerConfig config = ServerConfig.get();
+            ServerConfig config = ServerConfig.getLocal();
             if (grantXp && config.grantXpOnScan && config.xpAmountOnScan > 0) {
                 player.giveExperiencePoints(config.xpAmountOnScan);
             }

@@ -1,7 +1,9 @@
 package com.evandev.fieldguide.mixin.client;
 
 import com.evandev.fieldguide.client.FieldGuideClient;
+//? if >=1.21 {
 import net.minecraft.client.DeltaTracker;
+//?}
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
 import org.spongepowered.asm.mixin.Mixin;
@@ -17,7 +19,11 @@ import org.spongepowered.asm.mixin.Shadow;
 *///?}
 
 @Mixin(Gui.class)
-//? if <26.1 {
+//? if <1.21 {
+/*public class GuiMixin {
+    @Inject(method = "render", at = @At("TAIL"))
+    private void renderScanningIcon(GuiGraphics guiGraphics, float partialTick, CallbackInfo ci) {
+*///?} else if <26.1 {
 public class GuiMixin {
     @Inject(method = "render", at = @At("TAIL"))
     private void renderScanningIcon(GuiGraphics guiGraphics, DeltaTracker deltaTracker, CallbackInfo ci) {
@@ -43,7 +49,9 @@ public class GuiMixin {
         int yMouse = (int) this.minecraft.mouseHandler.getScaledYPos(this.minecraft.getWindow());
         GuiGraphics graphics = new GuiGraphics(this.minecraft, this.guiRenderState, xMouse, yMouse);
         *///?}
+        //? if >=1.21 {
         float partialTick = deltaTracker.getGameTimeDeltaPartialTick(true);
+        //?}
         //? if <26.2 {
         FieldGuideClient.renderScanningIcon(guiGraphics, partialTick);
         //?} else {

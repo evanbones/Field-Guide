@@ -41,7 +41,7 @@ public class PageItem extends Item {
     /*public @NotNull InteractionResult use(@NotNull Level level, @NotNull Player player, @NotNull InteractionHand hand) {
     *///?}
         ItemStack stack = player.getItemInHand(hand);
-        ResourceLocation entryId = stack.get(ModDataComponents.ENTRY_ID.get());
+        ResourceLocation entryId = ModDataComponents.get(stack, ModDataComponents.ENTRY_ID);
 
         if (entryId != null) {
             //? if <26.1 {
@@ -56,9 +56,9 @@ public class PageItem extends Item {
                     progress.unlock(serverPlayer, entryId, null, false);
 
                     // Unlock variants
-                    List<String> variants = stack.get(ModDataComponents.VARIANTS.get());
+                    List<String> variants = ModDataComponents.get(stack, ModDataComponents.VARIANTS);
                     if (variants != null) {
-                        Map<String, String> variantNames = stack.get(ModDataComponents.CUSTOM_VARIANT_NAMES.get());
+                        Map<String, String> variantNames = ModDataComponents.get(stack, ModDataComponents.CUSTOM_VARIANT_NAMES);
                         for (String variant : variants) {
                             progress.unlock(serverPlayer, entryId, variant, false);
 
@@ -70,19 +70,19 @@ public class PageItem extends Item {
                     }
 
                     // Restore custom data
-                    String customName = stack.get(ModDataComponents.CUSTOM_NAME.get());
+                    String customName = ModDataComponents.get(stack, ModDataComponents.CUSTOM_NAME);
                     if (customName != null) progress.setCustomName(entryId.toString(), customName);
 
-                    String customDesc = stack.get(ModDataComponents.CUSTOM_DESCRIPTION.get());
+                    String customDesc = ModDataComponents.get(stack, ModDataComponents.CUSTOM_DESCRIPTION);
                     if (customDesc != null) progress.setCustomDescription(entryId.toString(), customDesc);
 
-                    String photograph = stack.get(ModDataComponents.PHOTOGRAPH.get());
+                    String photograph = ModDataComponents.get(stack, ModDataComponents.PHOTOGRAPH);
                     if (photograph != null) progress.setEntryPhotograph(entryId.toString(), photograph);
 
-                    Long discoveryTime = stack.get(ModDataComponents.DISCOVERY_TIME.get());
+                    Long discoveryTime = ModDataComponents.get(stack, ModDataComponents.DISCOVERY_TIME);
                     if (discoveryTime != null) progress.setDiscoveryTime(entryId.toString(), discoveryTime);
 
-                    Long discoveryGameTime = stack.get(ModDataComponents.DISCOVERY_GAME_TIME.get());
+                    Long discoveryGameTime = ModDataComponents.get(stack, ModDataComponents.DISCOVERY_GAME_TIME);
                     if (discoveryGameTime != null) progress.setDiscoveryGameTime(entryId.toString(), discoveryGameTime);
 
                     progress.markEntryForResync(entryId.toString());
@@ -109,12 +109,14 @@ public class PageItem extends Item {
     }
 
     @Override
-    //? if <26.1 {
+    //? if >=1.21 && <26.1 {
     public void appendHoverText(@NotNull ItemStack stack, @NotNull TooltipContext context, @NotNull List<Component> tooltipComponents, @NotNull TooltipFlag tooltipFlag) {
-    //?} else {
+    //?} else if <1.21 {
+    /*public void appendHoverText(@NotNull ItemStack stack, @org.jetbrains.annotations.Nullable net.minecraft.world.level.Level level, @NotNull List<Component> tooltipComponents, @NotNull TooltipFlag tooltipFlag) {
+    *///?} else {
     /*public void appendHoverText(@NotNull ItemStack stack, @NotNull TooltipContext context, @NotNull net.minecraft.world.item.component.TooltipDisplay display, @NotNull java.util.function.Consumer<net.minecraft.network.chat.Component> tooltip, @NotNull TooltipFlag tooltipFlag) {
     *///?}
-        Component entryName = stack.get(ModDataComponents.ENTRY_NAME.get());
+        Component entryName = ModDataComponents.get(stack, ModDataComponents.ENTRY_NAME);
         if (entryName != null) {
             //? if <26.1 {
             tooltipComponents.add(Component.translatable("item.fieldguide.page.entry", entryName).withStyle(ChatFormatting.GOLD));
@@ -122,7 +124,7 @@ public class PageItem extends Item {
             /*tooltip.accept(Component.translatable("item.fieldguide.page.entry", entryName).withStyle(ChatFormatting.GOLD));
             *///?}
         }
-        String author = stack.get(ModDataComponents.AUTHOR.get());
+        String author = ModDataComponents.get(stack, ModDataComponents.AUTHOR);
         if (author != null) {
             //? if <26.1 {
             tooltipComponents.add(Component.translatable("item.fieldguide.page.author", author).withStyle(ChatFormatting.GRAY));
@@ -132,8 +134,12 @@ public class PageItem extends Item {
         }
         //? if <26.1 {
         tooltipComponents.add(Component.translatable("item.fieldguide.page.tooltip").withStyle(ChatFormatting.BLUE));
+        //?}
+        //? if >=1.21 && <26.1 {
         super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
-        //?} else {
+        //?} else if <1.21 {
+        /*super.appendHoverText(stack, level, tooltipComponents, tooltipFlag);
+        *///?} else {
         /*tooltip.accept(Component.translatable("item.fieldguide.page.tooltip").withStyle(ChatFormatting.BLUE));
         super.appendHoverText(stack, context, display, tooltip, tooltipFlag);
         *///?}

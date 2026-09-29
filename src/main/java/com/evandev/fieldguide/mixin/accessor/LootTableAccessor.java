@@ -10,5 +10,9 @@ import java.util.List;
 @Mixin(LootTable.class)
 public interface LootTableAccessor {
     @Accessor("pools")
+    //? if >=1.21 || forge {
     List<LootPool> fieldguide$getPools();
+    //?} else {
+    /*LootPool[] fieldguide$getPools();
+    *///?}
 }

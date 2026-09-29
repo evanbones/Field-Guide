@@ -1,7 +1,7 @@
 ### Added
 
-- Re-added Immersive Overlays support for NeoForge 26.3.
+- Parity fixes for 1.20.1.
 
 ### Fixed
 
-- Fixed missing Poplar tree entry on 26.3.
+- Fixed server configs not reloading after saving them in singleplayer.

@@ -50,7 +50,11 @@ public class LootTableHelper {
         }
 
         for (Object entry : uniqueEntries) {
+            //? if >=1.21 {
             ResourceKey<LootTable> tableId = null;
+            //?} else {
+            /*ResourceLocation tableId = null;
+            *///?}
 
             if (entry instanceof EntityType<?> type) {
                 //? if <26.1 {
@@ -72,9 +76,11 @@ public class LootTableHelper {
         return lootMap;
     }
 
-    //? if <26.1 {
+    //? if >=1.21 && <26.1 {
     private static void processEntry(ServerLevel level, Object entry, ResourceKey<LootTable> tableId, Map<ResourceLocation, List<ItemStack>> lootMap) {
-    //?} else {
+    //?} else if <1.21 {
+    /*private static void processEntry(ServerLevel level, Object entry, ResourceLocation tableId, Map<ResourceLocation, List<ItemStack>> lootMap) {
+    *///?} else {
     /*private static void processEntry(
             ServerLevel level,
             Object entry,
@@ -84,9 +90,15 @@ public class LootTableHelper {
     *///?}
         List<ItemStack> formattedDrops = new ArrayList<>();
 
+        //? if >=1.21 {
         if (tableId != null && !RegistryCompat.id(tableId).toString().equals("minecraft:empty")) {
             try {
                 LootTable table = level.getServer().reloadableRegistries().getLootTable(tableId);
+        //?} else {
+        /*if (tableId != null && !tableId.toString().equals("minecraft:empty")) {
+            try {
+                LootTable table = level.getServer().getLootData().getLootTable(tableId);
+        *///?}
                 //? if <26.1 {
                 List<ParsedDrop> finalDrops = StaticLootParser.parseTable(table, level);
                 //?}
@@ -94,9 +106,9 @@ public class LootTableHelper {
                 //? if <26.1 {
                 for (ParsedDrop drop : finalDrops) {
                     ItemStack stack = drop.stack.copy();
-                    stack.set(ModDataComponents.DROP_CHANCE.get(), drop.chance * 100.0f);
-                    stack.set(ModDataComponents.MIN_DROP.get(), drop.minCount);
-                    stack.set(ModDataComponents.MAX_DROP.get(), drop.maxCount);
+                    ModDataComponents.set(stack, ModDataComponents.DROP_CHANCE, drop.chance * 100.0f);
+                    ModDataComponents.set(stack, ModDataComponents.MIN_DROP, drop.minCount);
+                    ModDataComponents.set(stack, ModDataComponents.MAX_DROP, drop.maxCount);
                     formattedDrops.add(stack);
                 //?} else {
                 /*if (table != LootTable.EMPTY) {
@@ -104,15 +116,19 @@ public class LootTableHelper {
 
                     for (ParsedDrop drop : finalDrops) {
                         ItemStack stack = drop.stack.copy();
-                        stack.set(ModDataComponents.DROP_CHANCE.get(), drop.chance * 100.0f);
-                        stack.set(ModDataComponents.MIN_DROP.get(), drop.minCount);
-                        stack.set(ModDataComponents.MAX_DROP.get(), drop.maxCount);
+                        ModDataComponents.set(stack, ModDataComponents.DROP_CHANCE, drop.chance * 100.0f);
+                        ModDataComponents.set(stack, ModDataComponents.MIN_DROP, drop.minCount);
+                        ModDataComponents.set(stack, ModDataComponents.MAX_DROP, drop.maxCount);
                         formattedDrops.add(stack);
                     }
                 *///?}
                 }
             } catch (Exception e) {
+                //? if >=1.21 {
                 Constants.LOG.error("Failed to parse loot table {}", RegistryCompat.id(tableId), e);
+                //?} else {
+                /*Constants.LOG.error("Failed to parse loot table {}", tableId, e);
+                *///?}
             }
         }
 
@@ -131,17 +147,17 @@ public class LootTableHelper {
                     ItemStackKey key = new ItemStackKey(newStack);
                     ItemStack existingStack = existingMap.get(key);
                     if (existingStack != null) {
-                        float existingChance = existingStack.getOrDefault(ModDataComponents.DROP_CHANCE.get(), 0.0f);
-                        float newChance = newStack.getOrDefault(ModDataComponents.DROP_CHANCE.get(), 0.0f);
-                        existingStack.set(ModDataComponents.DROP_CHANCE.get(), Math.min(100.0f, existingChance + newChance));
+                        float existingChance = ModDataComponents.getOrDefault(existingStack, ModDataComponents.DROP_CHANCE, 0.0f);
+                        float newChance = ModDataComponents.getOrDefault(newStack, ModDataComponents.DROP_CHANCE, 0.0f);
+                        ModDataComponents.set(existingStack, ModDataComponents.DROP_CHANCE, Math.min(100.0f, existingChance + newChance));
 
-                        int existingMin = existingStack.getOrDefault(ModDataComponents.MIN_DROP.get(), 1);
-                        int newMin = newStack.getOrDefault(ModDataComponents.MIN_DROP.get(), 1);
-                        existingStack.set(ModDataComponents.MIN_DROP.get(), Math.min(existingMin, newMin));
+                        int existingMin = ModDataComponents.getOrDefault(existingStack, ModDataComponents.MIN_DROP, 1);
+                        int newMin = ModDataComponents.getOrDefault(newStack, ModDataComponents.MIN_DROP, 1);
+                        ModDataComponents.set(existingStack, ModDataComponents.MIN_DROP, Math.min(existingMin, newMin));
 
-                        int existingMax = existingStack.getOrDefault(ModDataComponents.MAX_DROP.get(), 1);
-                        int newMax = newStack.getOrDefault(ModDataComponents.MAX_DROP.get(), 1);
-                        existingStack.set(ModDataComponents.MAX_DROP.get(), Math.max(existingMax, newMax));
+                        int existingMax = ModDataComponents.getOrDefault(existingStack, ModDataComponents.MAX_DROP, 1);
+                        int newMax = ModDataComponents.getOrDefault(newStack, ModDataComponents.MAX_DROP, 1);
+                        ModDataComponents.set(existingStack, ModDataComponents.MAX_DROP, Math.max(existingMax, newMax));
                     } else {
                         existing.add(newStack);
                         existingMap.put(key, newStack);
@@ -254,7 +270,7 @@ public class LootTableHelper {
                     try {
                         for (var holder : BuiltInRegistries.ITEM.getTagOrEmpty(TagKey.create(Registries.ITEM, ResourceLocation.parse(target.substring(1))))) {
                             ItemStack s = new ItemStack(holder.value());
-                            s.set(ModDataComponents.DROP_CHANCE.get(), 100.0f);
+                            ModDataComponents.set(s, ModDataComponents.DROP_CHANCE, 100.0f);
                             distinctDrops.add(s);
                             added = true;
                         }
@@ -269,7 +285,7 @@ public class LootTableHelper {
                     *///?}
                     if (i != Items.AIR) {
                         ItemStack s = new ItemStack(i);
-                        s.set(ModDataComponents.DROP_CHANCE.get(), 100.0f);
+                        ModDataComponents.set(s, ModDataComponents.DROP_CHANCE, 100.0f);
                         distinctDrops.add(s);
                         added = true;
                     }

@@ -117,7 +117,7 @@ public class FieldGuideToast implements Toast {
                 }
             }
             if (visualVariant == null && !ge.visualVariants().isEmpty()) {
-                visualVariant = ge.visualVariants().getFirst();
+                visualVariant = ge.visualVariants().get(0);
             }
         }
 

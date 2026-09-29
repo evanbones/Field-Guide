@@ -239,7 +239,12 @@ public class BookTextAreaWidget extends AbstractWidget {
     }
 
     @Override
+    //? if >=1.21 {
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+    //?} else {
+    /*public boolean mouseScrolled(double mouseX, double mouseY, double scrollY) {
+        double scrollX = 0;
+    *///?}
         if (!scrollable || !this.isMouseOver(mouseX, mouseY)) return false;
         if (lineStarts.size() > maxVisibleLines) {
             scrollOffset = Math.max(0, Math.min(scrollOffset - (int) Math.signum(scrollY), lineStarts.size() - maxVisibleLines));

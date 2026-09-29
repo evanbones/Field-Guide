@@ -101,7 +101,7 @@ public class UpdateEntryDataPacket implements CustomPacketPayload {
 
         if (hasVariant) {
             boolean allowed = progress.isUnlocked(entryId, variantId)
-                    || (ServerConfig.get().unlockAllVariants && progress.isUnlocked(entryId));
+                    || (ServerConfig.getLocal().unlockAllVariants && progress.isUnlocked(entryId));
             if (!allowed) return;
         } else if (!progress.isUnlocked(entryId)) {
             return;
@@ -180,7 +180,11 @@ public class UpdateEntryDataPacket implements CustomPacketPayload {
                 return;
             }
 
+            //? if >=1.21 {
             Tag tag = ItemStack.CODEC.encodeStart(player.registryAccess().createSerializationContext(NbtOps.INSTANCE), stack).getOrThrow();
+            //?} else {
+            /*Tag tag = stack.save(new net.minecraft.nbt.CompoundTag());
+            *///?}
             progress.setEntryPhotograph(entryId, tag.toString());
         }
     }

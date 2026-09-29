@@ -22,7 +22,7 @@ public class ScanVerifier {
 
     public static boolean verifyScan(ServerPlayer player, ResourceLocation entryId,
                                      ResourceLocation scannedTargetId, BlockPos targetBlockPos, int targetEntityId) {
-        ServerConfig config = ServerConfig.get();
+        ServerConfig config = ServerConfig.getLocal();
 
         if (config.disableScanning) return false;
 

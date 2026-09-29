@@ -159,7 +159,7 @@ public class FieldGuideCategoryScreen extends BookScreen {
                 if (intro != null) {
                     this.setSelectedCategory(intro);
                 } else if (!this.getSortedCategories().isEmpty()) {
-                    this.setSelectedCategory(this.getSortedCategories().getFirst());
+                    this.setSelectedCategory(this.getSortedCategories().get(0));
                 }
             }
         }
@@ -421,8 +421,17 @@ public class FieldGuideCategoryScreen extends BookScreen {
     }
 
     @Override
+    //? if >=1.21 {
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+    //?} else {
+    /*public boolean mouseScrolled(double mouseX, double mouseY, double scrollY) {
+        double scrollX = 0;
+    *///?}
+        //? if >=1.21 {
         if (super.mouseScrolled(mouseX, mouseY, scrollX, scrollY)) {
+        //?} else {
+        /*if (super.mouseScrolled(mouseX, mouseY, scrollY)) {
+        *///?}
             return true;
         }
 
@@ -755,7 +764,7 @@ public class FieldGuideCategoryScreen extends BookScreen {
                 if (vd.variantId().equals(selected)) return vd;
             }
         }
-        return ge.visualVariants().getFirst();
+        return ge.visualVariants().get(0);
     }
 
     private Entity getCachedVariantEntity(ResourceLocation entryId, EntryVariantData variant) {

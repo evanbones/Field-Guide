@@ -5,7 +5,9 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+//? if >=1.21 {
 import net.minecraft.network.chat.ComponentSerialization;
+//?}
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;

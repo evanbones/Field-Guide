@@ -98,12 +98,21 @@ public class FieldGuidePhotographWidget extends AbstractButton {
     }
 
     @Override
+    //? if >=1.21 {
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+    //?} else {
+    /*public boolean mouseScrolled(double mouseX, double mouseY, double scrollY) {
+        double scrollX = 0;
+    *///?}
         if (scrollY > 0 && this.isHovered() && !photographGetter.get().isEmpty()) {
             this.onPress();
             return true;
         }
+        //? if >=1.21 {
         return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+        //?} else {
+        /*return super.mouseScrolled(mouseX, mouseY, scrollY);
+        *///?}
     }
 
     @Override

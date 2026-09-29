@@ -1,0 +1,32 @@
+{
+  "parent": "fieldguide:first_discovery",
+  "display": {
+    "icon": {
+      "item": "minecraft:diamond"
+    },
+    "title": {
+      "translate": "advancements.fieldguide.gem_alert.title"
+    },
+    "description": {
+      "translate": "advancements.fieldguide.gem_alert.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "scan": {
+      "trigger": "fieldguide:scan_entity",
+      "conditions": {
+        "entity": {
+          "distance": {
+            "absolute": {
+              "max": 2.0
+            }
+          }
+        }
+      }
+    }
+  }
+}

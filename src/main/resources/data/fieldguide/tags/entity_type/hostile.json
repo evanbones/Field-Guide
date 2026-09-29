@@ -2,8 +2,14 @@
   "replace": false,
   "values": [
     "minecraft:blaze",
-    "minecraft:bogged",
-    "minecraft:breeze",
+    {
+      "id": "minecraft:bogged",
+      "required": false
+    },
+    {
+      "id": "minecraft:breeze",
+      "required": false
+    },
     "minecraft:cave_spider",
     "minecraft:creeper",
     "minecraft:elder_guardian",

@@ -17,7 +17,11 @@ import java.util.function.Supplier;
 *///?}
 
 @IfMinecraftVersion(minVersion = "26.1")
+//? if <1.21 {
+/*@Mixin(targets = "net.minecraft.client.renderer.RenderType", remap = false)
+*///?} else {
 @Mixin(targets = "net.minecraft.client.renderer.rendertype.RenderSetup$TextureBinding", remap = false)
+//?}
 public interface TextureBindingAccessor {
     //? if >=26.1 {
     /*@Accessor("location")

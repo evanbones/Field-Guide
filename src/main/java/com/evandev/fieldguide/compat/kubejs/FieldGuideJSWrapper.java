@@ -1,7 +1,5 @@
-package com.evandev.fieldguide.neoforge.compat.kubejs;
+package com.evandev.fieldguide.compat.kubejs;
 
-//? if <26.2 {
-//? if neoforge {
 import com.evandev.fieldguide.server.ServerFieldGuideManager;
 import com.evandev.fieldguide.server.progress.FieldGuideProgressManager;
 import com.evandev.fieldguide.server.progress.PlayerFieldGuideProgress;
@@ -135,5 +133,3 @@ public class FieldGuideJSWrapper {
         }
     }
 }
-//?}
-//?}

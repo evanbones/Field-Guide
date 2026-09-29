@@ -11,7 +11,9 @@ import java.util.Map;
 *///?}
 
 @IfMinecraftVersion(minVersion = "26.1")
-//? if <26.1 {
+//? if <1.21 {
+/*@Mixin(targets = "net.minecraft.client.renderer.RenderType", remap = false)
+*///?} else if <26.1 {
 @Mixin(targets = "net.minecraft.client.renderer.rendertype.RenderSetup", remap = false)
 //?} else {
 /*@Mixin(RenderSetup.class)

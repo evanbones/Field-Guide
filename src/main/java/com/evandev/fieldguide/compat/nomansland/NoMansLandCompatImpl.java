@@ -1,6 +1,6 @@
 package com.evandev.fieldguide.compat.nomansland;
 
-//? if <26.1 {
+//? if >=1.21 && <26.1 {
 import com.evandev.fieldguide.Constants;
 import com.evandev.fieldguide.config.ServerConfig;
 import com.farcr.nomansland.client.ClientDialogueTracker;

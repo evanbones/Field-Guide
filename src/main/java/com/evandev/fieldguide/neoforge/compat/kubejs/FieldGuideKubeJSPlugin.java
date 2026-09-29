@@ -2,6 +2,7 @@ package com.evandev.fieldguide.neoforge.compat.kubejs;
 
 //? if <26.2 {
 //? if neoforge {
+import com.evandev.fieldguide.compat.kubejs.FieldGuideJSWrapper;
 import dev.latvian.mods.kubejs.event.EventGroupRegistry;
 import dev.latvian.mods.kubejs.plugin.KubeJSPlugin;
 import dev.latvian.mods.kubejs.script.BindingRegistry;

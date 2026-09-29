@@ -19,7 +19,6 @@ import com.evandev.fieldguide.util.BiomeSpawns;
 import com.evandev.fieldguide.util.RegistryCompat;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.core.Registry;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -187,9 +186,9 @@ public class ServerFieldGuideManager extends SimplePreparableReloadListener<Serv
 
         return BuiltInRegistries.ITEM.getOptional(EntryResolver.getRawId(entryId))
                 //? if <26.1 {
-                .map(item -> item.components().has(DataComponents.FOOD) || BuiltInRegistries.ITEM.getHolderOrThrow(BuiltInRegistries.ITEM.getResourceKey(item).get()).is(eatToUnlockTag))
+                .map(item -> RegistryCompat.isFood(item) || BuiltInRegistries.ITEM.getHolderOrThrow(BuiltInRegistries.ITEM.getResourceKey(item).get()).is(eatToUnlockTag))
                 //?} else {
-                /*.map(item -> item.components().has(DataComponents.FOOD) || BuiltInRegistries.ITEM.getOrThrow(BuiltInRegistries.ITEM.getResourceKey(item).get()).is(eatToUnlockTag))
+                /*.map(item -> RegistryCompat.isFood(item) || BuiltInRegistries.ITEM.getOrThrow(BuiltInRegistries.ITEM.getResourceKey(item).get()).is(eatToUnlockTag))
                 *///?}
                 .orElse(false);
     }
@@ -271,7 +270,7 @@ public class ServerFieldGuideManager extends SimplePreparableReloadListener<Serv
     }
 
     public void syncToPlayer(ServerPlayer player) {
-        Services.NETWORK.sendToPlayer(new SyncConfigPacket(ServerConfig.get()), player);
+        Services.NETWORK.sendToPlayer(new SyncConfigPacket(ServerConfig.getLocal()), player);
 
         List<Category> flattenedCategories = new ArrayList<>();
         List<GuideEntry> flattenedEntries = new ArrayList<>();

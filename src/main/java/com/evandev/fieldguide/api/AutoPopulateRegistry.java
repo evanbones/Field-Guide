@@ -5,8 +5,8 @@ import com.evandev.fieldguide.ModTags;
 import com.evandev.fieldguide.compat.cobblemon.FieldGuideCobblemonCompat;
 import com.evandev.fieldguide.entry.EntryValidator;
 import com.evandev.fieldguide.platform.Services;
+import com.evandev.fieldguide.util.RegistryCompat;
 import net.minecraft.core.Holder;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
@@ -68,7 +68,7 @@ public class AutoPopulateRegistry {
                 .toList());
 
         register("food", (params, categoryId) -> BuiltInRegistries.ITEM.stream()
-                .filter(i -> i.components().has(DataComponents.FOOD) && EntryValidator.isValidItem(i, categoryId))
+                .filter(i -> RegistryCompat.isFood(i) && EntryValidator.isValidItem(i, categoryId))
                 .sorted(Comparator.comparing(i -> BuiltInRegistries.ITEM.getKey(i).toString()))
                 .map(Object.class::cast)
                 .toList());

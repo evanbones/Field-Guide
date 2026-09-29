@@ -1,6 +1,6 @@
 package com.evandev.fieldguide.compat.nomansland;
 
-//? if <26.1 {
+//? if >=1.21 && <26.1 {
 import com.farcr.nomansland.common.friend.dialogue.DialogueState;
 import com.farcr.nomansland.common.friend.dialogue.DialogueUtil;
 import com.mojang.blaze3d.systems.RenderSystem;

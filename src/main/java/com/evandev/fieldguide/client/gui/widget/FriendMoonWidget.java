@@ -59,11 +59,7 @@ public class FriendMoonWidget extends AbstractWidget {
         ResourceLocation texture;
         if (replayActive) {
             if (NoMansLandCompat.isReplayTyping()) {
-                //? if <26.1 {
-                float delta = Minecraft.getInstance().getTimer().getGameTimeDeltaTicks();
-                //?} else {
-                /*float delta = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaTicks();
-                *///?}
+                float delta = GuiCompat.frameDeltaTicks();
                 talkProgress = (talkProgress + (delta * TALK_FRAME_SPEED)) % 2f;
                 texture = (((int) talkProgress) == 1) ? TALKING : HOVER;
             } else {

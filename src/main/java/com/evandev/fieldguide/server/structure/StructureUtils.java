@@ -37,7 +37,11 @@ public class StructureUtils {
             try {
                 var res = Minecraft.getInstance().getResourceManager().getResource(path);
                 if (res.isPresent()) {
+                    //? if >=1.21 {
                     CompoundTag raw = NbtIo.readCompressed(res.get().open(), NbtAccounter.unlimitedHeap());
+                    //?} else {
+                    /*CompoundTag raw = NbtIo.readCompressed(res.get().open());
+                    *///?}
                     CompoundTag tag = DataFixTypes.STRUCTURE.updateToCurrentVersion(Minecraft.getInstance().getFixerUpper(), raw, NbtUtils.getDataVersion(raw, 500));
                     StructureTemplate template = new StructureTemplate();
                     //? if <26.1 {
@@ -49,7 +53,7 @@ public class StructureUtils {
                     List<StructureTemplate.Palette> palettes = ((StructureTemplateAccessor) template).getPalettes();
 
                     if (!palettes.isEmpty()) {
-                        for (StructureTemplate.StructureBlockInfo info : palettes.getFirst().blocks()) {
+                        for (StructureTemplate.StructureBlockInfo info : palettes.get(0).blocks()) {
                             blocks.put(info.pos(), info.state());
                         }
                     }

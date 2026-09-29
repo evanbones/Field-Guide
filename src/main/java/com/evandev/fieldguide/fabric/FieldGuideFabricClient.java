@@ -110,7 +110,14 @@ public class FieldGuideFabricClient implements ClientModInitializer {
     }
 
     private static <T extends CustomPacketPayload> void receive(CustomPacketPayload.Type<T> type, Consumer<T> handler) {
+        //? if >=1.21 {
         ClientPlayNetworking.registerGlobalReceiver(type, (packet, context) -> context.client().execute(() -> handler.accept(packet)));
+        //?} else {
+        /^ClientPlayNetworking.registerGlobalReceiver(type.id(), (client, listener, buf, sender) -> {
+            T packet = Services.NETWORK.decode(type, buf);
+            client.execute(() -> handler.accept(packet));
+        });
+        ^///?}
     }
 }
 *///?}

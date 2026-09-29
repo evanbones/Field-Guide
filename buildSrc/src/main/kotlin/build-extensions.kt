@@ -22,13 +22,25 @@ fun ProcessResources.properties(files: Iterable<String>, vararg properties: Pair
 }
 
 val RESOURCE_OVERLAYS: Map<String, String> = linkedMapOf(
-    "1.21.1" to "<26.1",
+    "1.20.1" to "<1.21",
+    "pre-26.1" to "<26.1",
+    "1.21.1" to ">=1.21 <26.1",
+    "1.21+" to ">=1.21",
     "26.x" to ">=26.1",
     "26.1" to ">=26.1 <26.2",
     "26.2" to ">=26.2 <26.3",
     "pre-26.3" to "<26.3",
     "26.3+" to ">=26.3",
 )
+
+fun ProcessResources.legacyDataLayout() {
+    exclude("data/*/advancement/**", "data/*/recipe/**")
+    for ((from, to) in listOf("block" to "blocks", "item" to "items", "entity_type" to "entity_types")) {
+        filesMatching("data/*/tags/$from/**") {
+            path = path.replace("/tags/$from/", "/tags/$to/")
+        }
+    }
+}
 
 fun RepositoryHandler.fieldGuideRepositories() {
     mavenLocal()

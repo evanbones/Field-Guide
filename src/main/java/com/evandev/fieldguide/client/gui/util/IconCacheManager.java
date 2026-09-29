@@ -26,8 +26,11 @@ import java.util.stream.Stream;
 import com.mojang.blaze3d.vertex.VertexSorting;
 import net.minecraft.client.renderer.MultiBufferSource;
 import org.joml.Matrix4f;
-import org.joml.Matrix4fStack;
 import org.lwjgl.opengl.GL11;
+//?}
+
+//? if >=1.21 && <26.1 {
+import org.joml.Matrix4fStack;
 //?}
 
 //? if >=26.1 && <26.3 {
@@ -323,9 +326,15 @@ public class IconCacheManager {
         *///?}
 
         //? if <26.1 {
+        //? if >=1.21 {
         Matrix4fStack poseStack = RenderSystem.getModelViewStack();
         poseStack.pushMatrix();
         poseStack.identity();
+        //?} else {
+        /*PoseStack poseStack = RenderSystem.getModelViewStack();
+        poseStack.pushPose();
+        poseStack.setIdentity();
+        *///?}
         poseStack.translate(RENDER_SIZE / 2.0f, RENDER_SIZE / 2.0f, -11000.0f);
         RenderSystem.applyModelViewMatrix();
         //?} else {
@@ -446,8 +455,12 @@ public class IconCacheManager {
         RenderSystem.restoreProjectionMatrix();
         *///?}
 
-        //? if <26.1 {
+        //? if >=1.21 && <26.1 {
         poseStack.popMatrix();
+        //?} else if <1.21 {
+        /*poseStack.popPose();
+        *///?}
+        //? if <26.1 {
         RenderSystem.applyModelViewMatrix();
         Lighting.setupForFlatItems();
 

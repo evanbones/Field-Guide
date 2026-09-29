@@ -1,0 +1,58 @@
+{
+  "parent": "fieldguide:first_discovery",
+  "display": {
+    "icon": {
+      "item": "minecraft:red_mushroom"
+    },
+    "title": {
+      "translate": "advancements.fieldguide.mushroom_collector.title"
+    },
+    "description": {
+      "translate": "advancements.fieldguide.mushroom_collector.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "huge_brown_mushroom": {
+      "trigger": "fieldguide:entry_unlocked",
+      "conditions": {
+        "entry": "block:fieldguide/huge_brown_mushroom"
+      }
+    },
+    "huge_red_mushroom": {
+      "trigger": "fieldguide:entry_unlocked",
+      "conditions": {
+        "entry": "block:fieldguide/huge_red_mushroom"
+      }
+    },
+    "huge_crimson_fungus": {
+      "trigger": "fieldguide:entry_unlocked",
+      "conditions": {
+        "entry": "block:fieldguide/huge_crimson_fungus"
+      }
+    },
+    "huge_warped_fungus": {
+      "trigger": "fieldguide:entry_unlocked",
+      "conditions": {
+        "entry": "block:fieldguide/huge_warped_fungus"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "huge_brown_mushroom"
+    ],
+    [
+      "huge_red_mushroom"
+    ],
+    [
+      "huge_crimson_fungus"
+    ],
+    [
+      "huge_warped_fungus"
+    ]
+  ]
+}

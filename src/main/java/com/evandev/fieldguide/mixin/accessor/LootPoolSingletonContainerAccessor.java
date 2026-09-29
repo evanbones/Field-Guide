@@ -23,8 +23,11 @@ public interface LootPoolSingletonContainerAccessor {
     @Accessor("weight")
     int fieldguide$getWeight();
 
-    //? if <26.3 {
+    //? if >=1.21 && <26.3 {
     @Accessor("functions")
     List<LootItemFunction> fieldguide$getFunctions();
-    //?}
+    //?} else if <1.21 {
+    /*@Accessor("functions")
+    LootItemFunction[] fieldguide$getFunctions();
+    *///?}
 }

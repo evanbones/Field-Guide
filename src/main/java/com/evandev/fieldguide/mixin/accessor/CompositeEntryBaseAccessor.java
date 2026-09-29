@@ -10,5 +10,9 @@ import java.util.List;
 @Mixin(CompositeEntryBase.class)
 public interface CompositeEntryBaseAccessor {
     @Accessor("children")
+    //? if >=1.21 {
     List<LootPoolEntryContainer> fieldguide$getChildren();
+    //?} else {
+    /*LootPoolEntryContainer[] fieldguide$getChildren();
+    *///?}
 }

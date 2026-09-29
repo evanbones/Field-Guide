@@ -228,7 +228,7 @@ public class FieldGuideRaytracer {
     }
 
     public Object disambiguateComposite(Minecraft minecraft, BlockPos hitPos, List<Object> possibleEntries, Object actualTargetKey) {
-        if (minecraft.level == null || hitPos == null) return possibleEntries.getFirst();
+        if (minecraft.level == null || hitPos == null) return possibleEntries.get(0);
 
         Object bestMatch = null;
         int maxScore = 0;
@@ -289,6 +289,6 @@ public class FieldGuideRaytracer {
             return actualTargetKey;
         }
 
-        return bestMatch != null ? bestMatch : possibleEntries.getFirst();
+        return bestMatch != null ? bestMatch : possibleEntries.get(0);
     }
 }

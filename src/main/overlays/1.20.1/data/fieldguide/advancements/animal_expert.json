@@ -1,0 +1,29 @@
+{
+  "parent": "fieldguide:first_discovery",
+  "display": {
+    "icon": {
+      "item": "minecraft:pig_spawn_egg"
+    },
+    "title": {
+      "translate": "advancements.fieldguide.animal_expert.title"
+    },
+    "description": {
+      "translate": "advancements.fieldguide.animal_expert.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "complete": {
+      "trigger": "fieldguide:category_completed",
+      "conditions": {
+        "category": "fieldguide:animals"
+      }
+    }
+  },
+  "rewards": {
+    "experience": 100
+  }
+}

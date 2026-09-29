@@ -164,7 +164,12 @@ public class VariantOverviewWidget extends AbstractWidget {
     }
 
     @Override
+    //? if >=1.21 {
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+    //?} else {
+    /*public boolean mouseScrolled(double mouseX, double mouseY, double scrollY) {
+        double scrollX = 0;
+    *///?}
         if (!this.visible) return false;
 
         if (scrollY > 0 && this.currentPage > 0) {
@@ -175,7 +180,11 @@ public class VariantOverviewWidget extends AbstractWidget {
             return true;
         }
 
+        //? if >=1.21 {
         return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+        //?} else {
+        /*return super.mouseScrolled(mouseX, mouseY, scrollY);
+        *///?}
     }
 
     @Override
