@@ -1,0 +1,47 @@
+{
+  "values": [
+    {
+      "id": "minecraft:poplar_sapling",
+      "display": "minecraft:poplar_sapling",
+      "components": [
+        "minecraft:poplar_sapling",
+        "minecraft:poplar_log",
+        "minecraft:red_poplar_leaves",
+        "minecraft:orange_poplar_leaves",
+        "minecraft:yellow_poplar_leaves"
+      ],
+      "visual_variants": [
+        {
+          "variant_id": "red_poplar",
+          "display_name": "Red Poplar",
+          "structure_nbt": "minecraft:red_poplar",
+          "components": [
+            "minecraft:poplar_sapling",
+            "minecraft:poplar_log",
+            "minecraft:red_poplar_leaves"
+          ]
+        },
+        {
+          "variant_id": "orange_poplar",
+          "display_name": "Orange Poplar",
+          "structure_nbt": "minecraft:orange_poplar",
+          "components": [
+            "minecraft:poplar_sapling",
+            "minecraft:poplar_log",
+            "minecraft:orange_poplar_leaves"
+          ]
+        },
+        {
+          "variant_id": "yellow_poplar",
+          "display_name": "Yellow Poplar",
+          "structure_nbt": "minecraft:yellow_poplar",
+          "components": [
+            "minecraft:poplar_sapling",
+            "minecraft:poplar_log",
+            "minecraft:yellow_poplar_leaves"
+          ]
+        }
+      ]
+    }
+  ]
+}

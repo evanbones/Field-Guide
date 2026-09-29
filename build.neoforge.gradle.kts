@@ -126,7 +126,8 @@ dependencies {
     localRuntime("maven.modrinth:item-descriptions:${dep("item_descriptions")}")
 
     // Immersive Overlays
-    optDep("immersive_overlays")?.let { localRuntime("maven.modrinth:immersive-overlays:$it") }
+    compileOnly("maven.modrinth:immersive-overlays:${dep("immersive_overlays")}")
+    localRuntime("maven.modrinth:immersive-overlays:${dep("immersive_overlays")}")
 
     // ETF & EMF
     compileOnly("maven.modrinth:entitytexturefeatures:${dep("etf")}")
@@ -232,10 +233,10 @@ publishMods {
         minecraftVersions.add(property("deps.minecraft") as String)
         minecraftVersions.addAll(additionalVersions)
         requires("item-descriptions")
+        requires("immersive-overlays")
         optional("yacl")
         if (optDep("emi") != null) optional("emi")
         if (optDep("rrv") != null) optional("rrv")
-        if (optDep("immersive_overlays") != null) requires("immersive-overlays")
         if (optDep("kubejs") != null) optional("kubejs")
     }
 
@@ -245,10 +246,10 @@ publishMods {
         minecraftVersions.add(property("deps.minecraft") as String)
         minecraftVersions.addAll(additionalVersions)
         requires("item-descriptions")
+        requires("immersive-overlays")
         optional("yacl")
         if (optDep("emi") != null) optional("emi")
         if (optDep("rrv") != null) optional("rrv")
-        if (optDep("immersive_overlays") != null) requires("immersive-overlays")
         if (optDep("kubejs") != null) optional("kubejs")
         client = true
         server = true

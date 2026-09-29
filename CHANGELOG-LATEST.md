@@ -1,8 +1,7 @@
 ### Added
 
-- Added support for 26.3.
-- Added Reliable Recipe Viewer integration on 26.x: pressing the Field Guide key over an item searches the guide for it.
+- Re-added Immersive Overlays support for NeoForge 26.3.
 
-### Changed
+### Fixed
 
-- Switched to YACL on 1.21.1.
+- Fixed missing Poplar tree entry on 26.3.
