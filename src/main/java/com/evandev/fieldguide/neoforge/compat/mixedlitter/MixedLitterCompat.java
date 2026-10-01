@@ -146,11 +146,13 @@ public class MixedLitterCompat {
 
             for (Holder<VariantGroup> groupHolder : groupRegistry.holders().toList()) {
                 ResourceLocation groupId = groupRegistry.getKey(groupHolder.value());
+                boolean replacesDefault = groupHolder.value().replaceDefault();
                 List<Variant> matching = new ArrayList<>();
 
                 for (ResourceLocation id : variantRegistry.keySet()) {
                     Variant variant = variantRegistry.get(id);
                     if (variant != null && variant.group().isPresent() && variant.group().get().equals(groupId)) {
+                        if (!replacesDefault && variant.conditions().isPresent()) continue;
                         if (isForEntity(variant, id, entityId) && isVariantEnabled(variant, groupRegistry, remodelActive)) {
                             matching.add(variant);
                         }
@@ -206,6 +208,9 @@ public class MixedLitterCompat {
                 if (!isVariantEnabled(variant, groupRegistry, remodelActive)) continue;
                 if (isAntlerVariant(variant)) continue;
                 defs.add(new VariantDef(id.toString(), id));
+            }
+            if (!defs.isEmpty() && !hasReplaceDefaultGroup(entity)) {
+                defs.addFirst(new VariantDef("default", null));
             }
         } catch (Exception ignored) {
         }

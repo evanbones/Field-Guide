@@ -1,0 +1,34 @@
+{
+  "entries": [
+    {
+      "id": "crittersandcompanions:stag_beetle",
+      "replace": false,
+      "variants": [
+        {
+          "id": "blue",
+          "nbt": "{Variant:0}"
+        },
+        {
+          "id": "gold",
+          "nbt": "{Variant:1}"
+        },
+        {
+          "id": "orange_green",
+          "nbt": "{Variant:2}"
+        },
+        {
+          "id": "brown",
+          "nbt": "{Variant:3}"
+        },
+        {
+          "id": "red",
+          "nbt": "{Variant:4}"
+        },
+        {
+          "id": "brown_gold",
+          "nbt": "{Variant:5}"
+        }
+      ]
+    }
+  ]
+}

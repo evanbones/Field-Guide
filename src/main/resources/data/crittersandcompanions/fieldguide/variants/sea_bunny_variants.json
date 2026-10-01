@@ -1,0 +1,22 @@
+{
+  "entries": [
+    {
+      "id": "crittersandcompanions:sea_bunny",
+      "replace": false,
+      "variants": [
+        {
+          "id": "white",
+          "nbt": "{Variant:0}"
+        },
+        {
+          "id": "blue",
+          "nbt": "{Variant:1}"
+        },
+        {
+          "id": "yellow",
+          "nbt": "{Variant:2}"
+        }
+      ]
+    }
+  ]
+}

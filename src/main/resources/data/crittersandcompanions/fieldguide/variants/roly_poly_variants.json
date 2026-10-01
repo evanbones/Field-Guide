@@ -1,0 +1,38 @@
+{
+  "entries": [
+    {
+      "id": "crittersandcompanions:roly_poly",
+      "replace": false,
+      "variants": [
+        {
+          "id": "gray",
+          "nbt": "{Variant:0}"
+        },
+        {
+          "id": "black_white",
+          "nbt": "{Variant:1}"
+        },
+        {
+          "id": "gray_orange",
+          "nbt": "{Variant:2}"
+        },
+        {
+          "id": "black",
+          "nbt": "{Variant:3}"
+        },
+        {
+          "id": "yellow",
+          "nbt": "{Variant:4}"
+        },
+        {
+          "id": "orange",
+          "nbt": "{Variant:5}"
+        },
+        {
+          "id": "red",
+          "nbt": "{Variant:6}"
+        }
+      ]
+    }
+  ]
+}

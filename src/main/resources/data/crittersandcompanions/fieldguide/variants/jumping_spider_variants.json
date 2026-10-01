@@ -1,0 +1,42 @@
+{
+  "entries": [
+    {
+      "id": "crittersandcompanions:jumping_spider",
+      "replace": false,
+      "variants": [
+        {
+          "id": "brown",
+          "nbt": "{Variant:0}"
+        },
+        {
+          "id": "orange_blue",
+          "nbt": "{Variant:1}"
+        },
+        {
+          "id": "white",
+          "nbt": "{Variant:2}"
+        },
+        {
+          "id": "black_green",
+          "nbt": "{Variant:3}"
+        },
+        {
+          "id": "black_orange",
+          "nbt": "{Variant:4}"
+        },
+        {
+          "id": "navy",
+          "nbt": "{Variant:5}"
+        },
+        {
+          "id": "tan",
+          "nbt": "{Variant:6}"
+        },
+        {
+          "id": "brown_green",
+          "nbt": "{Variant:7}"
+        }
+      ]
+    }
+  ]
+}

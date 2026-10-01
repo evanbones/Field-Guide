@@ -1,7 +1,9 @@
 ### Added
 
-- Parity fixes for 1.20.1.
+- Added Critters and Companions variants.
 
 ### Fixed
 
-- Fixed server configs not reloading after saving them in singleplayer.
+- Fixed certain Mixed Litter variants not retaining their defaults.
+- Fixed toast icons flickering when changing variants.
+- Small performance improvements.

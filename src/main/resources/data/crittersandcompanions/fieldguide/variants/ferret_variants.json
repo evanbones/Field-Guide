@@ -1,0 +1,18 @@
+{
+  "entries": [
+    {
+      "id": "crittersandcompanions:ferret",
+      "replace": false,
+      "variants": [
+        {
+          "id": "brown",
+          "nbt": "{Variant:0}"
+        },
+        {
+          "id": "white",
+          "nbt": "{Variant:1}"
+        }
+      ]
+    }
+  ]
+}

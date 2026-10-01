@@ -1,0 +1,22 @@
+{
+  "entries": [
+    {
+      "id": "crittersandcompanions:stick_bug",
+      "replace": false,
+      "variants": [
+        {
+          "id": "green",
+          "nbt": "{Variant:0}"
+        },
+        {
+          "id": "brown",
+          "nbt": "{Variant:1}"
+        },
+        {
+          "id": "tan",
+          "nbt": "{Variant:2}"
+        }
+      ]
+    }
+  ]
+}

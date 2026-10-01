@@ -46,6 +46,8 @@ public class FieldGuideToast implements Toast {
     private final Object entry;
     private final String variantId;
     private Entity cachedEntity = null;
+    private EntryVariantData visualVariant = null;
+    private String cobblemonForm = null;
     private boolean entityInitialized = false;
     //? if >=26.1 {
     /*private Toast.Visibility wantedVisibility = Toast.Visibility.HIDE;
@@ -95,44 +97,19 @@ public class FieldGuideToast implements Toast {
         boolean isCobblemon = FieldGuideCobblemonCompat.isCobblemonEntry(this.entry);
         boolean isTutorial = this.entry instanceof GuideEntry ge && ge.isVirtual() && ge.virtualData() != null && "tutorial".equals(ge.virtualData().virtualType());
 
-        EntryVariantData visualVariant = null;
-        if (this.entry instanceof GuideEntry ge && ge.hasVisualVariants()) {
-            if (this.variantId != null && !this.variantId.isEmpty()) {
-                for (EntryVariantData vd : ge.visualVariants()) {
-                    if (vd.variantId().equals(this.variantId)) {
-                        visualVariant = vd;
-                        break;
-                    }
-                }
-            }
-            if (visualVariant == null) {
-                String selected = ProgressManager.getInstance().getSelectedVariant(ge.id());
-                if (selected != null) {
-                    for (EntryVariantData vd : ge.visualVariants()) {
-                        if (vd.variantId().equals(selected)) {
-                            visualVariant = vd;
-                            break;
-                        }
-                    }
-                }
-            }
-            if (visualVariant == null && !ge.visualVariants().isEmpty()) {
-                visualVariant = ge.visualVariants().get(0);
-            }
-        }
-
         if (!entityInitialized) {
+            if (this.entry instanceof GuideEntry ge && ge.hasVisualVariants()) {
+                visualVariant = resolveVisualVariant(ge);
+            }
+
             if (visualVariant != null && visualVariant.displayType() == EntryVariantData.DisplayType.ENTITY) {
                 if (Minecraft.getInstance().level != null) {
                     cachedEntity = EntryRenderHelper.createVariantEntity(Minecraft.getInstance().level, visualVariant.displayId(), visualVariant.nbt());
                 }
             } else if (isCobblemon) {
                 ResourceLocation id = ((GuideEntry) this.entry).id();
-                if (variantId != null) {
-                    cachedEntity = ClientFieldGuideCobblemonCompat.getDummyVariant(id, variantId, Minecraft.getInstance().level);
-                } else {
-                    cachedEntity = ClientFieldGuideCobblemonCompat.getDummyPokemon(id, Minecraft.getInstance().level);
-                }
+                cobblemonForm = (variantId != null && !variantId.isEmpty()) ? variantId : ClientFieldGuideCobblemonCompat.getFormForEntry(id);
+                cachedEntity = ClientFieldGuideCobblemonCompat.getDummyVariant(id, cobblemonForm, Minecraft.getInstance().level);
             } else if (coreEntry instanceof EntityType<?> type) {
                 cachedEntity = DummyEntities.create(type, Minecraft.getInstance().level);
 
@@ -157,7 +134,7 @@ public class FieldGuideToast implements Toast {
         } else if (this.entry instanceof GuideEntry ge && ge.isStructure() && ge.structureData() != null && coreEntry instanceof Block) {
             EntryRenderHelper.renderStructure(guiGraphics, ge, iconX, iconY, 24, true, false, 1.0F);
         } else if (isCobblemon && cachedEntity instanceof LivingEntity) {
-            EntryRenderHelper.renderCobblemon(guiGraphics, (GuideEntry) this.entry, iconX, iconY, 24, 24, true, false, 1.0F, false);
+            EntryRenderHelper.renderCobblemonForm(guiGraphics, (GuideEntry) this.entry, cobblemonForm, iconX, iconY, 24, 24, true, false, 1.0F);
         } else if (isTutorial) {
             EntryRenderHelper.renderTutorial(guiGraphics, (GuideEntry) this.entry, iconX, iconY, 24, 24, true, false, 1.0F);
         } else if (coreEntry instanceof EntityType<?>) {
@@ -177,5 +154,17 @@ public class FieldGuideToast implements Toast {
         //? if <26.1 {
         return timeSinceLastVisible >= 5000L ? Visibility.HIDE : Visibility.SHOW;
         //?}
+    }
+
+    private EntryVariantData resolveVisualVariant(GuideEntry ge) {
+        String target = (this.variantId != null && !this.variantId.isEmpty())
+                ? this.variantId
+                : ProgressManager.getInstance().getSelectedVariant(ge.id());
+        if (target != null) {
+            for (EntryVariantData vd : ge.visualVariants()) {
+                if (vd.variantId().equals(target)) return vd;
+            }
+        }
+        return ge.visualVariants().isEmpty() ? null : ge.visualVariants().get(0);
     }
 }

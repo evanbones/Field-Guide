@@ -1,0 +1,26 @@
+{
+  "entries": [
+    {
+      "id": "crittersandcompanions:dumbo_octopus",
+      "replace": false,
+      "variants": [
+        {
+          "id": "yellow",
+          "nbt": "{Variant:0}"
+        },
+        {
+          "id": "red",
+          "nbt": "{Variant:1}"
+        },
+        {
+          "id": "orange",
+          "nbt": "{Variant:2}"
+        },
+        {
+          "id": "purple",
+          "nbt": "{Variant:3}"
+        }
+      ]
+    }
+  ]
+}

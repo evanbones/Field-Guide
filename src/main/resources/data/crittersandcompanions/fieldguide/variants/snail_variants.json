@@ -1,0 +1,22 @@
+{
+  "entries": [
+    {
+      "id": "crittersandcompanions:snail",
+      "replace": false,
+      "variants": [
+        {
+          "id": "tan",
+          "nbt": "{Variant:0}"
+        },
+        {
+          "id": "brown",
+          "nbt": "{Variant:1}"
+        },
+        {
+          "id": "dark_brown",
+          "nbt": "{Variant:2}"
+        }
+      ]
+    }
+  ]
+}

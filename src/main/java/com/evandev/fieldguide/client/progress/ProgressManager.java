@@ -7,7 +7,6 @@ import com.evandev.fieldguide.api.GuideEntry;
 import com.evandev.fieldguide.client.ClientFieldGuideManager;
 import com.evandev.fieldguide.client.data.JournalPage;
 import com.evandev.fieldguide.client.gui.toasts.FieldGuideToast;
-import com.evandev.fieldguide.client.gui.util.IconCacheManager;
 import com.evandev.fieldguide.client.manager.ClientTextManager;
 import com.evandev.fieldguide.config.ClientConfig;
 import com.evandev.fieldguide.entry.EntryResolver;
@@ -331,7 +330,6 @@ public class ProgressManager {
         } else {
             selectedVariants.put(id.toString(), variantId);
         }
-        IconCacheManager.clearCache();
         Services.NETWORK.sendToServer(UpdateEntryDataPacket.setSelectedVariant(id, variantId));
     }
 

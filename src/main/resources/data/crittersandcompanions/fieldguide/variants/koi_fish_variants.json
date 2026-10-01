@@ -1,0 +1,94 @@
+{
+  "entries": [
+    {
+      "id": "crittersandcompanions:koi_fish",
+      "replace": false,
+      "variants": [
+        {
+          "id": "white_brown",
+          "nbt": "{Variant:0}"
+        },
+        {
+          "id": "white_peach",
+          "nbt": "{Variant:1}"
+        },
+        {
+          "id": "red_white",
+          "nbt": "{Variant:2}"
+        },
+        {
+          "id": "white_black_orange",
+          "nbt": "{Variant:3}"
+        },
+        {
+          "id": "orange",
+          "nbt": "{Variant:4}"
+        },
+        {
+          "id": "black",
+          "nbt": "{Variant:5}"
+        },
+        {
+          "id": "yellow",
+          "nbt": "{Variant:6}"
+        },
+        {
+          "id": "white",
+          "nbt": "{Variant:7}"
+        },
+        {
+          "id": "cream_black",
+          "nbt": "{Variant:8}"
+        },
+        {
+          "id": "yellow_black",
+          "nbt": "{Variant:9}"
+        },
+        {
+          "id": "white_yellow",
+          "nbt": "{Variant:10}"
+        },
+        {
+          "id": "charcoal",
+          "nbt": "{Variant:11}"
+        },
+        {
+          "id": "white_orange",
+          "nbt": "{Variant:12}"
+        },
+        {
+          "id": "black_silver",
+          "nbt": "{Variant:13}"
+        },
+        {
+          "id": "black_red",
+          "nbt": "{Variant:14}"
+        },
+        {
+          "id": "white_orange_black",
+          "nbt": "{Variant:15}"
+        },
+        {
+          "id": "white_red",
+          "nbt": "{Variant:16}"
+        },
+        {
+          "id": "silver",
+          "nbt": "{Variant:17}"
+        },
+        {
+          "id": "white_rose",
+          "nbt": "{Variant:18}"
+        },
+        {
+          "id": "orange_black",
+          "nbt": "{Variant:19}"
+        },
+        {
+          "id": "black_salmon",
+          "nbt": "{Variant:20}"
+        }
+      ]
+    }
+  ]
+}
