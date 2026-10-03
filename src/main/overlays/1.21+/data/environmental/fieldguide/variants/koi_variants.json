@@ -1,0 +1,90 @@
+{
+  "entries": [
+    {
+      "id": "environmental:koi",
+      "replace": false,
+      "variants": [
+        {
+          "id": "kohaku",
+          "nbt": "{BucketVariantTag:\"environmental:kohaku\"}"
+        },
+        {
+          "id": "ogon",
+          "nbt": "{BucketVariantTag:\"environmental:ogon\"}"
+        },
+        {
+          "id": "kigoi",
+          "nbt": "{BucketVariantTag:\"environmental:kigoi\"}"
+        },
+        {
+          "id": "tancho",
+          "nbt": "{BucketVariantTag:\"environmental:tancho\"}"
+        },
+        {
+          "id": "higoi",
+          "nbt": "{BucketVariantTag:\"environmental:higoi\"}"
+        },
+        {
+          "id": "chagoi",
+          "nbt": "{BucketVariantTag:\"environmental:chagoi\"}"
+        },
+        {
+          "id": "narumi_asagi",
+          "nbt": "{BucketVariantTag:\"environmental:narumi_asagi\"}"
+        },
+        {
+          "id": "tancho_sanke",
+          "nbt": "{BucketVariantTag:\"environmental:tancho_sanke\"}"
+        },
+        {
+          "id": "platinum_ogon",
+          "nbt": "{BucketVariantTag:\"environmental:platinum_ogon\"}"
+        },
+        {
+          "id": "orenji_ogon",
+          "nbt": "{BucketVariantTag:\"environmental:orenji_ogon\"}"
+        },
+        {
+          "id": "hi_utsuri",
+          "nbt": "{BucketVariantTag:\"environmental:hi_utsuri\"}"
+        },
+        {
+          "id": "magoi",
+          "nbt": "{BucketVariantTag:\"environmental:magoi\"}"
+        },
+        {
+          "id": "konjo_asagi",
+          "nbt": "{BucketVariantTag:\"environmental:konjo_asagi\"}"
+        },
+        {
+          "id": "ochiba",
+          "nbt": "{BucketVariantTag:\"environmental:ochiba\"}"
+        },
+        {
+          "id": "kumonryu",
+          "nbt": "{BucketVariantTag:\"environmental:kumonryu\"}"
+        },
+        {
+          "id": "aka_matsuba",
+          "nbt": "{BucketVariantTag:\"environmental:aka_matsuba\"}"
+        },
+        {
+          "id": "doitsu_chagoi",
+          "nbt": "{BucketVariantTag:\"environmental:doitsu_chagoi\"}"
+        },
+        {
+          "id": "kin_showa",
+          "nbt": "{BucketVariantTag:\"environmental:kin_showa\"}"
+        },
+        {
+          "id": "showa",
+          "nbt": "{BucketVariantTag:\"environmental:showa\"}"
+        },
+        {
+          "id": "shiro_utsuri",
+          "nbt": "{BucketVariantTag:\"environmental:shiro_utsuri\"}"
+        }
+      ]
+    }
+  ]
+}

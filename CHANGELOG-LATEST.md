@@ -1,3 +1,3 @@
-### Changed
+### Fixed
 
-- Updated variant API.
+- Fixed Environmental koi variants on 1.21+.
