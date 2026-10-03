@@ -348,12 +348,22 @@ public class FieldGuideVariantManager {
             }
 
             if (classProvider != null) {
-                if (classProvider instanceof CompositeVariantProvider<T> comp) {
-                    comp.addProvider(dataProvider);
-                    return comp;
+                List<VariantProvider<T>> specific = new ArrayList<>();
+                List<VariantProvider<T>> generic = new ArrayList<>();
+                List<VariantProvider<Mob>> mobLevel = new ArrayList<>();
+                addMatching(mobLevel, (VariantProvider<Mob>) PROVIDERS.get(Mob.class));
+                List<VariantProvider<T>> all = classProvider instanceof CompositeVariantProvider<T> comp ? comp.providers : List.of(classProvider);
+                for (VariantProvider<T> p : all) {
+                    if (mobLevel.contains(p)) generic.add(p);
+                    else specific.add(p);
                 }
-                CompositeVariantProvider<T> composite = new CompositeVariantProvider<>(classProvider);
-                composite.addProvider(dataProvider);
+
+                specific.add(dataProvider);
+                specific.addAll(generic);
+                CompositeVariantProvider<T> composite = new CompositeVariantProvider<>(specific.get(0));
+                for (int i = 1; i < specific.size(); i++) {
+                    composite.addProvider(specific.get(i));
+                }
                 return composite;
             }
             return dataProvider;
@@ -633,10 +643,15 @@ public class FieldGuideVariantManager {
 
         @Override
         public List<VariantDef> getVariants(T entity) {
-            List<VariantDef> list = providers.stream()
-                    .flatMap(p -> p.getVariants(entity).stream())
-                    .distinct()
-                    .toList();
+            List<VariantDef> list = new ArrayList<>();
+            Set<VariantDef> providerDefaults = new HashSet<>();
+            for (VariantProvider<T> p : providers) {
+                for (VariantDef v : p.getVariants(entity)) {
+                    if (list.contains(v)) continue;
+                    list.add(v);
+                    if (p.isDefaultVariant(entity, v)) providerDefaults.add(v);
+                }
+            }
 
             boolean hasMLVariants = list.stream().anyMatch(v -> v.value() instanceof ResourceLocation);
             boolean hasVanillaEnums = list.stream().anyMatch(v -> v.value() instanceof Enum<?>);
@@ -648,7 +663,7 @@ public class FieldGuideVariantManager {
                 list.stream().filter(v -> !(v.value() instanceof Enum<?>)).forEach(result::add);
             } else if (hasVanilla) {
                 for (VariantDef v : list) {
-                    if (v.id().equals("default") && v.value() == null) continue;
+                    if ((v.id().equals("default") && v.value() == null) || providerDefaults.contains(v)) continue;
                     result.add(v);
                 }
             } else {
@@ -707,7 +722,8 @@ public class FieldGuideVariantManager {
                 VariantDef current = p.getCurrent(entity);
                 if (current != null) {
                     states.add(current);
-                    if (!current.id().equals("default")) {
+                    if (!current.id().equals("default") && !p.isDefaultVariant(entity, current)
+                            && FieldGuideVariantManager.getVariants(entity).stream().anyMatch(v -> v.id().equals(current.id()))) {
                         mainId = current.id();
                     }
                 } else {

@@ -23,6 +23,10 @@ public interface VariantProvider<T extends Mob> {
         return false;
     }
 
+    default boolean isDefaultVariant(T entity, VariantDef def) {
+        return def.id().equals("default") && def.value() == null;
+    }
+
     //? if >=26.1 {
     /*default void applyToRenderState(T entity, EntityRenderState state, VariantDef def) {
     }
