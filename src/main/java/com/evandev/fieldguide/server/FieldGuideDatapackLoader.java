@@ -19,6 +19,7 @@ import net.minecraft.util.GsonHelper;
 
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -341,7 +342,11 @@ public final class FieldGuideDatapackLoader {
                 id -> id.getPath().endsWith(".json")
         );
 
-        for (Map.Entry<ResourceLocation, List<Resource>> entry : variantResources.entrySet()) {
+        // vanilla first so modded variants of the same entity are added after it
+        List<Map.Entry<ResourceLocation, List<Resource>>> sortedVariantResources = new ArrayList<>(variantResources.entrySet());
+        sortedVariantResources.sort(Comparator.comparing(e -> !e.getKey().getNamespace().equals("minecraft")));
+
+        for (Map.Entry<ResourceLocation, List<Resource>> entry : sortedVariantResources) {
             for (Resource resource : entry.getValue()) {
                 try (Reader reader = resource.openAsReader()) {
                     JsonObject json = GsonHelper.parse(reader);
@@ -374,7 +379,14 @@ public final class FieldGuideDatapackLoader {
                                     variantList.add(new DatapackVariant(id, nbt));
                                 }
                             }
-                            data.variants.put(entityId, new DatapackVariantDefinition(replace, variantList));
+                            DatapackVariantDefinition existing = data.variants.get(entityId);
+                            if (existing != null && !replace) {
+                                List<DatapackVariant> merged = new ArrayList<>(existing.variants());
+                                merged.addAll(variantList);
+                                data.variants.put(entityId, new DatapackVariantDefinition(existing.replace(), merged));
+                            } else {
+                                data.variants.put(entityId, new DatapackVariantDefinition(replace, variantList));
+                            }
                         }
                     }
                 } catch (Exception e) {

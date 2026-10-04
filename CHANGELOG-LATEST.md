@@ -1,3 +1,3 @@
 ### Fixed
 
-- Fixed Environmental koi variants on 1.21+.
+- Fixed certain variants not loading properly.
