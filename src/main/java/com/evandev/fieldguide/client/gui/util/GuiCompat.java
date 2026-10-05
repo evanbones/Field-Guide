@@ -102,6 +102,11 @@ public final class GuiCompat {
         *///?}
     }
 
+    public static String ellipsize(Font font, String text, int maxWidth) {
+        if (font.width(text) <= maxWidth) return text;
+        return font.plainSubstrByWidth(text, Math.max(0, maxWidth - font.width("..."))).stripTrailing() + "...";
+    }
+
     public static boolean hasShiftDown() {
         //? if <26.1 {
         return Screen.hasShiftDown();

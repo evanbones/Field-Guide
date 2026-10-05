@@ -622,10 +622,7 @@ public class FieldGuideCategoryScreen extends BookScreen {
         int titleY = this.rightPageBounds.top() + 8;
 
         int maxWidth = this.leftPageBounds.width() - 12 - offset;
-        String title = text.getString();
-        if (this.font.width(text) > maxWidth) {
-            title = font.plainSubstrByWidth(title, maxWidth) + "...";
-        }
+        String title = GuiCompat.ellipsize(this.font, text.getString(), maxWidth);
         guiGraphics.drawString(this.font, title, this.leftPageBounds.left() + 6 + offset, titleY, color, false);
     }
 

@@ -1,16 +1,12 @@
 package com.evandev.fieldguide.mixin.client;
 
 //? if <26.1 {
-import com.evandev.fieldguide.client.render.DiscoveryOverlayRenderer;
-import com.evandev.fieldguide.client.render.ScanOverlayRenderer;
+import com.evandev.fieldguide.client.render.LevelOverlays;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Camera;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.culling.Frustum;
-import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -29,7 +25,7 @@ public class LevelRendererMixin {
             at = @At("RETURN")
     )
     //? if >=1.21 {
-    private void renderScanOverlays(
+    private void captureScanOverlays(
             DeltaTracker deltaTracker,
             boolean renderBlockOutline,
             Camera camera,
@@ -44,7 +40,7 @@ public class LevelRendererMixin {
 
         float partialTick = deltaTracker.getGameTimeDeltaPartialTick(true);
     //?} else {
-    /*private void renderScanOverlays(
+    /*private void captureScanOverlays(
             PoseStack poseStack,
             float partialTick,
             long finishNanoTime,
@@ -58,24 +54,7 @@ public class LevelRendererMixin {
         Matrix4f frustumMatrix = poseStack.last().pose();
     *///?}
 
-        ScanOverlayRenderer.render(
-                poseStack,
-                partialTick,
-                camera,
-                Minecraft.getInstance().renderBuffers().bufferSource()
-        );
-
-        Frustum frustum = new Frustum(frustumMatrix, projectionMatrix);
-        Vec3 camPos = camera.getPosition();
-        frustum.prepare(camPos.x, camPos.y, camPos.z);
-
-        DiscoveryOverlayRenderer.render(
-                poseStack,
-                partialTick,
-                camera,
-                frustum,
-                Minecraft.getInstance().renderBuffers().bufferSource()
-        );
+        LevelOverlays.capture(poseStack.last(), frustumMatrix, projectionMatrix, camera, partialTick);
     }
 }
 //?} else {

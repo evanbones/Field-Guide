@@ -68,6 +68,14 @@
     {
       "id": "supplementaries:rope_tomatoes",
       "required": false
+    },
+    {
+      "id": "nomansland:cattail",
+      "required": false
+    },
+    {
+      "id": "nomansland:reeds",
+      "required": false
     }
   ]
 }

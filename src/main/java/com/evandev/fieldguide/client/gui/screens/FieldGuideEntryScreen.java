@@ -308,6 +308,15 @@ public class FieldGuideEntryScreen extends BookScreen {
         updateWidgetVisibility();
     }
 
+    private boolean showsUnlockQuill() {
+        return ClientConfig.get().showUnlockDate && ProgressManager.getInstance().getDiscoveryTime(entry) > 0;
+    }
+
+    private int getNameWidth() {
+        int width = this.rightPageBounds.width() - 12;
+        return showsUnlockQuill() ? width - 13 : width;
+    }
+
     private void setupTextWidgets(boolean unlocked) {
         int textX = this.rightPageBounds.left() + 6;
         int titleY = this.leftPageBounds.top() + 8;
@@ -316,7 +325,8 @@ public class FieldGuideEntryScreen extends BookScreen {
         if (unlocked) {
             String initialName = ClientFieldGuideManager.getEntryName(entry).getString();
             if (!ServerConfig.get().disableEditingNames) {
-                AbstractWidget nameWidget = ScholarCompat.createTextField(this.font, textX, titleY, textAreaWidth, LINE_HEIGHT, initialName, ClientConfig.get().getTextTitleColorInt(), textAreaWidth, FieldGuideLimits.MAX_ENTRY_NAME_LENGTH,
+                int nameWidth = getNameWidth();
+                AbstractWidget nameWidget = ScholarCompat.createTextField(this.font, textX, titleY, nameWidth, LINE_HEIGHT, initialName, ClientConfig.get().getTextTitleColorInt(), nameWidth, FieldGuideLimits.MAX_ENTRY_NAME_LENGTH,
                         newName -> ClientFieldGuideManager.setCustomName(entry, newName), false);
                 this.addRenderableWidget(nameWidget);
             }
@@ -607,11 +617,11 @@ public class FieldGuideEntryScreen extends BookScreen {
             //? if <26.1 {
             RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
             //?}
-            guiGraphics.drawString(this.font, getTitleForEntry(entry), titleX, titleY, ClientConfig.get().getTextMutedColorInt(), false);
+            guiGraphics.drawString(this.font, GuiCompat.ellipsize(this.font, getTitleForEntry(entry).getString(), textAreaWidth), titleX, titleY, ClientConfig.get().getTextMutedColorInt(), false);
             GuiCompat.textWithWordWrap(guiGraphics, font, Component.literal(hintText), titleX, titleY + 21, textAreaWidth, ClientConfig.get().getTextMutedColorInt());
         } else {
             long discoveryTime = ProgressManager.getInstance().getDiscoveryTime(entry);
-            if (discoveryTime > 0 && ClientConfig.get().showUnlockDate) {
+            if (showsUnlockQuill()) {
                 Component dateComponent;
 
                 if (ClientConfig.get().useRealWorldDate) {
@@ -643,7 +653,7 @@ public class FieldGuideEntryScreen extends BookScreen {
             }
 
             if (ServerConfig.get().disableEditingNames) {
-                guiGraphics.drawString(this.font, ClientFieldGuideManager.getEntryName(entry), titleX, titleY, ClientConfig.get().getTextTitleColorInt(), false);
+                guiGraphics.drawString(this.font, GuiCompat.ellipsize(this.font, ClientFieldGuideManager.getEntryName(entry).getString(), getNameWidth()), titleX, titleY, ClientConfig.get().getTextTitleColorInt(), false);
                 if (!entityVariants.isEmpty() && currentVariantIndex < entityVariants.size()) {
                     VariantDef variant = entityVariants.get(currentVariantIndex);
                     String variantId = variant.id();
@@ -656,7 +666,7 @@ public class FieldGuideEntryScreen extends BookScreen {
                         variantName = customVariantName != null ? Component.literal(customVariantName) : FieldGuideVariantManager.getVariantDisplayName(variant);
                     }
 
-                    guiGraphics.drawString(this.font, variantName, titleX, titleY + LINE_HEIGHT + 3, ClientConfig.get().getTextMutedColorInt(), false);
+                    guiGraphics.drawString(this.font, GuiCompat.ellipsize(this.font, variantName.getString(), textAreaWidth), titleX, titleY + LINE_HEIGHT + 3, ClientConfig.get().getTextMutedColorInt(), false);
                 }
             }
 

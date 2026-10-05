@@ -83,10 +83,10 @@ public class FieldGuideToast implements Toast {
         Component discovered = Component.translatable("fieldguide.toast.discovered");
 
         //? if <26.1 {
-        guiGraphics.drawString(toastComponent.getMinecraft().font, name, 30, 7, ClientConfig.get().getTextTitleColorInt(), false);
+        guiGraphics.drawString(toastComponent.getMinecraft().font, GuiCompat.ellipsize(toastComponent.getMinecraft().font, name.getString(), this.width() - 34), 30, 7, ClientConfig.get().getTextTitleColorInt(), false);
         guiGraphics.drawString(toastComponent.getMinecraft().font, discovered, 30, 17, 0xAF8C5C, false);
         //?} else {
-        /*guiGraphics.text(font, name, 30, 7, ClientConfig.get().getTextTitleColorInt(), false);
+        /*guiGraphics.text(font, Component.literal(GuiCompat.ellipsize(font, name.getString(), this.width() - 34)), 30, 7, ClientConfig.get().getTextTitleColorInt(), false);
         guiGraphics.text(font, discovered, 30, 17, 0xFFAF8C5C, false);
         *///?}
 

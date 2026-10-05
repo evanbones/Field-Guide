@@ -34,9 +34,12 @@
     "accessor.RenderSetupAccessor",
     "accessor.RenderTypeAccessor",
     "accessor.TextureBindingAccessor",
+    "client.EntityRendererMixin",
+    "client.GameRendererMixin",
     "client.InventoryScreenMixin",
     "client.LevelRendererMixin",
     "client.PauseScreenMixin",
+    "client.PlayerRendererMixin",
     "client.ScreenMixin"
   ],
   "server": [],

@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.21.0] - 2026-10-05
+
+### Changed
+
+- Improved truncation of long text.
+- Added a few No Man's Land plants to the multiblock scan tag.
+
+### Fixed
+
+- Fixed visuals with Iris shaders.
+- Fixed a crash when scanning named entities with Iris + Sodium installed.
+- Fixed scan/discovery overlays breaking shader packs (underwater blur, flickering).
+
 ## [1.20.5] - 2026-10-04
 
 ### Fixed

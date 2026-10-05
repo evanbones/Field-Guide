@@ -1,3 +1,10 @@
+### Changed
+
+- Improved truncation of long text.
+- Added a few No Man's Land plants to the multiblock scan tag.
+
 ### Fixed
 
-- Fixed hardcoded mouse buttons (also fixes text inputs on 26.3.)
+- Fixed visuals with Iris shaders.
+- Fixed a crash when scanning named entities with Iris + Sodium installed.
+- Fixed scan/discovery overlays breaking shader packs (underwater blur, flickering).

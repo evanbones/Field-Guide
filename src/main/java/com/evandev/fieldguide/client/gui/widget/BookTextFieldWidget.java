@@ -88,7 +88,8 @@ public class BookTextFieldWidget extends AbstractWidget {
     }
 
     private void tryUpdateText(String newText, int newCursorPos, int newSelectionPos) {
-        if (newText.length() <= maxCharacters && font.width(newText) <= maxTextWidth) {
+        int newWidth = font.width(newText);
+        if (newText.length() <= maxCharacters && (newWidth <= maxTextWidth || newWidth < font.width(this.text))) {
             this.text = newText;
             this.cursorPos = newCursorPos;
             this.selectionPos = newSelectionPos;
@@ -263,6 +264,13 @@ public class BookTextFieldWidget extends AbstractWidget {
     *///?}
         cursorPos = Math.max(0, Math.min(cursorPos, text.length()));
         selectionPos = Math.max(0, Math.min(selectionPos, text.length()));
+
+        if (!this.isFocused() && this.font.width(text) > this.width) {
+            String display = GuiCompat.ellipsize(this.font, text, this.width);
+            int displayX = this.centered ? this.getX() + (this.width - this.font.width(display)) / 2 : this.getX();
+            guiGraphics.drawString(this.font, display, displayX, this.getY(), textColor, false);
+            return;
+        }
 
         int renderX = this.centered ? this.getX() + (this.width - this.font.width(text)) / 2 : this.getX();
 

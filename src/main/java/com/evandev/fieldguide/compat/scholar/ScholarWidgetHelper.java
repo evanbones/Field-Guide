@@ -14,6 +14,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.locale.Language;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
@@ -58,7 +59,11 @@ public class ScholarWidgetHelper {
         textBox.setFontUnfocusedColor(textColor | 0xFF000000);
         if (centered) textBox.setHorizontalAlignment(HorizontalAlignment.CENTER);
 
-        Predicate<String> validator = str -> str.length() <= maxCharacters && font.width(str) <= maxTextWidth && !str.contains("\n");
+        Predicate<String> validator = str -> {
+            if (str.length() > maxCharacters || str.contains("\n")) return false;
+            int newWidth = font.width(str);
+            return newWidth <= maxTextWidth || newWidth < font.width(textBox.getEditor().getString());
+        };
         textBox.getEditor().setValidator(validator);
         return textBox;
     }
@@ -293,6 +298,11 @@ public class ScholarWidgetHelper {
         *///?}
             FormattedStringDisplayCache displayCache = this.getDisplayCache();
 
+            if (!scrollable && !this.isFocused() && font.width(this.getEditor().getString()) > this.width) {
+                renderEllipsized(guiGraphics);
+                return;
+            }
+
             if (!scrollable) {
                 this.renderLines(guiGraphics, mouseX, mouseY, partialTick, displayCache.getLines(), this.getCurrentFontColor());
 
@@ -355,6 +365,13 @@ public class ScholarWidgetHelper {
                 GuiCompat.blitSprite(guiGraphics, trackSprite, scrollbarX, scrollbarY, 4, scrollbarHeight);
                 GuiCompat.blitSprite(guiGraphics, thumbSprite, scrollbarX, thumbY, 4, thumbHeight);
             }
+        }
+
+        private void renderEllipsized(GuiGraphics guiGraphics) {
+            FormattedText text = this.getEditor().getString();
+            FormattedText truncated = FormattedText.composite(font.substrByWidth(text, Math.max(0, this.width - font.width("..."))), FormattedText.of("..."));
+            int x = this.getHorizontalAlignment() == HorizontalAlignment.CENTER ? this.getX() + (this.width - font.width(truncated)) / 2 : this.getX();
+            guiGraphics.drawString(this.font, Language.getInstance().getVisualOrder(truncated), x, this.getY(), this.getCurrentFontColor(), false);
         }
 
         private void renderCursorScrollable(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick, FormattedStringEditor editor, Pos2i cursor, int color) {
