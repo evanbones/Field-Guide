@@ -73,7 +73,18 @@ public class BookTextFieldWidget extends AbstractWidget {
     }
 
     public void setEditable(boolean editable) {
+        //? if >=26.1 {
+        /*if (this.isFocused()) Minecraft.getInstance().onTextInputFocusChange(this, editable);
+        *///?}
         this.editable = editable;
+    }
+
+    @Override
+    public void setFocused(boolean focused) {
+        super.setFocused(focused);
+        //? if >=26.1 {
+        /*if (this.editable || !focused) Minecraft.getInstance().onTextInputFocusChange(this, focused);
+        *///?}
     }
 
     private void tryUpdateText(String newText, int newCursorPos, int newSelectionPos) {

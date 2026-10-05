@@ -3,6 +3,7 @@ package com.evandev.fieldguide.client.gui.widget;
 import com.evandev.fieldguide.Constants;
 import com.evandev.fieldguide.client.ClientConstants;
 import com.evandev.fieldguide.client.gui.util.GuiCompat;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.ImageButton;
@@ -77,7 +78,7 @@ public class PaginatedGridWidget<T> extends AbstractWidget {
         if (nextButton.mouseClicked(event, doubleClick)) return true;
     *///?}
 
-        if (button == 0 && onClick != null && !items.isEmpty()) {
+        if (button == InputConstants.MOUSE_BUTTON_LEFT && onClick != null && !items.isEmpty()) {
             int indexStart = itemsPerPage * (currentPage - 1);
             int indexEnd = Math.min(items.size(), itemsPerPage * currentPage);
             int itemsToDraw = indexEnd - indexStart;

@@ -38,6 +38,7 @@ import com.evandev.fieldguide.network.CopyPagePacket;
 import com.evandev.fieldguide.platform.Services;
 import com.evandev.fieldguide.util.DummyEntities;
 import com.evandev.fieldguide.variant.FieldGuideVariantManager;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -493,12 +494,12 @@ public class FieldGuideEntryScreen extends BookScreen {
 
         Object clickEntry = EntryResolver.resolveCoreEntry(entry);
 
-        if ((button == 0 || button == 1) && (renderedEntity != null || clickEntry instanceof Block || clickEntry instanceof Item || this.variantOverviewWidget != null)) {
+        if ((button == InputConstants.MOUSE_BUTTON_LEFT || button == InputConstants.MOUSE_BUTTON_RIGHT) && (renderedEntity != null || clickEntry instanceof Block || clickEntry instanceof Item || this.variantOverviewWidget != null)) {
             int xPos = leftPageBounds.left() + leftPageBounds.width() / 2;
             int yPos = leftPageBounds.y_center() - 18;
             if (mouseX >= xPos - 50 && mouseX <= xPos + 50 && mouseY >= yPos - 50 && mouseY <= yPos + 50) {
                 if (ClientFieldGuideManager.isUnlocked(entry)) {
-                    if (button == 0) {
+                    if (button == InputConstants.MOUSE_BUTTON_LEFT) {
                         if (this.variantOverviewWidget != null) {
                             this.variantOverviewWidget.toggleVisibility();
                         }

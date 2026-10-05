@@ -1,6 +1,7 @@
 package com.evandev.fieldguide.client.gui.widget;
 
 import com.evandev.fieldguide.config.ClientConfig;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -41,10 +42,10 @@ public class FieldGuideSearchBox extends EditBox {
     @Override
     //? if <26.1 {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (button == 1 && this.isActive() && this.isMouseOver(mouseX, mouseY)) {
+        if (button == InputConstants.MOUSE_BUTTON_RIGHT && this.isActive() && this.isMouseOver(mouseX, mouseY)) {
     //?} else {
     /*public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        if (event.button() == 1 && this.isActive() && this.isMouseOver(event.x(), event.y())) {
+        if (event.button() == InputConstants.MOUSE_BUTTON_RIGHT && this.isActive() && this.isMouseOver(event.x(), event.y())) {
     *///?}
             this.setValue("");
             this.setFocused(true);

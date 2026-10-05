@@ -9,6 +9,7 @@ import com.evandev.fieldguide.client.gui.widget.FieldGuidePhotographWidget;
 import com.evandev.fieldguide.client.progress.ProgressManager;
 import com.evandev.fieldguide.config.ClientConfig;
 import com.evandev.fieldguide.config.ServerConfig;
+import com.mojang.blaze3d.platform.InputConstants;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.gui.screen.ItemListScreen;
 import io.github.mortuusars.exposure.client.render.photograph.PhotographStyle;
@@ -191,7 +192,7 @@ public class ClientExposureCompat {
 
         @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            if (button == 0 && hoveredSlot != null && hoveredSlot.hasItem()) {
+            if (button == InputConstants.MOUSE_BUTTON_LEFT && hoveredSlot != null && hoveredSlot.hasItem()) {
                 onSelect.accept(hoveredSlot.getItem());
                 return true;
             }

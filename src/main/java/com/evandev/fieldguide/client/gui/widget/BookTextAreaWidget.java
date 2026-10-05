@@ -85,7 +85,18 @@ public class BookTextAreaWidget extends AbstractWidget {
     }
 
     public void setEditable(boolean editable) {
+        //? if >=26.1 {
+        /*if (this.isFocused()) Minecraft.getInstance().onTextInputFocusChange(this, editable);
+        *///?}
         this.editable = editable;
+    }
+
+    @Override
+    public void setFocused(boolean focused) {
+        super.setFocused(focused);
+        //? if >=26.1 {
+        /*if (this.editable || !focused) Minecraft.getInstance().onTextInputFocusChange(this, focused);
+        *///?}
     }
 
     private void computeLineStarts() {
@@ -183,7 +194,7 @@ public class BookTextAreaWidget extends AbstractWidget {
         double mouseY = event.y();
         int button = event.button();
     *///?}
-        if (scrollable && button == 0 && isScrollbarHovered(mouseX, mouseY)) {
+        if (scrollable && button == InputConstants.MOUSE_BUTTON_LEFT && isScrollbarHovered(mouseX, mouseY)) {
             isDraggingScrollbar = true;
             updateScrollFromMouse(mouseY);
             return true;

@@ -10,6 +10,7 @@ import io.github.mortuusars.scholar.client.gui.widget.textbox.text.FormattedStri
 import io.github.mortuusars.scholar.client.gui.widget.textbox.text.FormattedStringEditor;
 import io.github.mortuusars.scholar.client.gui.widget.textbox.text.Formatting;
 import io.github.mortuusars.scholar.client.util.Pos2i;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -76,6 +77,14 @@ public class ScholarWidgetHelper {
             this.setOnTextChanged(formattedString -> onChanged.accept(formattedString.toString()));
         }
 
+        @Override
+        public void setFocused(boolean focused) {
+            super.setFocused(focused);
+            //? if >=26.1 {
+            /*Minecraft.getInstance().onTextInputFocusChange(this, focused);
+            *///?}
+        }
+
         private boolean isScrollbarHovered(double mouseX, double mouseY) {
             if (!scrollable) return false;
             int totalLines = getDisplayCache().getLines().size();
@@ -127,7 +136,7 @@ public class ScholarWidgetHelper {
             double mouseY = event.y();
             int button = event.button();
         *///?}
-            if (scrollable && button == 0 && isScrollbarHovered(mouseX, mouseY)) {
+            if (scrollable && button == InputConstants.MOUSE_BUTTON_LEFT && isScrollbarHovered(mouseX, mouseY)) {
                 isDraggingScrollbar = true;
                 updateScrollFromMouse(mouseY);
                 return true;
@@ -144,7 +153,7 @@ public class ScholarWidgetHelper {
                 return true;
             }
 
-            if (isHovered && button == 0) {
+            if (isHovered && button == InputConstants.MOUSE_BUTTON_LEFT) {
                 //? if <26.1 {
                 if (this.getFormattingToolbar().mouseClicked(mouseX, mouseY + scrollPixelOffset, button)) {
                 //?} else {
@@ -200,7 +209,7 @@ public class ScholarWidgetHelper {
                 updateScrollFromMouse(mouseY);
                 return true;
             }
-            if (button == 0 && this.canDrag) {
+            if (button == InputConstants.MOUSE_BUTTON_LEFT && this.canDrag) {
                 int scrollPixelOffset = scrollable ? scrollOffset * font.lineHeight : 0;
                 int indexAtMousePos = getDisplayCache().getCharIndexAtPosition(this.font, (int) (mouseX - getX()), (int) (mouseY + scrollPixelOffset - getY()));
                 if (indexAtMousePos < 0) indexAtMousePos = getEditor().getString().length();
