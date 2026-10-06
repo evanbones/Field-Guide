@@ -1,5 +1,9 @@
 package com.evandev.fieldguide.util;
 
+//? if forgelike && <26.1 {
+import com.evandev.fieldguide.compat.quark.QuarkCompat;
+import com.evandev.fieldguide.platform.Services;
+//?}
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
@@ -22,7 +26,13 @@ public final class DummyEntities {
     @Nullable
     public static Entity create(EntityType<?> type, Level level) {
         //? if <26.1 {
-        return type.create(level);
+        Entity entity = type.create(level);
+        //? if forgelike {
+        if (entity != null && Services.PLATFORM.isModLoaded("quark")) {
+            QuarkCompat.prepareDisplayEntity(entity);
+        }
+        //?}
+        return entity;
         //?} else {
         /*Entity entity = type.create(level, EntitySpawnReason.LOAD);
         if (entity != null) {

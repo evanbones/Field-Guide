@@ -1,10 +1,7 @@
-### Changed
+### Added
 
-- Improved truncation of long text.
-- Added a few No Man's Land plants to the multiblock scan tag.
+- Added Quark tree variants.
 
 ### Fixed
 
-- Fixed visuals with Iris shaders.
-- Fixed a crash when scanning named entities with Iris + Sodium installed.
-- Fixed scan/discovery overlays breaking shader packs (underwater blur, flickering).
+- Fixed Quark Forgotten display.

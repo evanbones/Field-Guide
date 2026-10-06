@@ -170,6 +170,13 @@ dependencies {
         modCompileOnly("maven.modrinth:astemirlib:${dep("astemirlib")}")
     }
 
+    // Quark
+    optDep("quark")?.let {
+        modCompileOnly("maven.modrinth:quark:$it")
+        modRuntimeOnly("maven.modrinth:quark:$it")
+        modRuntimeOnly("maven.modrinth:zeta:${dep("zeta")}")
+    }
+
     // Mixin Constraints
     compileOnly("com.moulberry:mixinconstraints:${dep("mixin_constraints")}")
     val mixinConstraints = implementation("com.moulberry:mixinconstraints") {

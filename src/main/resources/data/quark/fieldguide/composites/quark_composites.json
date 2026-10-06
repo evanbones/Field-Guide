@@ -1,0 +1,81 @@
+{
+  "values": [
+    {
+      "id": "quark:blue_blossom_sapling",
+      "display": "quark:blue_blossom_sapling",
+      "components": [
+        "quark:blue_blossom_sapling",
+        "quark:lavender_blossom_sapling",
+        "quark:orange_blossom_sapling",
+        "quark:yellow_blossom_sapling",
+        "quark:red_blossom_sapling",
+        "quark:blossom_log",
+        "quark:blue_blossom_leaves",
+        "quark:lavender_blossom_leaves",
+        "quark:orange_blossom_leaves",
+        "quark:yellow_blossom_leaves",
+        "quark:red_blossom_leaves"
+      ],
+      "visual_variants": [
+        {
+          "variant_id": "blue_blossom",
+          "display_name": "Frosty",
+          "structure_nbt": "quark:blue_blossom",
+          "components": [
+            "quark:blue_blossom_sapling",
+            "quark:blossom_log",
+            "quark:blue_blossom_leaves"
+          ]
+        },
+        {
+          "variant_id": "lavender_blossom",
+          "display_name": "Serene",
+          "structure_nbt": "quark:lavender_blossom",
+          "components": [
+            "quark:lavender_blossom_sapling",
+            "quark:blossom_log",
+            "quark:lavender_blossom_leaves"
+          ]
+        },
+        {
+          "variant_id": "orange_blossom",
+          "display_name": "Warm",
+          "structure_nbt": "quark:orange_blossom",
+          "components": [
+            "quark:orange_blossom_sapling",
+            "quark:blossom_log",
+            "quark:orange_blossom_leaves"
+          ]
+        },
+        {
+          "variant_id": "yellow_blossom",
+          "display_name": "Sunny",
+          "structure_nbt": "quark:yellow_blossom",
+          "components": [
+            "quark:yellow_blossom_sapling",
+            "quark:blossom_log",
+            "quark:yellow_blossom_leaves"
+          ]
+        },
+        {
+          "variant_id": "red_blossom",
+          "display_name": "Fiery",
+          "structure_nbt": "quark:red_blossom",
+          "components": [
+            "quark:red_blossom_sapling",
+            "quark:blossom_log",
+            "quark:red_blossom_leaves"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "quark:ancient_sapling",
+      "structure_nbt": "quark:ancient_tree",
+      "components": [
+        "quark:ancient_log",
+        "quark:ancient_leaves"
+      ]
+    }
+  ]
+}

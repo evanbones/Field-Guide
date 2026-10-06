@@ -167,6 +167,13 @@ dependencies {
     // Serene Seasons
     optDep("serene_seasons")?.let { compileOnly("maven.modrinth:serene-seasons:$it") }
 
+    // Quark
+    optDep("quark")?.let {
+        compileOnly("maven.modrinth:quark:$it")
+        localRuntime("maven.modrinth:quark:$it")
+        localRuntime("maven.modrinth:zeta:${dep("zeta")}")
+    }
+
     // Mixin Constraints
     compileOnly("com.moulberry:mixinconstraints:${dep("mixin_constraints")}")
     val mixinConstraints = implementation("com.moulberry:mixinconstraints") {

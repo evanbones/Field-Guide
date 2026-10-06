@@ -35,6 +35,7 @@
     "accessor.RenderTypeAccessor",
     "accessor.TextureBindingAccessor",
     "client.EntityRendererMixin",
+    "client.ForgottenClothingLayerMixin",
     "client.GameRendererMixin",
     "client.InventoryScreenMixin",
     "client.LevelRendererMixin",
