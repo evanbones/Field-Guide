@@ -165,7 +165,17 @@ public class ModRenderTypes {
         if (cache.containsKey(original)) {
             return cache.get(original);
         }
-        RenderType wrapped = hasScanAttributes(original) ? factory.apply(original) : null;
+        RenderType wrapped = null;
+        if (hasScanAttributes(original)) {
+            try {
+                wrapped = factory.apply(original);
+            } catch (Exception e) {
+                Constants.LOG.warn("Failed to build scan render type for {}", original, e);
+            }
+            if (wrapped == null) {
+                Constants.LOG.warn("Scan render type for {} is unavailable, skipping it in the scan overlay", original);
+            }
+        }
         cache.put(original, wrapped);
         return wrapped;
     }
@@ -196,68 +206,64 @@ public class ModRenderTypes {
             return null;
         }
 
-        try {
-            return cached(DEPTH_WRAP_CACHE, original, type -> {
-                RenderPipeline originalPipeline = type.pipeline();
-                RenderPipeline translucentPipeline = RenderTypes.translucentMovingBlock().pipeline();
+        return cached(DEPTH_WRAP_CACHE, original, type -> {
+            RenderPipeline originalPipeline = type.pipeline();
+            RenderPipeline translucentPipeline = RenderTypes.translucentMovingBlock().pipeline();
 
-                RenderPipeline.Builder builder = RenderPipeline.builder()
-                        .withLocation(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "scan_depth_wrap"))
-                        .withVertexShader(SCAN_SHADER_ID)
-                        .withFragmentShader(SCAN_SHADER_ID)
-                        //? if <26.2 {
-                        .withVertexFormat(originalPipeline.getVertexFormat(), originalPipeline.getVertexFormatMode())
-                        .withColorTargetState(translucentPipeline.getColorTargetState())
-                        .withCull(originalPipeline.isCull());
-                        //?} else if <26.3 {
-                        /^.withVertexBinding(0, originalPipeline.getVertexFormatBindings()[0])
-                        .withPrimitiveTopology(originalPipeline.getPrimitiveTopology())
-                        .withColorTargetState(translucentPipeline.getColorTargetState())
-                        .withCull(originalPipeline.isCull());
-                        ^///?} else {
-                        /^.withVertexBinding(0, originalPipeline.getVertexFormatBindings().getFirst())
-                        .withPrimitiveTopology(originalPipeline.getPrimitiveTopology())
-                        .withColorTargetState(translucentPipeline.getColorTargetStates().getFirst())
-                        .withCull(originalPipeline.isCull())
-                        .withPushConstantSize(originalPipeline.pushConstantSize());
-                        ^///?}
+            RenderPipeline.Builder builder = RenderPipeline.builder()
+                    .withLocation(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "scan_depth_wrap"))
+                    .withVertexShader(SCAN_SHADER_ID)
+                    .withFragmentShader(SCAN_SHADER_ID)
+                    //? if <26.2 {
+                    .withVertexFormat(originalPipeline.getVertexFormat(), originalPipeline.getVertexFormatMode())
+                    .withColorTargetState(translucentPipeline.getColorTargetState())
+                    .withCull(originalPipeline.isCull());
+                    //?} else if <26.3 {
+                    /^.withVertexBinding(0, originalPipeline.getVertexFormatBindings()[0])
+                    .withPrimitiveTopology(originalPipeline.getPrimitiveTopology())
+                    .withColorTargetState(translucentPipeline.getColorTargetState())
+                    .withCull(originalPipeline.isCull());
+                    ^///?} else {
+                    /^.withVertexBinding(0, originalPipeline.getVertexFormatBindings().getFirst())
+                    .withPrimitiveTopology(originalPipeline.getPrimitiveTopology())
+                    .withColorTargetState(translucentPipeline.getColorTargetStates().getFirst())
+                    .withCull(originalPipeline.isCull())
+                    .withPushConstantSize(originalPipeline.pushConstantSize());
+                    ^///?}
 
-                if (originalPipeline.getDepthStencilState() != null) {
-                    builder.withDepthStencilState(Optional.of(originalPipeline.getDepthStencilState()));
+            if (originalPipeline.getDepthStencilState() != null) {
+                builder.withDepthStencilState(Optional.of(originalPipeline.getDepthStencilState()));
+            }
+
+            //? if <26.2 {
+            for (String sampler : originalPipeline.getSamplers()) {
+                builder.withSampler(sampler);
+            }
+
+            for (RenderPipeline.UniformDescription uniform : originalPipeline.getUniforms()) {
+                if (uniform.textureFormat() != null) {
+                    builder.withUniform(uniform.name(), uniform.type(), uniform.textureFormat());
+                } else {
+                    builder.withUniform(uniform.name(), uniform.type());
                 }
+            //?} else {
+            /^for (BindGroupLayout layout : originalPipeline.getBindGroupLayouts()) {
+                builder.withBindGroupLayout(layout);
+            ^///?}
+            }
 
-                //? if <26.2 {
-                for (String sampler : originalPipeline.getSamplers()) {
-                    builder.withSampler(sampler);
-                }
+            RenderPipeline pipeline = builder.build();
+            if (!compiles(pipeline)) {
+                return null;
+            }
 
-                for (RenderPipeline.UniformDescription uniform : originalPipeline.getUniforms()) {
-                    if (uniform.textureFormat() != null) {
-                        builder.withUniform(uniform.name(), uniform.type(), uniform.textureFormat());
-                    } else {
-                        builder.withUniform(uniform.name(), uniform.type());
-                    }
-                //?} else {
-                /^for (BindGroupLayout layout : originalPipeline.getBindGroupLayouts()) {
-                    builder.withBindGroupLayout(layout);
-                ^///?}
-                }
-
-                RenderPipeline pipeline = builder.build();
-                if (!compiles(pipeline)) {
-                    return null;
-                }
-
-                RenderSetup setup = copyTextures(original, RenderSetup.builder(pipeline))
-                        //? if <26.3 {
-                        .setOutputTarget(type.outputTarget())
-                        //?}
-                        .createRenderSetup();
-                return RenderType.create(Constants.MOD_ID + "_scan_depth_wrap", setup);
-            });
-        } catch (Exception e) {
-            return null;
-        }
+            RenderSetup setup = copyTextures(original, RenderSetup.builder(pipeline))
+                    //? if <26.3 {
+                    .setOutputTarget(type.outputTarget())
+                    //?}
+                    .createRenderSetup();
+            return RenderType.create(Constants.MOD_ID + "_scan_depth_wrap", setup);
+        });
     }
 
     public static RenderType wrapForScan(RenderType original) {
@@ -265,67 +271,63 @@ public class ModRenderTypes {
             return null;
         }
 
-        try {
-            return cached(SCAN_WRAP_CACHE, original, type -> {
-                RenderPipeline originalPipeline = type.pipeline();
-                RenderPipeline translucentPipeline = RenderTypes.translucentMovingBlock().pipeline();
+        return cached(SCAN_WRAP_CACHE, original, type -> {
+            RenderPipeline originalPipeline = type.pipeline();
+            RenderPipeline translucentPipeline = RenderTypes.translucentMovingBlock().pipeline();
 
-                RenderPipeline.Builder builder = RenderPipeline.builder()
-                        .withLocation(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "scan_wrap"))
-                        .withVertexShader(SCAN_SHADER_ID)
-                        .withFragmentShader(SCAN_SHADER_ID)
-                        //? if <26.2 {
-                        .withVertexFormat(originalPipeline.getVertexFormat(), originalPipeline.getVertexFormatMode())
-                        .withColorTargetState(translucentPipeline.getColorTargetState())
-                        .withCull(originalPipeline.isCull());
-                        //?} else if <26.3 {
-                        /^.withVertexBinding(0, originalPipeline.getVertexFormatBindings()[0])
-                        .withPrimitiveTopology(originalPipeline.getPrimitiveTopology())
-                        .withColorTargetState(translucentPipeline.getColorTargetState())
-                        .withCull(originalPipeline.isCull());
-                        ^///?} else {
-                        /^.withVertexBinding(0, originalPipeline.getVertexFormatBindings().getFirst())
-                        .withPrimitiveTopology(originalPipeline.getPrimitiveTopology())
-                        .withColorTargetState(translucentPipeline.getColorTargetStates().getFirst())
-                        .withCull(originalPipeline.isCull())
-                        .withPushConstantSize(originalPipeline.pushConstantSize());
-                        ^///?}
+            RenderPipeline.Builder builder = RenderPipeline.builder()
+                    .withLocation(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "scan_wrap"))
+                    .withVertexShader(SCAN_SHADER_ID)
+                    .withFragmentShader(SCAN_SHADER_ID)
+                    //? if <26.2 {
+                    .withVertexFormat(originalPipeline.getVertexFormat(), originalPipeline.getVertexFormatMode())
+                    .withColorTargetState(translucentPipeline.getColorTargetState())
+                    .withCull(originalPipeline.isCull());
+                    //?} else if <26.3 {
+                    /^.withVertexBinding(0, originalPipeline.getVertexFormatBindings()[0])
+                    .withPrimitiveTopology(originalPipeline.getPrimitiveTopology())
+                    .withColorTargetState(translucentPipeline.getColorTargetState())
+                    .withCull(originalPipeline.isCull());
+                    ^///?} else {
+                    /^.withVertexBinding(0, originalPipeline.getVertexFormatBindings().getFirst())
+                    .withPrimitiveTopology(originalPipeline.getPrimitiveTopology())
+                    .withColorTargetState(translucentPipeline.getColorTargetStates().getFirst())
+                    .withCull(originalPipeline.isCull())
+                    .withPushConstantSize(originalPipeline.pushConstantSize());
+                    ^///?}
 
-                builder.withDepthStencilState(Optional.of(new DepthStencilState(CompareOp.EQUAL, false)));
+            builder.withDepthStencilState(Optional.of(new DepthStencilState(CompareOp.EQUAL, false)));
 
-                //? if <26.2 {
-                for (String sampler : originalPipeline.getSamplers()) {
-                    builder.withSampler(sampler);
+            //? if <26.2 {
+            for (String sampler : originalPipeline.getSamplers()) {
+                builder.withSampler(sampler);
+            }
+
+            for (RenderPipeline.UniformDescription uniform : originalPipeline.getUniforms()) {
+                if (uniform.textureFormat() != null) {
+                    builder.withUniform(uniform.name(), uniform.type(), uniform.textureFormat());
+                } else {
+                    builder.withUniform(uniform.name(), uniform.type());
                 }
+            //?} else {
+            /^for (BindGroupLayout layout : originalPipeline.getBindGroupLayouts()) {
+                builder.withBindGroupLayout(layout);
+            ^///?}
+            }
 
-                for (RenderPipeline.UniformDescription uniform : originalPipeline.getUniforms()) {
-                    if (uniform.textureFormat() != null) {
-                        builder.withUniform(uniform.name(), uniform.type(), uniform.textureFormat());
-                    } else {
-                        builder.withUniform(uniform.name(), uniform.type());
-                    }
-                //?} else {
-                /^for (BindGroupLayout layout : originalPipeline.getBindGroupLayouts()) {
-                    builder.withBindGroupLayout(layout);
-                ^///?}
-                }
+            RenderPipeline pipeline = builder.build();
+            if (!compiles(pipeline)) {
+                return null;
+            }
 
-                RenderPipeline pipeline = builder.build();
-                if (!compiles(pipeline)) {
-                    return null;
-                }
-
-                RenderSetup setup = copyTextures(original, RenderSetup.builder(pipeline))
-                        //? if <26.3 {
-                        .setOutputTarget(OutputTarget.ITEM_ENTITY_TARGET)
-                        //?}
-                        .sortOnUpload()
-                        .createRenderSetup();
-                return RenderType.create(Constants.MOD_ID + "_scan_wrap", setup);
-            });
-        } catch (Exception e) {
-            return null;
-        }
+            RenderSetup setup = copyTextures(original, RenderSetup.builder(pipeline))
+                    //? if <26.3 {
+                    .setOutputTarget(OutputTarget.ITEM_ENTITY_TARGET)
+                    //?}
+                    .sortOnUpload()
+                    .createRenderSetup();
+            return RenderType.create(Constants.MOD_ID + "_scan_wrap", setup);
+        });
     }
 }
 *///?}
