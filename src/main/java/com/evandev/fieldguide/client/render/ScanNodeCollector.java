@@ -110,29 +110,41 @@ public record ScanNodeCollector(SubmitNodeCollector delegate, float r, float g, 
 
     @Override
     public void submitBlockModel(@NonNull PoseStack poseStack, @NonNull RenderType renderType, @NonNull List<BlockStateModelPart> parts, int @NonNull [] tintLayers, int lightCoords, int overlayCoords, int outlineColor) {
-        delegate.submitBlockModel(poseStack, wrap(renderType), cull(parts), tintLayers, scanLight(), overlayCoords, outlineColor);
+        RenderType wrapped = wrap(renderType);
+        if (wrapped == null) return;
+        delegate.submitBlockModel(poseStack, wrapped, cull(parts), tintLayers, scanLight(), overlayCoords, outlineColor);
     }
 
     @Override
     //? if <26.2 {
     public <S> void submitModel(@NonNull Model<? super S> model, S state, @NonNull PoseStack poseStack, @NonNull RenderType renderType, int lightCoords, int overlayCoords, int tintedColor, TextureAtlasSprite sprite, int outlineColor, ModelFeatureRenderer.CrumblingOverlay crumblingOverlay) {
-        delegate.submitModel(model, state, poseStack, wrap(renderType), scanLight(), overlayCoords, tintedColor, sprite, outlineColor, crumblingOverlay);
+        RenderType wrapped = wrap(renderType);
+        if (wrapped == null) return;
+        delegate.submitModel(model, state, poseStack, wrapped, scanLight(), overlayCoords, tintedColor, sprite, outlineColor, crumblingOverlay);
     }
 
     @Override
     public void submitModelPart(@NonNull ModelPart modelPart, @NonNull PoseStack poseStack, @NonNull RenderType renderType, int lightCoords, int overlayCoords, TextureAtlasSprite sprite, boolean sheeted, boolean hasFoil, int tintedColor, ModelFeatureRenderer.CrumblingOverlay crumblingOverlay, int outlineColor) {
-        delegate.submitModelPart(modelPart, poseStack, wrap(renderType), scanLight(), overlayCoords, sprite, sheeted, false, tintedColor, crumblingOverlay, outlineColor);
+        RenderType wrapped = wrap(renderType);
+        if (wrapped == null) return;
+        delegate.submitModelPart(modelPart, poseStack, wrapped, scanLight(), overlayCoords, sprite, sheeted, false, tintedColor, crumblingOverlay, outlineColor);
     //?} else if <26.3 {
     /^public <S> void submitModel(@NonNull Model<? super S> model, S state, @NonNull PoseStack poseStack, @NonNull RenderType renderType, int lightCoords, int overlayCoords, int tintedColor, TextureAtlasSprite sprite, int outlineColor, ModelFeatureRenderer.CrumblingOverlay crumblingOverlay) {
-        delegate.submitModel(model, state, poseStack, wrap(renderType), scanLight(), overlayCoords, tintedColor, sprite, outlineColor, crumblingOverlay);
+        RenderType wrapped = wrap(renderType);
+        if (wrapped == null) return;
+        delegate.submitModel(model, state, poseStack, wrapped, scanLight(), overlayCoords, tintedColor, sprite, outlineColor, crumblingOverlay);
     }
 
     @Override
     public void submitModelPart(@NonNull ModelPart modelPart, @NonNull PoseStack poseStack, @NonNull RenderType renderType, int lightCoords, int overlayCoords, TextureAtlasSprite sprite, int tintedColor, ModelFeatureRenderer.CrumblingOverlay crumblingOverlay, int outlineColor) {
-        delegate.submitModelPart(modelPart, poseStack, wrap(renderType), scanLight(), overlayCoords, sprite, tintedColor, crumblingOverlay, outlineColor);
+        RenderType wrapped = wrap(renderType);
+        if (wrapped == null) return;
+        delegate.submitModelPart(modelPart, poseStack, wrapped, scanLight(), overlayCoords, sprite, tintedColor, crumblingOverlay, outlineColor);
     ^///?} else {
     /^public <S> void submitModel(@NonNull Model<? super S> model, S state, @NonNull PoseStack poseStack, @NonNull RenderType renderType, int lightCoords, int overlayCoords, int tintedColor, UvMapping uvMapping, int outlineColor) {
-        delegate.submitModel(model, state, poseStack, wrap(renderType), scanLight(), overlayCoords, tintedColor, uvMapping, outlineColor);
+        RenderType wrapped = wrap(renderType);
+        if (wrapped == null) return;
+        delegate.submitModel(model, state, poseStack, wrapped, scanLight(), overlayCoords, tintedColor, uvMapping, outlineColor);
     ^///?}
     }
 
@@ -152,7 +164,10 @@ public record ScanNodeCollector(SubmitNodeCollector delegate, float r, float g, 
         //?} else {
         /^for (BakedQuad quad : quads.all()) {
         ^///?}
-            byType.computeIfAbsent(wrap(quad.materialInfo().itemRenderType()), k -> new ArrayList<>()).add(quad);
+            RenderType wrapped = wrap(quad.materialInfo().itemRenderType());
+            if (wrapped != null) {
+                byType.computeIfAbsent(wrapped, k -> new ArrayList<>()).add(quad);
+            }
         }
 
         int light = scanLight();
@@ -228,7 +243,10 @@ public record ScanNodeCollector(SubmitNodeCollector delegate, float r, float g, 
 
     @Override
     public void submitCustomGeometry(@NonNull PoseStack poseStack, @NonNull RenderType renderType, @NonNull CustomGeometryRenderer customGeometryRenderer) {
-        delegate.submitCustomGeometry(poseStack, wrap(renderType), customGeometryRenderer);
+        RenderType wrapped = wrap(renderType);
+        if (wrapped != null) {
+            delegate.submitCustomGeometry(poseStack, wrapped, customGeometryRenderer);
+        }
     }
 
     @Override

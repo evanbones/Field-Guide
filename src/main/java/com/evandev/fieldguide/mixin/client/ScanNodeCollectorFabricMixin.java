@@ -93,6 +93,7 @@ public abstract class ScanNodeCollectorFabricMixin implements FabricOrderedSubmi
                         temp.fromBakedQuad(quad);
                         RenderType original = renderTypeFunction.apply(temp.chunkLayer());
                         RenderType wrapped = isDepth() ? ModRenderTypes.wrapForDepth(original) : ModRenderTypes.wrapForScan(original);
+                        if (wrapped == null) continue;
 
                         MutableMesh targetMesh = meshMap.computeIfAbsent(wrapped, k -> Renderer.get().mutableMesh());
                         QuadEmitter emitter = targetMesh.emitter();
@@ -115,6 +116,7 @@ public abstract class ScanNodeCollectorFabricMixin implements FabricOrderedSubmi
             mesh.forEach(quad -> {
                 RenderType original = renderTypeFunction.apply(quad.chunkLayer());
                 RenderType wrapped = isDepth() ? ModRenderTypes.wrapForDepth(original) : ModRenderTypes.wrapForScan(original);
+                if (wrapped == null) return;
 
                 MutableMesh targetMesh = meshMap.computeIfAbsent(wrapped, k -> Renderer.get().mutableMesh());
                 QuadEmitter emitter = targetMesh.emitter();

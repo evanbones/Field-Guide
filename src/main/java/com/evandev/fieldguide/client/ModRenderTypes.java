@@ -115,8 +115,12 @@ import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+
+import com.mojang.blaze3d.systems.RenderSystem;
 
 //? if <26.3 {
 import com.mojang.blaze3d.pipeline.DepthStencilState;
@@ -155,13 +159,45 @@ public class ModRenderTypes {
         return builder;
     }
 
+    private static final List<String> SCAN_ATTRIBUTES = List.of("Position", "Color", "UV0", "UV2");
+
+    private static RenderType cached(Map<RenderType, RenderType> cache, RenderType original, Function<RenderType, RenderType> factory) {
+        if (cache.containsKey(original)) {
+            return cache.get(original);
+        }
+        RenderType wrapped = hasScanAttributes(original) ? factory.apply(original) : null;
+        cache.put(original, wrapped);
+        return wrapped;
+    }
+
+    private static boolean compiles(RenderPipeline pipeline) {
+        //? if <26.3 {
+        return RenderSystem.getDevice().precompilePipeline(pipeline).isValid();
+        //?} else {
+        /^return RenderSystem.getCompiledPipelineNullable(pipeline) != null;
+        ^///?}
+    }
+
+    private static boolean hasScanAttributes(RenderType type) {
+        //? if <26.2 {
+        List<String> attributes = type.pipeline().getVertexFormat().getElementAttributeNames();
+        return attributes.containsAll(SCAN_ATTRIBUTES);
+        //?} else if <26.3 {
+        /^var format = type.pipeline().getVertexFormatBindings()[0];
+        return SCAN_ATTRIBUTES.stream().allMatch(format::contains);
+        ^///?} else {
+        /^var format = type.pipeline().getVertexFormatBindings().getFirst();
+        return SCAN_ATTRIBUTES.stream().allMatch(format::contains);
+        ^///?}
+    }
+
     public static RenderType wrapForDepth(RenderType original) {
         if (original == null) {
             return null;
         }
 
         try {
-            return DEPTH_WRAP_CACHE.computeIfAbsent(original, type -> {
+            return cached(DEPTH_WRAP_CACHE, original, type -> {
                 RenderPipeline originalPipeline = type.pipeline();
                 RenderPipeline translucentPipeline = RenderTypes.translucentMovingBlock().pipeline();
 
@@ -207,7 +243,12 @@ public class ModRenderTypes {
                 ^///?}
                 }
 
-                RenderSetup setup = copyTextures(original, RenderSetup.builder(builder.build()))
+                RenderPipeline pipeline = builder.build();
+                if (!compiles(pipeline)) {
+                    return null;
+                }
+
+                RenderSetup setup = copyTextures(original, RenderSetup.builder(pipeline))
                         //? if <26.3 {
                         .setOutputTarget(type.outputTarget())
                         //?}
@@ -215,7 +256,7 @@ public class ModRenderTypes {
                 return RenderType.create(Constants.MOD_ID + "_scan_depth_wrap", setup);
             });
         } catch (Exception e) {
-            return original;
+            return null;
         }
     }
 
@@ -225,7 +266,7 @@ public class ModRenderTypes {
         }
 
         try {
-            return SCAN_WRAP_CACHE.computeIfAbsent(original, type -> {
+            return cached(SCAN_WRAP_CACHE, original, type -> {
                 RenderPipeline originalPipeline = type.pipeline();
                 RenderPipeline translucentPipeline = RenderTypes.translucentMovingBlock().pipeline();
 
@@ -269,7 +310,12 @@ public class ModRenderTypes {
                 ^///?}
                 }
 
-                RenderSetup setup = copyTextures(original, RenderSetup.builder(builder.build()))
+                RenderPipeline pipeline = builder.build();
+                if (!compiles(pipeline)) {
+                    return null;
+                }
+
+                RenderSetup setup = copyTextures(original, RenderSetup.builder(pipeline))
                         //? if <26.3 {
                         .setOutputTarget(OutputTarget.ITEM_ENTITY_TARGET)
                         //?}
@@ -278,7 +324,7 @@ public class ModRenderTypes {
                 return RenderType.create(Constants.MOD_ID + "_scan_wrap", setup);
             });
         } catch (Exception e) {
-            return original;
+            return null;
         }
     }
 }
