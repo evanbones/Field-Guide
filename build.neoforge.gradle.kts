@@ -137,7 +137,10 @@ dependencies {
     compileOnly("maven.modrinth:reliable-remover:${dep("reliable_remover")}")
 
     // Scholar
-    optDep("scholar")?.let { compileOnly("maven.modrinth:scholar:$it") }
+    optDep("scholar")?.let {
+        compileOnly("maven.modrinth:scholar:$it")
+        localRuntime("maven.modrinth:scholar:$it")
+    }
 
     // Exposure
     optDep("exposure")?.let { compileOnly("maven.modrinth:exposure:$it") }

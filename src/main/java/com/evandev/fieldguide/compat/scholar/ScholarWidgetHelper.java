@@ -16,6 +16,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
@@ -35,16 +36,16 @@ import net.minecraft.client.input.MouseButtonEvent;
 *///?}
 
 public class ScholarWidgetHelper {
-    public static AbstractWidget createTextArea(Font font, int x, int y, int width, int height, int maxVisibleLines, int lineHeight, int textColor, boolean scrollable, int maxCharacters, String initialText, Consumer<String> onChanged, Consumer<String> onSpillover) {
-        ScholarTextBox textBox = new ScholarTextBox(font, x, y, width, height, scrollable, maxVisibleLines, initialText, onChanged);
+    public static AbstractWidget createTextArea(Font font, int x, int y, int width, int height, int maxVisibleLines, int lineHeight, int textColor, boolean scrollable, int maxCharacters, String initialText, Consumer<String> onChanged) {
+        ScholarTextBox textBox = new ScholarTextBox(font, x, y, width, height, scrollable, false, maxVisibleLines, initialText, onChanged);
         textBox.setFontColor(textColor | 0xFF000000);
         textBox.setFontUnfocusedColor(textColor | 0xFF000000);
 
         Predicate<String> validator = str -> {
             if (str.length() > maxCharacters) return false;
             if (!scrollable) {
-                int h = font.wordWrapHeight(FormattedText.of(str), width) + (str.endsWith("\n") ? font.lineHeight : 0);
-                return h <= height;
+                int lines = font.getSplitter().splitLines(str, width, Style.EMPTY).size() + (str.endsWith("\n") ? 1 : 0);
+                return lines <= textBox.maxVisibleLines;
             }
             return true;
         };
@@ -54,7 +55,7 @@ public class ScholarWidgetHelper {
     }
 
     public static AbstractWidget createTextField(Font font, int x, int y, int width, int height, String initialText, int textColor, int maxTextWidth, int maxCharacters, Consumer<String> onChanged, boolean centered) {
-        ScholarTextBox textBox = new ScholarTextBox(font, x, y, width, height, false, 1, initialText, onChanged);
+        ScholarTextBox textBox = new ScholarTextBox(font, x, y, width, height, false, true, 1, initialText, onChanged);
         textBox.setFontColor(textColor | 0xFF000000);
         textBox.setFontUnfocusedColor(textColor | 0xFF000000);
         if (centered) textBox.setHorizontalAlignment(HorizontalAlignment.CENTER);
@@ -70,13 +71,15 @@ public class ScholarWidgetHelper {
 
     private static class ScholarTextBox extends TextBox {
         private final boolean scrollable;
+        private final boolean singleLine;
         private final int maxVisibleLines;
         private int scrollOffset = 0;
         private boolean isDraggingScrollbar = false;
 
-        public ScholarTextBox(Font font, int x, int y, int width, int height, boolean scrollable, int maxVisibleLines, String initialText, Consumer<String> onChanged) {
+        public ScholarTextBox(Font font, int x, int y, int width, int height, boolean scrollable, boolean singleLine, int maxVisibleLines, String initialText, Consumer<String> onChanged) {
             super(font, x, y, width, height);
             this.scrollable = scrollable;
+            this.singleLine = singleLine;
             this.maxVisibleLines = maxVisibleLines > 0 ? maxVisibleLines : height / font.lineHeight;
             this.setText(FormattedString.parse(initialText));
             this.setOnTextChanged(formattedString -> onChanged.accept(formattedString.toString()));
@@ -298,7 +301,7 @@ public class ScholarWidgetHelper {
         *///?}
             FormattedStringDisplayCache displayCache = this.getDisplayCache();
 
-            if (!scrollable && !this.isFocused() && font.width(this.getEditor().getString()) > this.width) {
+            if (singleLine && !this.isFocused() && font.width(this.getEditor().getString()) > this.width) {
                 renderEllipsized(guiGraphics);
                 return;
             }

@@ -100,7 +100,10 @@ dependencies {
     modCompileOnly("maven.modrinth:reliable-remover:${dep("reliable_remover")}")
 
     // Scholar
-    optDep("scholar")?.let { modCompileOnly("maven.modrinth:scholar:$it") }
+    optDep("scholar")?.let {
+        modCompileOnly("maven.modrinth:scholar:$it")
+        modLocalRuntime("maven.modrinth:scholar:$it")
+    }
 
     // Exposure
     optDep("exposure")?.let {

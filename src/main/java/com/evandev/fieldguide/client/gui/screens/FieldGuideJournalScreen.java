@@ -74,7 +74,7 @@ public class FieldGuideJournalScreen extends BookScreen {
             AbstractWidget leftContentWidget = ScholarCompat.createTextArea(this.font, textXLeft, textY, textAreaWidth, textAreaHeight, 12, 9, ClientConfig.get().getTextColorInt(), false, FieldGuideLimits.MAX_JOURNAL_PAGE_CONTENT_LENGTH, lPage.content, text -> {
                 lPage.content = text;
                 manager.saveJournal();
-            }, spill -> handleSpillover(spill, currentSpread * 2));
+            });
             this.addRenderableWidget(leftTitleWidget);
             this.addRenderableWidget(leftContentWidget);
         }
@@ -90,7 +90,7 @@ public class FieldGuideJournalScreen extends BookScreen {
         AbstractWidget rightContentWidget = ScholarCompat.createTextArea(this.font, textXRight, textY, textAreaWidth, textAreaHeight, 12, 9, ClientConfig.get().getTextColorInt(), false, FieldGuideLimits.MAX_JOURNAL_PAGE_CONTENT_LENGTH, rPage.content, text -> {
             rPage.content = text;
             manager.saveJournal();
-        }, spill -> handleSpillover(spill, (currentSpread == 0 ? 0 : currentSpread * 2) + 1));
+        });
 
         this.addRenderableWidget(rightTitleWidget);
         this.addRenderableWidget(rightContentWidget);
@@ -135,20 +135,6 @@ public class FieldGuideJournalScreen extends BookScreen {
     private void changeSpread(int direction) {
         cleanupEmptyPages();
         currentSpread += direction;
-        Minecraft.getInstance().setScreen(new FieldGuideJournalScreen(this.getSelectedCategory(), currentSpread));
-    }
-
-    private void handleSpillover(String spill, int targetPageIndex) {
-        if (targetPageIndex >= FieldGuideLimits.MAX_JOURNAL_PAGES) return;
-        ClientFieldGuideManager manager = ClientFieldGuideManager.getInstance();
-        List<JournalPage> pages = manager.getJournalPages();
-        while (pages.size() <= targetPageIndex) {
-            pages.add(new JournalPage("", getDefaultJournalText(), System.currentTimeMillis()));
-        }
-        JournalPage targetPage = pages.get(targetPageIndex);
-        targetPage.content = spill + targetPage.content;
-        manager.saveJournal();
-
         Minecraft.getInstance().setScreen(new FieldGuideJournalScreen(this.getSelectedCategory(), currentSpread));
     }
 

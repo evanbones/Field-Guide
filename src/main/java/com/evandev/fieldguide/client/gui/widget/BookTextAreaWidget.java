@@ -10,8 +10,9 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -40,7 +41,6 @@ public class BookTextAreaWidget extends AbstractWidget {
     private int scrollOffset = 0;
     private boolean isDraggingScrollbar = false;
     private boolean editable = true;
-    private Consumer<String> onSpillover;
 
     public BookTextAreaWidget(Font font, int x, int y, int width, int height, int maxVisibleLines, int textColor, boolean scrollable, int maxCharacters, String initialText, Consumer<String> onChanged) {
         this(font, x, y, width, height, maxVisibleLines, 9, textColor, scrollable, maxCharacters, initialText, onChanged);
@@ -59,10 +59,6 @@ public class BookTextAreaWidget extends AbstractWidget {
         this.onChanged = onChanged;
         this.cursorPos = this.text.length();
         this.selectionPos = this.cursorPos;
-    }
-
-    public void setOnSpillover(Consumer<String> onSpillover) {
-        this.onSpillover = onSpillover;
     }
 
     public String getText() {
@@ -101,32 +97,20 @@ public class BookTextAreaWidget extends AbstractWidget {
 
     private void computeLineStarts() {
         lineStarts.clear();
-        lineStarts.add(0);
-        int lineStart = 0;
-        int lastSpace = -1;
+        lineStarts.addAll(computeLineStarts(text));
+    }
 
-        for (int i = 0; i < text.length(); i++) {
-            char c = text.charAt(i);
-            if (c == '\n') {
-                lineStart = i + 1;
-                lastSpace = -1;
-                lineStarts.add(lineStart);
-                continue;
-            }
-            if (c == ' ') {
-                lastSpace = i;
-            }
-            String currentSub = text.substring(lineStart, i + 1);
-            if (this.font.width(currentSub) > this.width) {
-                if (lastSpace != -1 && lastSpace >= lineStart) {
-                    lineStart = lastSpace + 1;
-                } else {
-                    lineStart = i;
-                }
-                lastSpace = -1;
-                lineStarts.add(lineStart);
-            }
-        }
+    private List<Integer> computeLineStarts(String text) {
+        List<Integer> lineStarts = new ArrayList<>();
+        this.font.getSplitter().splitLines(text, this.width, Style.EMPTY, true, (style, start, end) -> lineStarts.add(start));
+        if (lineStarts.isEmpty()) lineStarts.add(0);
+        else if (text.endsWith("\n")) lineStarts.add(text.length());
+        return lineStarts;
+    }
+
+    private String getLineText(int line) {
+        int end = line + 1 < lineStarts.size() ? lineStarts.get(line + 1) : text.length();
+        return StringUtils.stripEnd(text.substring(lineStarts.get(line), end), " \n");
     }
 
     private void updateText(String proposedText, int newCursorPos) {
@@ -145,44 +129,13 @@ public class BookTextAreaWidget extends AbstractWidget {
             return;
         }
 
-        if (this.font.split(Component.literal(proposedText), this.width).size() <= maxVisibleLines) {
+        if (computeLineStarts(proposedText).size() <= maxVisibleLines) {
             this.text = proposedText;
             this.computeLineStarts();
             this.cursorPos = newCursorPos;
             this.selectionPos = this.cursorPos;
             this.onChanged.accept(this.text);
-        } else if (onSpillover != null) {
-            int splitIndex = getSplitIndexForMaxLines(proposedText);
-            this.text = proposedText.substring(0, splitIndex);
-            this.computeLineStarts();
-            String spill = proposedText.substring(splitIndex);
-
-            boolean cursorMovedToSpill = newCursorPos > splitIndex;
-            if (!cursorMovedToSpill) {
-                this.cursorPos = newCursorPos;
-                this.selectionPos = this.cursorPos;
-            }
-            this.onChanged.accept(this.text);
-
-            if (cursorMovedToSpill) {
-                this.setFocused(false);
-            }
-            onSpillover.accept(spill);
         }
-    }
-
-    private int getSplitIndexForMaxLines(String text) {
-        int low = 0, high = text.length(), best = 0;
-        while (low <= high) {
-            int mid = (low + high) / 2;
-            if (this.font.split(Component.literal(text.substring(0, mid)), this.width).size() <= maxVisibleLines) {
-                best = mid;
-                low = mid + 1;
-            } else {
-                high = mid - 1;
-            }
-        }
-        return best;
     }
 
     @Override
@@ -517,14 +470,11 @@ public class BookTextAreaWidget extends AbstractWidget {
     //?} else {
     /*protected void extractWidgetRenderState(@NonNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
     *///?}
-        List<FormattedCharSequence> lines = this.font.split(Component.literal(text), this.width);
         int totalLines = lineStarts.size();
         scrollOffset = Math.max(0, Math.min(scrollOffset, Math.max(0, totalLines - maxVisibleLines)));
 
         for (int i = 0; i < maxVisibleLines && (i + scrollOffset) < totalLines; i++) {
-            if (i + scrollOffset < lines.size()) {
-                guiGraphics.drawString(this.font, lines.get(i + scrollOffset), this.getX(), this.getY() + i * this.lineHeight, textColor, false);
-            }
+            guiGraphics.drawString(this.font, getLineText(i + scrollOffset), this.getX(), this.getY() + i * this.lineHeight, textColor, false);
         }
 
         if (this.isFocused()) {
@@ -538,7 +488,7 @@ public class BookTextAreaWidget extends AbstractWidget {
                     if (scrollable && (line < scrollOffset || line >= scrollOffset + maxVisibleLines)) continue;
                     int visibleLine = line - scrollOffset;
                     int lineStartX = (line == startCoords[2]) ? startCoords[0] : this.getX();
-                    int lineEndX = (line == endCoords[2]) ? endCoords[0] : this.getX() + (line < lines.size() ? this.font.width(lines.get(line)) : 0);
+                    int lineEndX = (line == endCoords[2]) ? endCoords[0] : this.getX() + this.font.width(getLineText(line));
                     guiGraphics.fill(lineStartX, this.getY() + visibleLine * this.lineHeight, lineEndX, this.getY() + (visibleLine + 1) * this.lineHeight, 0x550000FF);
                 }
             }

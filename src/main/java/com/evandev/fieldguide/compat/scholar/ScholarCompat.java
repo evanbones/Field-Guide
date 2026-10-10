@@ -10,20 +10,14 @@ import java.util.function.Consumer;
 
 public class ScholarCompat {
     public static AbstractWidget createTextArea(Font font, int x, int y, int width, int height, int maxVisibleLines, int textColor, boolean scrollable, int maxCharacters, String initialText, Consumer<String> onChanged) {
-        return createTextArea(font, x, y, width, height, maxVisibleLines, 9, textColor, scrollable, maxCharacters, initialText, onChanged, null);
+        return createTextArea(font, x, y, width, height, maxVisibleLines, 9, textColor, scrollable, maxCharacters, initialText, onChanged);
     }
 
     public static AbstractWidget createTextArea(Font font, int x, int y, int width, int height, int maxVisibleLines, int lineHeight, int textColor, boolean scrollable, int maxCharacters, String initialText, Consumer<String> onChanged) {
-        return createTextArea(font, x, y, width, height, maxVisibleLines, lineHeight, textColor, scrollable, maxCharacters, initialText, onChanged, null);
-    }
-
-    public static AbstractWidget createTextArea(Font font, int x, int y, int width, int height, int maxVisibleLines, int lineHeight, int textColor, boolean scrollable, int maxCharacters, String initialText, Consumer<String> onChanged, Consumer<String> onSpillover) {
         if (Services.PLATFORM.isModLoaded("scholar")) {
-            return ScholarWidgetHelper.createTextArea(font, x, y, width, height, maxVisibleLines, lineHeight, textColor, scrollable, maxCharacters, initialText, onChanged, onSpillover);
+            return ScholarWidgetHelper.createTextArea(font, x, y, width, height, maxVisibleLines, lineHeight, textColor, scrollable, maxCharacters, initialText, onChanged);
         }
-        BookTextAreaWidget widget = new BookTextAreaWidget(font, x, y, width, height, maxVisibleLines, lineHeight, textColor, scrollable, maxCharacters, initialText, onChanged);
-        if (onSpillover != null) widget.setOnSpillover(onSpillover);
-        return widget;
+        return new BookTextAreaWidget(font, x, y, width, height, maxVisibleLines, lineHeight, textColor, scrollable, maxCharacters, initialText, onChanged);
     }
 
     public static AbstractWidget createTextField(Font font, int x, int y, int width, int height, String initialText, int textColor, int maxTextWidth, int maxCharacters, Consumer<String> onChanged, boolean centered) {
