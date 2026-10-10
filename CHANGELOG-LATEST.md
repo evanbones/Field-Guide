@@ -1,7 +1,4 @@
-### Changed
-
-- Improved text box handling.
-
 ### Fixed
 
-- Fixed text in text boxes getting cut off.
+- Fixed grouping by biome not working properly.
+- Performance improvements.

@@ -1,8 +1,10 @@
 package com.evandev.fieldguide.client.search;
 
+import com.evandev.fieldguide.Constants;
 import com.evandev.fieldguide.api.seasons.Season;
 import com.evandev.fieldguide.api.seasons.SeasonsAPI;
 import com.evandev.fieldguide.client.ClientFieldGuideManager;
+import com.evandev.fieldguide.client.manager.ClientCategoryManager;
 import com.evandev.fieldguide.client.manager.ClientLootManager;
 import com.evandev.fieldguide.compat.cobblemon.ClientFieldGuideCobblemonCompat;
 import com.evandev.fieldguide.entry.EntryResolver;
@@ -10,6 +12,7 @@ import com.evandev.fieldguide.platform.Services;
 import com.evandev.fieldguide.util.BiomeSpawns;
 import com.evandev.fieldguide.util.RegistryCompat;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
@@ -18,17 +21,20 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
 public class SearchManager {
 
-    public static List<Object> groupByQueries(List<Object> entries, List<String> queries) {
+    private static final ResourceLocation SEARCH_SCOPE = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "search_scope");
+
+    public static List<Object> groupByQueries(List<Object> entries, List<String> queries, ResourceLocation categoryId) {
         List<Object> remainingEntries = new ArrayList<>(entries);
         List<Object> groupedResults = new ArrayList<>(entries.size());
 
         for (String query : queries) {
-            List<Object> results = getMatches(query, remainingEntries);
+            List<Object> results = getMatches(query, remainingEntries, categoryId);
 
             groupedResults.addAll(results);
 
@@ -45,7 +51,7 @@ public class SearchManager {
     }
 
     public static List<Object> searchEntries(String query, List<Object> entries) {
-        List<Object> rawMatches = getMatches(query, entries);
+        List<Object> rawMatches = getMatches(query, entries, null);
         List<Object> visibleResults = new ArrayList<>();
 
         for (Object match : rawMatches) {
@@ -57,7 +63,7 @@ public class SearchManager {
         return visibleResults;
     }
 
-    private static List<Object> getMatches(String query, List<Object> entries) {
+    private static List<Object> getMatches(String query, List<Object> entries, @Nullable ResourceLocation categoryId) {
         String processedQuery = query.toLowerCase(Locale.ROOT).trim();
         List<Object> results = new ArrayList<>();
         if (processedQuery.isEmpty()) return results;
@@ -70,7 +76,7 @@ public class SearchManager {
 
         if (processedQuery.startsWith("#")) return matchByTag(processedQuery.substring(1), entries, exactMatch);
         if (processedQuery.startsWith("^")) return matchByDrop(processedQuery.substring(1), entries, exactMatch);
-        if (processedQuery.startsWith("!")) return matchByBiome(processedQuery.substring(1), entries, exactMatch);
+        if (processedQuery.startsWith("!")) return matchByBiome(processedQuery.substring(1), entries, exactMatch, categoryId);
         if (processedQuery.startsWith("@")) return matchByModId(processedQuery.substring(1), entries, exactMatch);
         if (processedQuery.startsWith("$")) return matchBySeason(processedQuery.substring(1), entries, exactMatch);
 
@@ -148,103 +154,83 @@ public class SearchManager {
         return results;
     }
 
-    private static List<Object> matchByBiome(String biomeQuery, List<Object> entries, boolean exactMatch) {
-        List<Object> results = new ArrayList<>();
-        if (biomeQuery.isEmpty()) return results;
+    private static List<Object> matchByBiome(String biomeQuery, List<Object> entries, boolean exactMatch, @Nullable ResourceLocation categoryId) {
+        if (biomeQuery.isEmpty()) return new ArrayList<>();
+        Set<Object> results = new LinkedHashSet<>();
+        ClientCategoryManager categoryManager = ClientCategoryManager.getInstance();
 
         var connection = Minecraft.getInstance().getConnection();
         if (connection != null) {
             var biomeRegistry = RegistryCompat.registry(connection.registryAccess(), Registries.BIOME);
+            Map<ResourceLocation, Holder<Biome>> matchedBiomes = new LinkedHashMap<>();
 
             //? if <26.1 {
             for (var biomeEntry : biomeRegistry.entrySet()) {
-                if (matchLocation(biomeEntry.getKey().location(), biomeQuery, exactMatch)) {
-            //?} else {
-            /*biomeRegistry.listElements().forEach(biomeEntry -> {
-                if (matchLocation(biomeEntry.key().identifier(), biomeQuery, exactMatch)) {
-            *///?}
-                    try {
-                        //? if <26.1 {
-                        Biome biome = biomeEntry.getValue();
-                        //?} else {
-                        /*Biome biome = biomeEntry.value();
-                        *///?}
-
-                        for (MobCategory cat : MobCategory.values()) {
-                            for (EntityType<?> spawnType : BiomeSpawns.types(biome, cat)) {
-
-                                Object entry = ClientFieldGuideManager.getInstance().getEntryForTarget(spawnType);
-                                ResourceLocation categoryId = null;
-
-                                if (entry != null) {
-                                    var category = ClientFieldGuideManager.getInstance().getCategoryForEntry(entry);
-                                    if (category != null) {
-                                        categoryId = category.getId();
-                                    }
-                                }
-
-                                if (EntryResolver.isValidEntity(spawnType, categoryId)) {
-                                    if (entry != null && !results.contains(entry) && entries.contains(entry)) {
-                                        results.add(entry);
-                                    }
-                                }
-                            }
-                        }
-
-                        if (Services.PLATFORM.isModLoaded("cobblemon")) {
-                            for (Object entry : entries) {
-                                //? if <26.1 {
-                                if (ClientFieldGuideCobblemonCompat.isCobblemonBiomeMatch(entry, biomeEntry.getKey().location(), biomeRegistry.getHolderOrThrow(biomeEntry.getKey()))) {
-                                //?} else {
-                                /*if (ClientFieldGuideCobblemonCompat.isCobblemonBiomeMatch(entry, biomeEntry.key().identifier(), biomeEntry)) {
-                                *///?}
-                                    if (!results.contains(entry)) {
-                                        results.add(entry);
-                                    }
-                                }
-                            }
-                        }
-                    } catch (Exception ignored) {
-                    }
+                ResourceLocation biomeId = biomeEntry.getKey().location();
+                if (matchLocation(biomeId, biomeQuery, exactMatch)) {
+                    matchedBiomes.put(biomeId, biomeRegistry.getHolderOrThrow(biomeEntry.getKey()));
                 }
-            //? if <26.1 {
             }
             //?} else {
-            /*});
+            /*biomeRegistry.listElements().forEach(biomeEntry -> {
+                ResourceLocation biomeId = biomeEntry.key().identifier();
+                if (matchLocation(biomeId, biomeQuery, exactMatch)) matchedBiomes.put(biomeId, biomeEntry);
+            });
             *///?}
+
+            Set<EntityType<?>> spawnTypes = new LinkedHashSet<>();
+            for (Holder<Biome> holder : matchedBiomes.values()) {
+                try {
+                    for (MobCategory cat : MobCategory.values()) {
+                        spawnTypes.addAll(BiomeSpawns.types(holder.value(), cat));
+                    }
+                } catch (Exception ignored) {
+                }
+            }
+
+            Map<ResourceLocation, List<Object>> scope = Map.of(SEARCH_SCOPE, entries);
+            for (EntityType<?> spawnType : spawnTypes) {
+                Object entry = EntryResolver.getEntryForTarget(scope, spawnType);
+                if (entry == null || results.contains(entry)) continue;
+
+                ResourceLocation entryCategoryId = categoryId;
+                if (entryCategoryId == null) {
+                    var category = categoryManager.getCategoryForEntry(entry);
+                    if (category != null) entryCategoryId = category.getId();
+                }
+                if (EntryResolver.isValidEntity(spawnType, entryCategoryId)) results.add(entry);
+            }
+
+            if (Services.PLATFORM.isModLoaded("cobblemon") && !matchedBiomes.isEmpty()) {
+                for (Object entry : entries) {
+                    if (results.contains(entry)) continue;
+                    for (var biome : matchedBiomes.entrySet()) {
+                        try {
+                            if (ClientFieldGuideCobblemonCompat.isCobblemonBiomeMatch(entry, biome.getKey(), biome.getValue())) {
+                                results.add(entry);
+                                break;
+                            }
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
+            }
         }
 
         for (Object entry : entries) {
-            ResourceLocation entryId = ClientFieldGuideManager.getEntryId(entry);
-            if (entryId != null) {
-                for (String addition : ClientFieldGuideManager.getInstance().getBiomeAdditions()) {
-                    String[] parts = addition.split("\\|");
-                    if (parts.length == 2 && parts[0].equals(entryId.toString())) {
-                        ResourceLocation biomeId = ResourceLocation.parse(parts[1]);
-                        if (matchLocation(biomeId, biomeQuery, exactMatch)) {
-                            if (!results.contains(entry)) results.add(entry);
-                        }
-                    }
+            if (results.contains(entry)) continue;
+            for (ResourceLocation biomeId : categoryManager.getBiomeAdditions(entry, null)) {
+                if (matchLocation(biomeId, biomeQuery, exactMatch)) {
+                    results.add(entry);
+                    break;
                 }
             }
         }
 
-        for (Object entry : new ArrayList<>(results)) {
-            ResourceLocation entryId = ClientFieldGuideManager.getEntryId(entry);
-            if (entryId != null) {
-                for (String removal : ClientFieldGuideManager.getInstance().getBiomeRemovals()) {
-                    String[] parts = removal.split("\\|");
-                    if (parts.length == 2 && parts[0].equals(entryId.toString())) {
-                        ResourceLocation biomeId = ResourceLocation.parse(parts[1]);
-                        if (matchLocation(biomeId, biomeQuery, exactMatch)) {
-                            results.remove(entry);
-                        }
-                    }
-                }
-            }
-        }
+        results.removeIf(entry -> categoryManager.getBiomeRemovals(entry, null).stream()
+                .anyMatch(biomeId -> matchLocation(biomeId, biomeQuery, exactMatch)));
 
-        return results;
+        return new ArrayList<>(results);
     }
 
     private static List<Object> matchByModId(String modQuery, List<Object> entries, boolean exactMatch) {

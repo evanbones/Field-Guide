@@ -154,7 +154,7 @@ public class ClientCategoryManager {
         resolvedCategoryEntries.clear();
         syncedCategories.values().forEach(category -> {
             List<Object> entries = EntryResolutionHelper.resolveCategoryEntries(category, syncedEntries, Collections.emptyList(), this.redirects);
-            List<Object> groupedEntries = SearchManager.groupByQueries(entries, category.getGroupByQueries());
+            List<Object> groupedEntries = SearchManager.groupByQueries(entries, category.getGroupByQueries(), category.getId());
 
             resolvedCategoryEntries.put(category.getId(), groupedEntries);
         });
