@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.21.5] - 2026-10-15
+
+### Fixed
+
+- Fixed `x_offset` and `y_offset` (and their `grid_`/`page_` variants) not applying to block and item entries.
+
 ## [1.21.4] - 2026-10-10
 
 ### Fixed

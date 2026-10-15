@@ -459,6 +459,8 @@ public class EntryRenderHelper {
             EntryVisual visual = ClientFieldGuideManager.getInstance().getEntryVisual(block);
 
             float clampedScale = 100f * getVisualScale(visual, isPage);
+            float xOff = getXOffset(visual, isPage);
+            float yOff = getYOffset(visual, isPage);
 
             pose.pushPose();
             //? if <26.1 {
@@ -468,7 +470,7 @@ public class EntryRenderHelper {
             *///?}
             pose.mulPose(Axis.XP.rotationDegrees(30.0F));
             pose.mulPose(Axis.YP.rotationDegrees(210.0F));
-            pose.translate(-0.5, -0.5, -0.5);
+            pose.translate(-0.5 + (xOff / clampedScale), -0.5 + (yOff / clampedScale), -0.5);
 
             BlockState state = block.defaultBlockState();
 
@@ -549,6 +551,8 @@ public class EntryRenderHelper {
             EntryVisual visual = ClientFieldGuideManager.getInstance().getEntryVisual(item);
 
             float clampedScale = 100f * getVisualScale(visual, isPage);
+            float xOff = getXOffset(visual, isPage);
+            float yOff = getYOffset(visual, isPage);
 
             pose.pushPose();
             //? if <26.1 {
@@ -556,6 +560,7 @@ public class EntryRenderHelper {
             //?} else {
             /*pose.scale(clampedScale, -clampedScale, 1.0f);
             *///?}
+            pose.translate(xOff / clampedScale, yOff / clampedScale, 0.0f);
 
             try {
                 //? if <26.1 {
