@@ -47,11 +47,11 @@
       "required": false
     },
     {
-      "id": "vanillabackport:parched",
+      "id": "minecraft:creaking",
       "required": false
     },
     {
-      "id": "minecraft:creaking",
+      "id": "minecraft:camel_husk",
       "required": false
     },
     {

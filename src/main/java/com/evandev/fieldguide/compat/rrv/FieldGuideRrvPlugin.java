@@ -18,7 +18,7 @@ public class FieldGuideRrvPlugin implements ReliableRecipeViewerClientPlugin {
             if (FieldGuideClient.OPEN_GUIDE_KEY == null || !FieldGuideClient.OPEN_GUIDE_KEY.matches(event)) return false;
 
             ItemStack stack = slot.getStack();
-            if (stack.isEmpty()) return false;
+            if (stack.isEmpty() || !FieldGuideClient.canOpenGuide()) return false;
 
             Minecraft mc = Minecraft.getInstance();
             FieldGuideCategoryScreen screen = new FieldGuideCategoryScreen("=^" + stack.getHoverName().getString().toLowerCase(Locale.ROOT), mc.screen);

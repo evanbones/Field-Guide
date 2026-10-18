@@ -38,15 +38,7 @@
     "minecraft:wandering_trader",
     "minecraft:zombie_horse",
     {
-      "id": "vanillabackport:sulfur_cube",
-      "required": false
-    },
-    {
       "id": "minecraft:sulfur_cube",
-      "required": false
-    },
-    {
-      "id": "vanillabackport:happy_ghast",
       "required": false
     },
     {

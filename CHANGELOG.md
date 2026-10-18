@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.21.6] - 2026-10-18
+
+### Added
+
+- Vanilla Backport compat: Poplar Tree (all three leaf colors) and Pale Oak Tree now use their full structure previews on 1.20.1/1.21.1.
+- Shelf Mushroom, Pale Hanging Moss, Leaf Litter, and Short/Tall Dry Grass now appear in the Plants category.
+- Camel Husk now shows the hostile attribute icon.
+
+### Fixed
+
+- Fixed opening the Field Guide from EMI (or RRV) bypassing "Require Item to Open".
+
 ## [1.21.5] - 2026-10-15
 
 ### Fixed
