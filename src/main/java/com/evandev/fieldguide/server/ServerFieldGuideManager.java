@@ -45,6 +45,7 @@ public class ServerFieldGuideManager extends SimplePreparableReloadListener<Serv
     private final Map<ResourceLocation, EntryUnlockData> entryUnlockDataMap = new HashMap<>();
     private final Map<ResourceLocation, Set<ResourceLocation>> triggerOnMap = new HashMap<>();
     private final Map<ResourceLocation, Optional<ResourceLocation>> canonicalIdCache = new ConcurrentHashMap<>();
+    private final Map<ResourceLocation, Boolean> hasEntryCache = new ConcurrentHashMap<>();
 
     private Map<ResourceLocation, Category> categories = new LinkedHashMap<>();
     private Map<ResourceLocation, GuideEntry> allEntries = new HashMap<>();
@@ -144,7 +145,8 @@ public class ServerFieldGuideManager extends SimplePreparableReloadListener<Serv
     }
 
     public boolean hasEntry(ResourceLocation entryId) {
-        return EntryResolver.hasEntry(resolvedCategoryEntries, entryId, findCanonicalEntryId(entryId));
+        if (entryId == null) return false;
+        return hasEntryCache.computeIfAbsent(entryId, id -> EntryResolver.hasEntry(resolvedCategoryEntries, id, findCanonicalEntryId(id)));
     }
 
     public GuideEntry getResolvedEntry(ResourceLocation entryId) {
@@ -409,6 +411,7 @@ public class ServerFieldGuideManager extends SimplePreparableReloadListener<Serv
     private void resolveAllCategories() {
         resolvedCategoryEntries.clear();
         canonicalIdCache.clear();
+        hasEntryCache.clear();
         Set<String> allCompositeComponents = new HashSet<>();
 
         for (Category cat : categories.values()) {

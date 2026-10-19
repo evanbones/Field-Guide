@@ -221,7 +221,10 @@ public class EntryResolver {
         if (id == null) return null;
         String ns = id.getNamespace();
         if (ns.equals("item") || ns.equals("entity") || ns.equals("block")) {
-            return ResourceLocation.parse(id.getPath().replaceFirst("/", ":"));
+            String path = id.getPath();
+            int slash = path.indexOf('/');
+            if (slash == -1) return ResourceLocation.parse(path);
+            return ResourceLocation.fromNamespaceAndPath(path.substring(0, slash), path.substring(slash + 1));
         }
         String path = id.getPath();
         if (path.startsWith("entity/") || path.startsWith("item/") || path.startsWith("block/")) {

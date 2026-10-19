@@ -37,7 +37,8 @@ public abstract class InventoryMixin {
 
     @Inject(method = "setItem", at = @At("HEAD"))
     private void onSetItem(int slot, ItemStack stack, CallbackInfo ci) {
-        if (!ServerConfig.get().disableObtainUnlocks && !stack.isEmpty() && player instanceof ServerPlayer serverPlayer) {
+        if (!ServerConfig.get().disableObtainUnlocks && !stack.isEmpty() && player instanceof ServerPlayer serverPlayer
+                && !((Inventory) (Object) this).getItem(slot).is(stack.getItem())) {
             ResourceLocation itemId = EntryResolver.getEntryId(stack.getItem());
             PlayerFieldGuideProgress progress = FieldGuideProgressManager.getInstance().getProgress(serverPlayer);
             if (progress != null) {
