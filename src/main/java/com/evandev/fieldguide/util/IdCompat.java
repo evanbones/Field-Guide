@@ -4,9 +4,6 @@ package com.evandev.fieldguide.util;
 /*import net.minecraft.resources.ResourceLocation;
 
 public final class IdCompat {
-    private IdCompat() {
-    }
-
     public static ResourceLocation fromNamespaceAndPath(String namespace, String path) {
         return new ResourceLocation(namespace, path);
     }

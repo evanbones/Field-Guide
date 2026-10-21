@@ -12,9 +12,6 @@ import java.util.function.Predicate;
 
 public final class ScanRayTraceUtil {
 
-    private ScanRayTraceUtil() {
-    }
-
     // mirrors ProjectileUtil.getEntityHitResult, but with configurable padding
     public static EntityHitResult getScanEntityHitResult(Entity source, Vec3 startVec, Vec3 endVec, AABB searchBox, Predicate<Entity> filter, double maxDistSq) {
         Level level = source.level();

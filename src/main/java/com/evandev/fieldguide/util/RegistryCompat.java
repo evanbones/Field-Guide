@@ -11,9 +11,6 @@ import net.minecraft.core.component.DataComponents;
 //?}
 
 public final class RegistryCompat {
-    private RegistryCompat() {
-    }
-
     public static <E> Registry<E> registry(RegistryAccess access, ResourceKey<? extends Registry<? extends E>> key) {
         //? if <26.1 {
         return access.registryOrThrow(key);

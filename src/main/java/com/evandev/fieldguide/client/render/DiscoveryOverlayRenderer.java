@@ -88,9 +88,6 @@ public final class DiscoveryOverlayRenderer {
     private static long lastRecomputeTime = Long.MIN_VALUE;
     private static long lastRenderMs = 0L;
 
-    private DiscoveryOverlayRenderer() {
-    }
-
     //? if <26.1 {
     public static void render(PoseStack poseStack, float partialTick, Camera camera, Frustum frustum, MultiBufferSource.BufferSource bufferSource) {
     //?} else {

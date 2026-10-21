@@ -25,9 +25,6 @@ import java.util.Map;
 
 public final class FieldGuideDatapackLoader {
 
-    private FieldGuideDatapackLoader() {
-    }
-
     public static ServerFieldGuideManager.ReloadData load(ResourceManager resourceManager) {
         ServerFieldGuideManager.ReloadData data = new ServerFieldGuideManager.ReloadData();
 

@@ -43,9 +43,6 @@ public final class LegacySprites {
         }
     };
 
-    private LegacySprites() {
-    }
-
     public static void clearCache() {
         CACHE.clear();
     }

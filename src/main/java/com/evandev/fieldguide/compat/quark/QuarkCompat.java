@@ -12,9 +12,6 @@ import org.violetmoon.quark.content.mobs.entity.Forgotten;
 public final class QuarkCompat {
     private static final ResourceLocation FORGOTTEN_HAT = ResourceLocation.fromNamespaceAndPath("quark", "forgotten_hat");
 
-    private QuarkCompat() {
-    }
-
     public static void prepareDisplayEntity(Entity entity) {
         if (entity instanceof Forgotten forgotten) {
             forgotten.setItemSlot(EquipmentSlot.HEAD, new ItemStack(BuiltInRegistries.ITEM.get(FORGOTTEN_HAT)));

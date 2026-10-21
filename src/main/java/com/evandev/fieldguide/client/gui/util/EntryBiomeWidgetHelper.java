@@ -21,9 +21,6 @@ import java.util.function.Supplier;
 
 public final class EntryBiomeWidgetHelper {
 
-    private EntryBiomeWidgetHelper() {
-    }
-
     public static PaginatedGridWidget<ResourceLocation> createBiomeGridWidget(
             Bounds rightPageBounds,
             List<ResourceLocation> spawnBiomes,

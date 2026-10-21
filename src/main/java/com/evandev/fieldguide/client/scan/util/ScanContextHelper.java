@@ -16,9 +16,6 @@ import java.util.function.Predicate;
 
 public final class ScanContextHelper {
 
-    private ScanContextHelper() {
-    }
-
     /**
      * Traces vertically up a trunk/tree column up to maxSteps blocks, stopping when non-tree blocks or air are reached.
      */

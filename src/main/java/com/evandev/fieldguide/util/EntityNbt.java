@@ -5,9 +5,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
 
 public final class EntityNbt {
-    private EntityNbt() {
-    }
-
     public static CompoundTag save(Entity entity) {
         CompoundTag tag = new CompoundTag();
         entity.saveWithoutId(tag);
@@ -28,9 +25,6 @@ import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.level.storage.TagValueOutput;
 
 public final class EntityNbt {
-    private EntityNbt() {
-    }
-
     public static CompoundTag save(Entity entity) {
         try (ProblemReporter.ScopedCollector reporter = new ProblemReporter.ScopedCollector(Constants.LOG)) {
             TagValueOutput output = TagValueOutput.createWithContext(reporter, entity.registryAccess());

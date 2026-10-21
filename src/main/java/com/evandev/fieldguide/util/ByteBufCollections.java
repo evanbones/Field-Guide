@@ -15,9 +15,6 @@ import java.util.function.Function;
 import java.util.function.IntFunction;
 
 public final class ByteBufCollections {
-    private ByteBufCollections() {
-    }
-
     public static <B extends FriendlyByteBuf, T> List<T> readList(B buf, Function<? super B, T> reader) {
         int size = buf.readVarInt();
         List<T> list = new ArrayList<>(Math.min(size, 65536));

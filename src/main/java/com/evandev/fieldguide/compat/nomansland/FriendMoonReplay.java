@@ -18,8 +18,6 @@ import net.minecraft.util.Mth;
 import java.util.List;
 
 public final class FriendMoonReplay {
-    private FriendMoonReplay() {}
-
     public static final int FRIEND_MOON_GREEN = 0xFF000000 | DialogueUtil.FRIEND_MOON_TEXT_COLOR;
     private static final ResourceLocation SPEAK_SOUND = ResourceLocation.fromNamespaceAndPath("nomansland", "entity.friend_moon.speak_bgr");
     public static final float INTRO_TICKS = 16f;

@@ -20,9 +20,6 @@ public final class DummyEntities {
     /*private static final AtomicInteger NEXT_ID = new AtomicInteger(-1);
     *///?}
 
-    private DummyEntities() {
-    }
-
     @Nullable
     public static Entity create(EntityType<?> type, Level level) {
         //? if <26.1 {

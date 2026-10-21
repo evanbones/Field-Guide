@@ -19,9 +19,6 @@ import net.minecraft.client.renderer.RenderPipelines;
 *///?}
 
 public final class GuiCompat {
-    private GuiCompat() {
-    }
-
     public static void push(GuiGraphics g) {
         //? if <26.1 {
         g.pose().pushPose();

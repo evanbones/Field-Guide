@@ -268,6 +268,7 @@ public class EntryRenderHelper {
     }
 
     public static void renderCobblemon(GuiGraphics guiGraphics, GuideEntry entry, int x, int y, int maxWidth, int maxHeight, boolean unlocked, boolean isPage, float bounceScale, boolean syncWithProgress) {
+        if (!ClientFieldGuideCobblemonCompat.isSpeciesAvailable(entry.id())) return;
         String formName;
         if (syncWithProgress) {
             formName = ClientFieldGuideCobblemonCompat.getFormForEntry(entry.id());
@@ -287,6 +288,7 @@ public class EntryRenderHelper {
     }
 
     public static void renderCobblemonForm(GuiGraphics guiGraphics, GuideEntry entry, String formName, int x, int y, int maxWidth, int maxHeight, boolean unlocked, boolean isPage, float bounceScale) {
+        if (!ClientFieldGuideCobblemonCompat.isSpeciesAvailable(entry.id())) return;
         Object cacheKey = formName.equalsIgnoreCase("standard") ? entry : entry.id().toString() + "#" + formName;
 
         renderWithCache(entry, cacheKey, guiGraphics, x, y, maxWidth, maxHeight, unlocked, isPage, bounceScale, (pose, output) -> {

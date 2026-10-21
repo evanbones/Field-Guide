@@ -74,7 +74,7 @@ import com.mojang.renderpearl.api.commands.RenderPass;
 public class IconCacheManager {
     private static final Path CACHE_DIR = Services.PLATFORM.getConfigDirectory().resolve("../fieldguide_cache");
     private static final int RENDER_SIZE = 256;
-    private static final int CACHE_FORMAT = 5;
+    private static final int CACHE_FORMAT = 6;
 
     @FunctionalInterface
     public interface RenderAction {

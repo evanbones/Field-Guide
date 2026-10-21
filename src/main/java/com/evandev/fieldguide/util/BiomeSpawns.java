@@ -11,9 +11,6 @@ import java.util.List;
 *///?}
 
 public final class BiomeSpawns {
-    private BiomeSpawns() {
-    }
-
     public static List<EntityType<?>> types(Biome biome, MobCategory category) {
         //? if <26.1 {
         return biome.getMobSettings().getMobs(category).unwrap().stream().<EntityType<?>>map(spawn -> spawn.type).toList();

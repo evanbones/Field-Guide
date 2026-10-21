@@ -17,9 +17,6 @@ public final class ByteBufCodecs {
     public static final StreamCodec<FriendlyByteBuf, Component> COMPONENT = StreamCodec.of(FriendlyByteBuf::writeComponent, FriendlyByteBuf::readComponent);
     public static final StreamCodec<FriendlyByteBuf, String> STRING_UTF8 = StreamCodec.of(FriendlyByteBuf::writeUtf, FriendlyByteBuf::readUtf);
 
-    private ByteBufCodecs() {
-    }
-
     public static <B extends ByteBuf, V> Function<StreamCodec<B, V>, StreamCodec<B, List<V>>> list() {
         return element -> StreamCodec.of(
                 (buf, values) -> {

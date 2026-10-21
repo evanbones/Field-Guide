@@ -5,7 +5,6 @@ import com.evandev.fieldguide.api.AutoPopulateRegistry;
 import com.evandev.fieldguide.api.EntryVariantData;
 import com.evandev.fieldguide.api.GuideEntry;
 import com.evandev.fieldguide.client.ClientFieldGuideManager;
-import com.evandev.fieldguide.compat.cobblemon.ClientFieldGuideCobblemonCompat;
 import com.evandev.fieldguide.config.ServerConfig;
 import com.evandev.fieldguide.entry.EntryResolver;
 import com.evandev.fieldguide.network.RequestLootPacket;
@@ -24,9 +23,6 @@ public class ClientLootManager {
     private final Map<Object, List<ItemStack>> dropCache = new HashMap<>();
     private final Map<String, Set<ResourceLocation>> dropIndex = new HashMap<>();
     private final Set<ResourceLocation> requestedIds = new HashSet<>();
-
-    private ClientLootManager() {
-    }
 
     public static ClientLootManager getInstance() {
         return INSTANCE;
@@ -150,10 +146,6 @@ public class ClientLootManager {
                     requestLoot(id);
                 }
             }
-        }
-
-        if (Services.PLATFORM.isModLoaded("cobblemon")) {
-            rawDrops.addAll(ClientFieldGuideCobblemonCompat.getCobblemonDrops(entry));
         }
 
         List<ItemStack> distinct = distinctLoot(rawDrops);

@@ -464,6 +464,7 @@ public class ServerFieldGuideManager extends SimplePreparableReloadListener<Serv
         resolveAllCategories();
         StaticLootParser.clearCache();
         this.serverLootCache = LootTableHelper.generateLootMap(server.overworld());
+        addCobblemonData();
         expandBiomeTags(server);
         expandItemTags(server);
         generateAutoBiomeAdditions(server);
@@ -478,6 +479,7 @@ public class ServerFieldGuideManager extends SimplePreparableReloadListener<Serv
         resolveAllCategories();
         StaticLootParser.clearCache();
         this.serverLootCache = LootTableHelper.generateLootMap(server.overworld());
+        addCobblemonData();
         expandBiomeTags(server);
         expandItemTags(server);
         generateAutoBiomeAdditions(server);
@@ -502,6 +504,19 @@ public class ServerFieldGuideManager extends SimplePreparableReloadListener<Serv
         }
 
         return data;
+    }
+
+    private void addCobblemonData() {
+        if (!FieldGuideCobblemonCompat.isLoaded()) return;
+        this.serverLootCache.putAll(FieldGuideCobblemonCompat.getCobblemonDrops());
+
+        Set<String> additionsSet = new LinkedHashSet<>(this.biomeAdditions);
+        FieldGuideCobblemonCompat.getCobblemonBiomes().forEach((entryId, biomes) -> {
+            for (String biome : biomes) {
+                additionsSet.add(entryId + "|" + biome);
+            }
+        });
+        this.biomeAdditions = new ArrayList<>(additionsSet);
     }
 
     private void generateAutoBiomeAdditions(MinecraftServer server) {

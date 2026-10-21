@@ -20,9 +20,6 @@ public final class LevelOverlays {
     private static boolean pending;
     private static boolean rendering;
 
-    private LevelOverlays() {
-    }
-
     public static void capture(PoseStack.Pose pose, Matrix4f frustumMatrix, Matrix4f projectionMatrix, Camera cam, float tick) {
         POSE.set(pose.pose());
         NORMAL.set(pose.normal());

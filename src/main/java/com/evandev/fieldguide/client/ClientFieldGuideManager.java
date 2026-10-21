@@ -12,7 +12,6 @@ import com.evandev.fieldguide.client.manager.*;
 import com.evandev.fieldguide.client.progress.ProgressManager;
 import com.evandev.fieldguide.client.scan.FieldGuideScanner;
 import com.evandev.fieldguide.client.search.SearchManager;
-import com.evandev.fieldguide.compat.cobblemon.ClientFieldGuideCobblemonCompat;
 import com.evandev.fieldguide.compat.cobblemon.FieldGuideCobblemonCompat;
 import com.evandev.fieldguide.config.ModConfig;
 import com.evandev.fieldguide.config.ServerConfig;
@@ -35,9 +34,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ClientFieldGuideManager implements ResourceManagerReloadListener {
     private static final ClientFieldGuideManager INSTANCE = new ClientFieldGuideManager();
     private final Map<String, List<ResourceLocation>> biomeCache = new ConcurrentHashMap<>();
-
-    private ClientFieldGuideManager() {
-    }
 
     public static ClientFieldGuideManager getInstance() {
         return INSTANCE;
@@ -312,10 +308,6 @@ public class ClientFieldGuideManager implements ResourceManagerReloadListener {
             EntryVisual visual = getEntryVisual(entry);
             if (visual != null && visual.spawnBiomes != null) {
                 biomes.addAll(visual.spawnBiomes);
-            }
-
-            if (isCobblemon) {
-                biomes.addAll(ClientFieldGuideCobblemonCompat.getCobblemonBiomes(entry));
             }
         }
 

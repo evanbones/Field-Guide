@@ -13,14 +13,12 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 public final class FieldGuideCobblemonCompat {
     public static final String MOD_ID = "cobblemon";
     private static final String POKEMON_PATH = "pokemon";
-
-    private FieldGuideCobblemonCompat() {
-    }
 
     public static void init() {
         if (isLoaded()) {
@@ -130,13 +128,13 @@ public final class FieldGuideCobblemonCompat {
         return MOD_ID.equals(id.getNamespace());
     }
 
-    public static Set<String> getCobblemonBiomesForId(ResourceLocation id) {
-        if (!isLoaded()) return null;
-        return CobblemonCompatImpl.getCobblemonBiomesForId(id);
+    public static Map<ResourceLocation, Set<String>> getCobblemonBiomes() {
+        if (!isLoaded()) return Map.of();
+        return CobblemonCompatImpl.getCobblemonBiomes();
     }
 
-    public static List<ItemStack> getCobblemonDropsForId(ResourceLocation id) {
-        if (!isLoaded()) return null;
-        return CobblemonCompatImpl.getCobblemonDropsForId(id);
+    public static Map<ResourceLocation, List<ItemStack>> getCobblemonDrops() {
+        if (!isLoaded()) return Map.of();
+        return CobblemonCompatImpl.getCobblemonDrops();
     }
 }

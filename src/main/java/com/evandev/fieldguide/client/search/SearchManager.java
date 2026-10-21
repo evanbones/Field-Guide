@@ -6,7 +6,7 @@ import com.evandev.fieldguide.api.seasons.SeasonsAPI;
 import com.evandev.fieldguide.client.ClientFieldGuideManager;
 import com.evandev.fieldguide.client.manager.ClientCategoryManager;
 import com.evandev.fieldguide.client.manager.ClientLootManager;
-import com.evandev.fieldguide.compat.cobblemon.ClientFieldGuideCobblemonCompat;
+import com.evandev.fieldguide.compat.cobblemon.FieldGuideCobblemonCompat;
 import com.evandev.fieldguide.entry.EntryResolver;
 import com.evandev.fieldguide.platform.Services;
 import com.evandev.fieldguide.util.BiomeSpawns;
@@ -204,15 +204,9 @@ public class SearchManager {
             if (Services.PLATFORM.isModLoaded("cobblemon") && !matchedBiomes.isEmpty()) {
                 for (Object entry : entries) {
                     if (results.contains(entry)) continue;
-                    for (var biome : matchedBiomes.entrySet()) {
-                        try {
-                            if (ClientFieldGuideCobblemonCompat.isCobblemonBiomeMatch(entry, biome.getKey(), biome.getValue())) {
-                                results.add(entry);
-                                break;
-                            }
-                        } catch (Exception ignored) {
-                        }
-                    }
+                    if (!FieldGuideCobblemonCompat.isCobblemonEntry(entry)) continue;
+                    List<ResourceLocation> biomes = ClientFieldGuideManager.getInstance().getResolvedBiomes(entry);
+                    if (matchedBiomes.keySet().stream().anyMatch(biomes::contains)) results.add(entry);
                 }
             }
         }

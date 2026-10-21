@@ -20,9 +20,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 
 public final class EntryAttributesRenderer {
 
-    private EntryAttributesRenderer() {
-    }
-
     public static void renderAttributes(
             GuiGraphics guiGraphics,
             Font font,
