@@ -1,6 +1,7 @@
 package com.evandev.fieldguide.compat.cobblemon;
 
 //? if <26.1 {
+import com.cobblemon.mod.common.CobblemonEntities;
 import com.cobblemon.mod.common.api.pokemon.PokemonProperties;
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
 import com.cobblemon.mod.common.pokemon.Pokemon;
@@ -44,10 +45,13 @@ public final class ClientFieldGuideCobblemonCompat {
 
         try {
             PokemonProperties props = PokemonProperties.Companion.parse("species=" + speciesName + " form=" + variantName, " ", "=");
-            PokemonEntity pokemonEntity = props.createEntity(level);
+            Pokemon pokemon = new Pokemon();
+            props.apply(pokemon);
+            pokemon.checkGender();
+
+            PokemonEntity pokemonEntity = new PokemonEntity(level, pokemon, CobblemonEntities.POKEMON);
             pokemonEntity.setNoAi(true);
 
-            Pokemon pokemon = pokemonEntity.getPokemon();
             CobblemonCompatImpl.applyForm(pokemon, variantName);
             pokemon.updateAspects();
 
