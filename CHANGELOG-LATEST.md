@@ -1,3 +1,3 @@
 ### Fixed
 
-- Properly fixed Cobblemon rendering blank on dedicated servers.
+- Fixed sapling entries showing up alongside their tree entries on first world load.

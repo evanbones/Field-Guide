@@ -26,7 +26,6 @@ import java.util.function.Predicate;
 
 public class AutoPopulateRegistry {
     private static final Map<String, BiFunction<String, ResourceLocation, List<Object>>> STRATEGIES = new HashMap<>();
-    private static final Set<ResourceLocation> HANDLED_SAPLINGS = new HashSet<>();
 
     static {
         register("mod_entities", (modId, categoryId) -> BuiltInRegistries.ENTITY_TYPE.stream()
@@ -223,94 +222,86 @@ public class AutoPopulateRegistry {
 
     public static List<Object> getAutoTrees(Predicate<ResourceLocation> namespaceFilter, ResourceLocation categoryId) {
         List<Object> results = new ArrayList<>();
-        HANDLED_SAPLINGS.clear();
 
         for (Block block : BuiltInRegistries.BLOCK) {
             ResourceLocation id = BuiltInRegistries.BLOCK.getKey(block);
             if (!namespaceFilter.test(id) || !EntryValidator.isValidBlock(block, categoryId)) continue;
 
-            if (id.getPath().endsWith("_sapling")) {
-                String baseName = id.getPath().replace("_sapling", "");
+            TreeBlocks tree = findTreeBlocks(id);
+            if (tree == null) continue;
 
-                //? if <26.1 {
-                Block leaves = BuiltInRegistries.BLOCK.get(ResourceLocation.fromNamespaceAndPath(id.getNamespace(), baseName + "_leaves"));
-                //?} else {
-                /*Block leaves = BuiltInRegistries.BLOCK.getValue(ResourceLocation.fromNamespaceAndPath(id.getNamespace(), baseName + "_leaves"));
-                *///?}
-                if (leaves == Blocks.AIR) continue;
+            String baseName = id.getPath().replace("_sapling", "");
+            String logId = BuiltInRegistries.BLOCK.getKey(tree.log()).toString();
+            String leavesId = BuiltInRegistries.BLOCK.getKey(tree.leaves()).toString();
 
-                //? if <26.1 {
-                Block log = BuiltInRegistries.BLOCK.get(ResourceLocation.fromNamespaceAndPath(id.getNamespace(), baseName + "_log"));
-                //?} else {
-                /*Block log = BuiltInRegistries.BLOCK.getValue(ResourceLocation.fromNamespaceAndPath(id.getNamespace(), baseName + "_log"));
-                *///?}
-                if (log == Blocks.AIR) {
-                    //? if <26.1 {
-                    log = BuiltInRegistries.BLOCK.get(ResourceLocation.fromNamespaceAndPath("minecraft", baseName + "_log"));
-                    //?} else {
-                    /*log = BuiltInRegistries.BLOCK.getValue(ResourceLocation.fromNamespaceAndPath("minecraft", baseName + "_log"));
-                    *///?}
-                }
-                if (log == Blocks.AIR) {
-                    String[] parts = baseName.split("_", 2);
-                    if (parts.length > 1) {
-                        //? if <26.1 {
-                        log = BuiltInRegistries.BLOCK.get(ResourceLocation.fromNamespaceAndPath(id.getNamespace(), parts[1] + "_log"));
-                        //?} else {
-                        /*log = BuiltInRegistries.BLOCK.getValue(ResourceLocation.fromNamespaceAndPath(id.getNamespace(), parts[1] + "_log"));
-                        *///?}
-                        if (log == Blocks.AIR) {
-                            //? if <26.1 {
-                            log = BuiltInRegistries.BLOCK.get(ResourceLocation.fromNamespaceAndPath("minecraft", parts[1] + "_log"));
-                            //?} else {
-                            /*log = BuiltInRegistries.BLOCK.getValue(ResourceLocation.fromNamespaceAndPath("minecraft", parts[1] + "_log"));
-                            *///?}
-                        }
-                    }
-                }
-                if (log == Blocks.AIR) continue;
+            List<String> treeStructure = Arrays.asList(
+                    "0,0,0|" + logId,
+                    "0,1,0|" + logId,
+                    "-1,2,0|" + leavesId,
+                    "1,2,0|" + leavesId,
+                    "0,2,-1|" + leavesId,
+                    "0,2,1|" + leavesId,
+                    "0,2,0|" + leavesId,
+                    "0,3,0|" + leavesId
+            );
 
-                HANDLED_SAPLINGS.add(id);
+            List<ResourceLocation> components = Arrays.asList(
+                    id,
+                    BuiltInRegistries.BLOCK.getKey(tree.leaves()),
+                    BuiltInRegistries.BLOCK.getKey(tree.log())
+            );
 
-                String logId = BuiltInRegistries.BLOCK.getKey(log).toString();
-                String leavesId = BuiltInRegistries.BLOCK.getKey(leaves).toString();
-
-                List<String> treeStructure = Arrays.asList(
-                        "0,0,0|" + logId,
-                        "0,1,0|" + logId,
-                        "-1,2,0|" + leavesId,
-                        "1,2,0|" + leavesId,
-                        "0,2,-1|" + leavesId,
-                        "0,2,1|" + leavesId,
-                        "0,2,0|" + leavesId,
-                        "0,3,0|" + leavesId
-                );
-
-                List<ResourceLocation> components = Arrays.asList(
-                        BuiltInRegistries.BLOCK.getKey(block),
-                        BuiltInRegistries.BLOCK.getKey(leaves),
-                        BuiltInRegistries.BLOCK.getKey(log)
-                );
-
-                results.add(new GuideEntry(
-                        ResourceLocation.fromNamespaceAndPath(id.getNamespace(), baseName + "_tree"),
-                        id,
-                        null,
-                        EntryKind.STRUCTURE,
-                        false,
-                        false,
-                        null,
-                        components,
-                        new StructureData(null, treeStructure),
-                        null,
-                        null,
-                        EntryUnlockData.DEFAULT,
-                        null,
-                        null
-                ));
-            }
+            results.add(new GuideEntry(
+                    ResourceLocation.fromNamespaceAndPath(id.getNamespace(), baseName + "_tree"),
+                    id,
+                    null,
+                    EntryKind.STRUCTURE,
+                    false,
+                    false,
+                    null,
+                    components,
+                    new StructureData(null, treeStructure),
+                    null,
+                    null,
+                    EntryUnlockData.DEFAULT,
+                    null,
+                    null
+            ));
         }
         return results;
+    }
+
+    private record TreeBlocks(Block leaves, Block log) {
+    }
+
+    private static TreeBlocks findTreeBlocks(ResourceLocation saplingId) {
+        if (!saplingId.getPath().endsWith("_sapling")) return null;
+        String namespace = saplingId.getNamespace();
+        String baseName = saplingId.getPath().replace("_sapling", "");
+
+        Block leaves = getBlock(namespace, baseName + "_leaves");
+        if (leaves == Blocks.AIR) return null;
+
+        Block log = getBlock(namespace, baseName + "_log");
+        if (log == Blocks.AIR) log = getBlock("minecraft", baseName + "_log");
+        if (log == Blocks.AIR) {
+            String[] parts = baseName.split("_", 2);
+            if (parts.length > 1) {
+                log = getBlock(namespace, parts[1] + "_log");
+                if (log == Blocks.AIR) log = getBlock("minecraft", parts[1] + "_log");
+            }
+        }
+        if (log == Blocks.AIR) return null;
+
+        return new TreeBlocks(leaves, log);
+    }
+
+    private static Block getBlock(String namespace, String path) {
+        //? if <26.1 {
+        return BuiltInRegistries.BLOCK.get(ResourceLocation.fromNamespaceAndPath(namespace, path));
+        //?} else {
+        /*return BuiltInRegistries.BLOCK.getValue(ResourceLocation.fromNamespaceAndPath(namespace, path));
+        *///?}
     }
 
     public static List<Object> getPlants(Predicate<ResourceLocation> namespaceFilter, ResourceLocation categoryId) {
@@ -319,7 +310,7 @@ public class AutoPopulateRegistry {
                 .filter(b -> EntryValidator.isValidBlock(b, categoryId))
                 .filter(b -> {
                     ResourceLocation id = BuiltInRegistries.BLOCK.getKey(b);
-                    if (HANDLED_SAPLINGS.contains(id)) return false;
+                    if (findTreeBlocks(id) != null) return false;
                     return b.defaultBlockState().is(ModTags.Blocks.PLANTS) || b instanceof BushBlock;
                 })
                 .sorted(Comparator.comparing(b -> BuiltInRegistries.BLOCK.getKey(b).toString()))
