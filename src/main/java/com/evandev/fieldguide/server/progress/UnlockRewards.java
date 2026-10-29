@@ -25,14 +25,24 @@ class UnlockRewards {
     static void grant(ServerPlayer player, ResourceLocation entryId, boolean grantXp) {
         try {
             ServerConfig config = ServerConfig.getLocal();
-            if (grantXp && config.grantXpOnScan && config.xpAmountOnScan > 0) {
-                player.giveExperiencePoints(config.xpAmountOnScan);
+            if (grantXp && config.grantXpOnScan) {
+                int xp = getXpAmount(entryId, config);
+                if (xp > 0) player.giveExperiencePoints(xp);
             }
 
             executeCommands(player, entryId, config);
         } catch (Exception e) {
             Constants.LOG.error("Failed to grant unlock rewards for entry {} to {}", entryId, player.getName().getString(), e);
         }
+    }
+
+    private static int getXpAmount(ResourceLocation entryId, ServerConfig config) {
+        ResourceLocation categoryId = ServerFieldGuideManager.getInstance().getCategoryForEntryId(entryId);
+        if (categoryId != null && config.categoryXpAmounts != null) {
+            Integer amount = config.categoryXpAmounts.get(categoryId.toString());
+            if (amount != null) return amount;
+        }
+        return config.xpAmountOnScan;
     }
 
     private static void executeCommands(ServerPlayer player, ResourceLocation entryId, ServerConfig config) {

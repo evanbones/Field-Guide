@@ -26,6 +26,9 @@
         ],
         "rrv_client": [
             "com.evandev.fieldguide.compat.rrv.FieldGuideRrvPlugin"
+        ],
+        "jade": [
+            "com.evandev.fieldguide.compat.jade.FieldGuideJadePlugin"
         ]
     },
     "mixins": [

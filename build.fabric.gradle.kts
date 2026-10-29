@@ -99,6 +99,12 @@ dependencies {
     // Reliable Remover
     modCompileOnly("maven.modrinth:reliable-remover:${dep("reliable_remover")}")
 
+    // Jade
+    optDep("jade")?.let {
+        modCompileOnly("maven.modrinth:jade:$it")
+        modLocalRuntime("maven.modrinth:jade:$it")
+    }
+
     // Scholar
     optDep("scholar")?.let {
         modCompileOnly("maven.modrinth:scholar:$it")
@@ -225,6 +231,7 @@ publishMods {
         if (optDep("rrv") != null) optional("rrv")
         optional("modmenu")
         if (optDep("kubejs") != null) optional("kubejs")
+        if (optDep("jade") != null) optional("jade")
         if (optDep("immersive_overlays") != null) requires("immersive-overlays")
     }
 
@@ -240,6 +247,7 @@ publishMods {
         if (optDep("rrv") != null) optional("rrv")
         optional("modmenu")
         if (optDep("kubejs") != null) optional("kubejs")
+        if (optDep("jade") != null) optional("jade")
         if (optDep("immersive_overlays") != null) requires("immersive-overlays")
         client = true
         server = true

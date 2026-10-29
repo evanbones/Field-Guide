@@ -13,6 +13,7 @@ import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -46,6 +47,7 @@ public class YaclConfigIntegration {
                 .option(createBoolOption("hide_tabs_until_unlocked", false, () -> serverConfig.hideTabsUntilUnlocked, val -> serverConfig.hideTabsUntilUnlocked = val))
                 .option(createBoolOption("show_undiscovered_names", false, () -> serverConfig.showUndiscoveredNames, val -> serverConfig.showUndiscoveredNames = val))
                 .option(createBoolOption("hide_undiscovered_from_search", false, () -> serverConfig.hideUndiscoveredFromSearch, val -> serverConfig.hideUndiscoveredFromSearch = val))
+                .option(createBoolOption("hide_undiscovered_in_jade", false, () -> serverConfig.hideUndiscoveredInJade, val -> serverConfig.hideUndiscoveredInJade = val))
                 .option(createBoolOption("disable_scanning", false, () -> serverConfig.disableScanning, val -> serverConfig.disableScanning = val))
                 .option(createBoolOption("disable_obtain_unlocks", false, () -> serverConfig.disableObtainUnlocks, val -> serverConfig.disableObtainUnlocks = val))
                 .option(createBoolOption("enable_spyglass_scanning", true, () -> serverConfig.enableSpyglassScanning, val -> serverConfig.enableSpyglassScanning = val))
@@ -66,6 +68,7 @@ public class YaclConfigIntegration {
                 .option(createBoolOption("grant_xp_on_scan", true, () -> serverConfig.grantXpOnScan, val -> serverConfig.grantXpOnScan = val))
                 .option(createBoolOption("enable_reliable_remover", true, () -> serverConfig.enableReliableRemover, val -> serverConfig.enableReliableRemover = val))
                 .option(createIntOption("xp_amount_on_scan", 5, 0, 1000, () -> serverConfig.xpAmountOnScan, val -> serverConfig.xpAmountOnScan = val))
+                .group(createStringList("category_xp_amounts", convertXpMapToList(ServerConfig.defaultCategoryXpAmounts()), () -> convertXpMapToList(serverConfig.categoryXpAmounts), val -> serverConfig.categoryXpAmounts = convertListToXpMap(val)))
                 .option(createBoolOption("disable_loot_display", false, () -> serverConfig.disableLootDisplay, val -> serverConfig.disableLootDisplay = val))
                 .option(createBoolOption("disable_biome_display", false, () -> serverConfig.disableBiomeDisplay, val -> serverConfig.disableBiomeDisplay = val))
                 .option(createBoolOption("disable_variants", false, () -> serverConfig.disableVariants, val -> serverConfig.disableVariants = val))
@@ -135,6 +138,10 @@ public class YaclConfigIntegration {
     }
 
     private static ListOption<String> createCommandList(String name, Supplier<List<String>> getter, Consumer<List<String>> setter) {
+        return createStringList(name, new ArrayList<>(), getter, setter);
+    }
+
+    private static ListOption<String> createStringList(String name, List<String> defaultValue, Supplier<List<String>> getter, Consumer<List<String>> setter) {
         //? if <26.1 {
         return ListOption.<String>createBuilder()
         //?} else {
@@ -142,7 +149,7 @@ public class YaclConfigIntegration {
         *///?}
                 .name(Component.translatable("option.fieldguide." + name))
                 .description(OptionDescription.of(Component.translatable("option.fieldguide." + name + ".tooltip")))
-                .binding(new ArrayList<>(), getter, setter)
+                .binding(defaultValue, getter, setter)
                 .controller(StringControllerBuilder::create)
                 .initial("")
                 .build();
@@ -192,6 +199,31 @@ public class YaclConfigIntegration {
             }
         }
         return list;
+    }
+
+    private static List<String> convertXpMapToList(Map<String, Integer> map) {
+        List<String> list = new ArrayList<>();
+        if (map != null) {
+            for (Map.Entry<String, Integer> entry : map.entrySet()) {
+                list.add(entry.getKey() + "=" + entry.getValue());
+            }
+        }
+        return list;
+    }
+
+    private static Map<String, Integer> convertListToXpMap(List<String> list) {
+        Map<String, Integer> map = new LinkedHashMap<>();
+        if (list != null) {
+            for (String s : list) {
+                String[] parts = s.split("=", 2);
+                if (parts.length != 2) continue;
+                try {
+                    map.put(parts[0].trim(), Math.max(0, Integer.parseInt(parts[1].trim())));
+                } catch (NumberFormatException ignored) {
+                }
+            }
+        }
+        return map;
     }
 
     private static Map<String, List<String>> convertListToMap(List<String> list) {

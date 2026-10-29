@@ -90,19 +90,8 @@ public class FieldGuideRaytracer {
             Entity hitEntity = entityHit.getEntity();
             if (hitEntity instanceof EnderDragonPart part) hitEntity = part.parentMob;
 
-            EntityType<?> type = hitEntity.getType();
-            ResourceLocation originalId = BuiltInRegistries.ENTITY_TYPE.getKey(type);
-            ResourceLocation redirectId = ClientFieldGuideManager.getInstance().getRedirect(originalId);
-
-            Object actualTargetKey = type;
-            if (hitEntity instanceof ItemEntity itemEntity) {
-                actualTargetKey = itemEntity.getItem().getItem();
-            } else if (FieldGuideCobblemonCompat.isPokemon(hitEntity)) {
-                actualTargetKey = FieldGuideCobblemonCompat.getPokemonEntryId(hitEntity);
-            } else if (redirectId != null) {
-                Object redirected = EntryResolver.resolveRegistryObject(redirectId, EntryResolver.RegistryType.ENTITY, EntryResolver.RegistryType.BLOCK);
-                if (redirected != null) actualTargetKey = redirected;
-            }
+            ResourceLocation originalId = BuiltInRegistries.ENTITY_TYPE.getKey(hitEntity.getType());
+            Object actualTargetKey = resolveEntityTarget(hitEntity);
 
             entryForTarget = getContextAwareEntry(actualTargetKey, minecraft, hitEntity.blockPosition());
 
@@ -171,13 +160,7 @@ public class FieldGuideRaytracer {
                 Block block = state.getBlock();
 
                 ResourceLocation originalId = BuiltInRegistries.BLOCK.getKey(block);
-                ResourceLocation redirectId = ClientFieldGuideManager.getInstance().getRedirect(originalId);
-
-                Object actualTargetKey = block;
-                if (redirectId != null) {
-                    Object redirected = EntryResolver.resolveRegistryObject(redirectId, EntryResolver.RegistryType.BLOCK, EntryResolver.RegistryType.ENTITY);
-                    if (redirected != null) actualTargetKey = redirected;
-                }
+                Object actualTargetKey = resolveBlockTarget(block);
 
                 entryForTarget = getContextAwareEntry(actualTargetKey, minecraft, blockHit.getBlockPos());
                 Category cat = ClientFieldGuideManager.getInstance().getCategoryForEntry(entryForTarget);
@@ -191,13 +174,7 @@ public class FieldGuideRaytracer {
                 Block block = state.getBlock();
 
                 ResourceLocation originalId = BuiltInRegistries.BLOCK.getKey(block);
-                ResourceLocation redirectId = ClientFieldGuideManager.getInstance().getRedirect(originalId);
-
-                Object actualTargetKey = block;
-                if (redirectId != null) {
-                    Object redirected = EntryResolver.resolveRegistryObject(redirectId, EntryResolver.RegistryType.BLOCK, EntryResolver.RegistryType.ENTITY);
-                    if (redirected != null) actualTargetKey = redirected;
-                }
+                Object actualTargetKey = resolveBlockTarget(block);
 
                 entryForTarget = getContextAwareEntry(actualTargetKey, minecraft, firstBlockHit.getBlockPos());
                 Category cat = ClientFieldGuideManager.getInstance().getCategoryForEntry(entryForTarget);
@@ -210,6 +187,27 @@ public class FieldGuideRaytracer {
         }
 
         FieldGuideScanManager.getInstance().handleTargetAcquisition(minecraft, foundTarget, entryForTarget, hitDistSq, blockHit);
+    }
+
+    public static Object resolveEntityTarget(Entity entity) {
+        if (entity instanceof ItemEntity itemEntity) return itemEntity.getItem().getItem();
+        if (FieldGuideCobblemonCompat.isPokemon(entity)) return FieldGuideCobblemonCompat.getPokemonEntryId(entity);
+
+        ResourceLocation redirectId = ClientFieldGuideManager.getInstance().getRedirect(BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()));
+        if (redirectId != null) {
+            Object redirected = EntryResolver.resolveRegistryObject(redirectId, EntryResolver.RegistryType.ENTITY, EntryResolver.RegistryType.BLOCK);
+            if (redirected != null) return redirected;
+        }
+        return entity.getType();
+    }
+
+    public static Object resolveBlockTarget(Block block) {
+        ResourceLocation redirectId = ClientFieldGuideManager.getInstance().getRedirect(BuiltInRegistries.BLOCK.getKey(block));
+        if (redirectId != null) {
+            Object redirected = EntryResolver.resolveRegistryObject(redirectId, EntryResolver.RegistryType.BLOCK, EntryResolver.RegistryType.ENTITY);
+            if (redirected != null) return redirected;
+        }
+        return block;
     }
 
     public Object getContextAwareEntry(Object target, Minecraft minecraft, BlockPos pos) {

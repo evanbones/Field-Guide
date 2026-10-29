@@ -143,6 +143,12 @@ dependencies {
     // Reliable Remover
     modCompileOnly("maven.modrinth:reliable-remover:${dep("reliable_remover")}")
 
+    // Jade
+    optDep("jade")?.let {
+        modCompileOnly("maven.modrinth:jade:$it")
+        modRuntimeOnly("maven.modrinth:jade:$it")
+    }
+
     // Scholar
     optDep("scholar")?.let {
         modCompileOnly("maven.modrinth:scholar:$it")
@@ -250,6 +256,7 @@ publishMods {
         optional("yacl")
         if (optDep("emi") != null) optional("emi")
         if (optDep("kubejs") != null) optional("kubejs")
+        if (optDep("jade") != null) optional("jade")
     }
 
     curseforge {
@@ -262,6 +269,7 @@ publishMods {
         optional("yacl")
         if (optDep("emi") != null) optional("emi")
         if (optDep("kubejs") != null) optional("kubejs")
+        if (optDep("jade") != null) optional("jade")
         client = true
         server = true
     }

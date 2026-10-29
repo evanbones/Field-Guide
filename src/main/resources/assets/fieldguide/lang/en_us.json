@@ -45,6 +45,8 @@
 
   "option.fieldguide.hide_undiscovered_from_search": "Hide Undiscovered From Search",
   "option.fieldguide.hide_undiscovered_from_search.tooltip": "If enabled, undiscovered entries will be hidden from search results.",
+  "option.fieldguide.hide_undiscovered_in_jade": "Hide Undiscovered Names in Jade",
+  "option.fieldguide.hide_undiscovered_in_jade.tooltip": "If enabled, Jade will show '???' instead of the name of mobs and blocks that have not been discovered yet.",
 
   "option.fieldguide.disable_scanning": "Disable Scanning",
   "option.fieldguide.disable_scanning.tooltip": "If enabled, you will no longer be able to scan entries with spyglasses.",
@@ -118,7 +120,9 @@
   "option.fieldguide.grant_xp_on_scan.tooltip": "If enabled, discovering a new entry via scanning will grant the player experience points.",
 
   "option.fieldguide.xp_amount_on_scan": "XP Amount on Scan",
-  "option.fieldguide.xp_amount_on_scan.tooltip": "The amount of experience points granted when an entry is successfully scanned for the first time.",
+  "option.fieldguide.xp_amount_on_scan.tooltip": "The amount of experience points granted when an entry is successfully scanned for the first time. Used for categories not listed in Category XP Amounts.",
+  "option.fieldguide.category_xp_amounts": "Category XP Amounts",
+  "option.fieldguide.category_xp_amounts.tooltip": "Experience points granted when an entry in a specific category is scanned for the first time, overriding the default XP amount. Format: category_id=amount",
 
   "option.fieldguide.enable_reliable_remover": "Reliable Remover Integration",
   "option.fieldguide.enable_reliable_remover.tooltip": "Whether or not blacklisted items should be removed from Field Guide entries and loot displays.",

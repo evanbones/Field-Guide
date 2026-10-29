@@ -11,6 +11,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -57,11 +58,13 @@ public class ServerConfig {
 
     public boolean showUndiscoveredNames = false;
     public boolean hideUndiscoveredFromSearch = false;
+    public boolean hideUndiscoveredInJade = false;
 
     public double scanSpeed = 1.0D;
     public double minScanHitboxSize = 1.0D;
     public boolean grantXpOnScan = true;
     public int xpAmountOnScan = 5;
+    public Map<String, Integer> categoryXpAmounts = defaultCategoryXpAmounts();
 
     public boolean enableReliableRemover = true;
     public boolean exposureUnlockViaPhotograph = true;
@@ -69,6 +72,15 @@ public class ServerConfig {
     public List<String> globalScanCommands = new ArrayList<>();
     public Map<String, List<String>> categoryScanCommands = new HashMap<>();
     public Map<String, List<String>> entryScanCommands = new HashMap<>();
+
+    public static Map<String, Integer> defaultCategoryXpAmounts() {
+        Map<String, Integer> amounts = new LinkedHashMap<>();
+        amounts.put("fieldguide:bosses", 50);
+        amounts.put("fieldguide:monsters", 7);
+        amounts.put("fieldguide:animals", 5);
+        amounts.put("fieldguide:plants", 2);
+        return amounts;
+    }
 
     public static ServerConfig get() {
         if (SYNCED_INSTANCE != null) {
@@ -102,6 +114,7 @@ public class ServerConfig {
                 if (INSTANCE.categoryScanCommands == null) INSTANCE.categoryScanCommands = new HashMap<>();
                 if (INSTANCE.entryScanCommands == null) INSTANCE.entryScanCommands = new HashMap<>();
                 if (INSTANCE.globalScanCommands == null) INSTANCE.globalScanCommands = new ArrayList<>();
+                if (INSTANCE.categoryXpAmounts == null) INSTANCE.categoryXpAmounts = defaultCategoryXpAmounts();
             } catch (Exception e) {
                 Constants.LOG.error("Failed to load fieldguide-server.json", e);
                 INSTANCE = new ServerConfig();
