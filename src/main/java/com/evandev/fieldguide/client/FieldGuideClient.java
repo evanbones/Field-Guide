@@ -108,9 +108,12 @@ public class FieldGuideClient {
     }
 
     public static void openGuide() {
+        if (canOpenGuide()) showGuide();
+    }
+
+    public static void showGuide() {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.screen == null && minecraft.player != null) {
-            if (!canOpenGuide()) return;
             minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.BOOK_PAGE_TURN, 1.0F, 1.0F));
             ClientFieldGuideManager manager = ClientFieldGuideManager.getInstance();
             long lastTime = manager.getLastUnlockTime();

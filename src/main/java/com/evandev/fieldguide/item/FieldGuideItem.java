@@ -12,6 +12,15 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
+//? if <1.21 {
+/*import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LecternBlock;
+import net.minecraft.world.level.block.state.BlockState;
+*///?}
+
 //? if <26.1 {
 import net.minecraft.world.InteractionResultHolder;
 
@@ -59,6 +68,19 @@ public class FieldGuideItem extends Item {
         /*return InteractionResult.SUCCESS;
         *///?}
     }
+
+    //? if <1.21 {
+    /*@Override
+    public @NotNull InteractionResult useOn(@NotNull UseOnContext context) {
+        Level level = context.getLevel();
+        BlockPos pos = context.getClickedPos();
+        BlockState state = level.getBlockState(pos);
+        if (state.is(Blocks.LECTERN) && LecternBlock.tryPlaceBook(context.getPlayer(), level, pos, state, context.getItemInHand())) {
+            return InteractionResult.sidedSuccess(level.isClientSide);
+        }
+        return InteractionResult.PASS;
+    }
+    *///?}
 
     @Override
     //? if >=1.21 && <26.1 {

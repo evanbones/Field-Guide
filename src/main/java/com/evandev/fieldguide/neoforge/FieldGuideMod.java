@@ -83,6 +83,7 @@ public class FieldGuideMod {
         registrar.playToClient(ProgressUpdatePacket.TYPE, ProgressUpdatePacket.CODEC, clientHandler(ProgressUpdatePacket::handleClient));
         registrar.playToClient(ExportContentPacket.TYPE, ExportContentPacket.CODEC, clientHandler(ExportContentPacket::handleClient));
         registrar.playToClient(SyncConfigPacket.TYPE, SyncConfigPacket.CODEC, clientHandler(SyncConfigPacket::handleClient));
+        registrar.playToClient(OpenGuidePacket.TYPE, OpenGuidePacket.CODEC, clientHandler(OpenGuidePacket::handleClient));
 
         registrar.playToServer(ScanUnlockPacket.TYPE, ScanUnlockPacket.CODEC, serverHandler(ScanUnlockPacket::handleServer));
         registrar.playToServer(MarkSeenPacket.TYPE, MarkSeenPacket.CODEC, serverHandler(MarkSeenPacket::handleServer));

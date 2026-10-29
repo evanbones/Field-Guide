@@ -59,6 +59,7 @@ public class FieldGuideMod {
         clientbound(ProgressUpdatePacket.class, ProgressUpdatePacket.TYPE, ProgressUpdatePacket.CODEC, ProgressUpdatePacket::handleClient);
         clientbound(ExportContentPacket.class, ExportContentPacket.TYPE, ExportContentPacket.CODEC, ExportContentPacket::handleClient);
         clientbound(SyncConfigPacket.class, SyncConfigPacket.TYPE, SyncConfigPacket.CODEC, SyncConfigPacket::handleClient);
+        clientbound(OpenGuidePacket.class, OpenGuidePacket.TYPE, OpenGuidePacket.CODEC, OpenGuidePacket::handleClient);
 
         serverbound(ScanUnlockPacket.class, ScanUnlockPacket.TYPE, ScanUnlockPacket.CODEC, ScanUnlockPacket::handleServer);
         serverbound(MarkSeenPacket.class, MarkSeenPacket.TYPE, MarkSeenPacket.CODEC, MarkSeenPacket::handleServer);

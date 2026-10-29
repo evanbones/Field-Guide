@@ -1,3 +1,3 @@
-### Fixed
+### Added
 
-- Fixed sapling entries showing up alongside their tree entries on first world load.
+- The Field Guide can now be placed on lecterns.

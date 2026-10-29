@@ -77,6 +77,7 @@ public class FieldGuideFabricClient implements ClientModInitializer {
         receive(SyncCategoriesPacket.TYPE, SyncCategoriesPacket::handleClient);
         receive(ProgressUpdatePacket.TYPE, ProgressUpdatePacket::handleClient);
         receive(SyncConfigPacket.TYPE, SyncConfigPacket::handleClient);
+        receive(OpenGuidePacket.TYPE, OpenGuidePacket::handleClient);
         receive(ExportContentPacket.TYPE, ExportContentPacket::handleClient);
 
         //? if <26.1 {

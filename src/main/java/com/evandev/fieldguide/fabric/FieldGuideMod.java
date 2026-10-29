@@ -54,6 +54,7 @@ public class FieldGuideMod implements ModInitializer {
         clientbound(ExportContentPacket.TYPE, ExportContentPacket.CODEC);
         clientbound(ProgressUpdatePacket.TYPE, ProgressUpdatePacket.CODEC);
         clientbound(SyncConfigPacket.TYPE, SyncConfigPacket.CODEC);
+        clientbound(OpenGuidePacket.TYPE, OpenGuidePacket.CODEC);
 
         serverbound(ScanUnlockPacket.TYPE, ScanUnlockPacket.CODEC);
         serverbound(MarkSeenPacket.TYPE, MarkSeenPacket.CODEC);
