@@ -1,3 +1,3 @@
 ### Added
 
-- The Field Guide can now be placed on lecterns.
+- The Field Guide can now be placed in chiseled bookshelves.
