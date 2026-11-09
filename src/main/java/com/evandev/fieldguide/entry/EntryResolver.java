@@ -1,5 +1,6 @@
 package com.evandev.fieldguide.entry;
 
+import com.evandev.fieldguide.optimization.IndexedUnlockSet;
 import com.evandev.fieldguide.api.AutoPopulateRegistry;
 import com.evandev.fieldguide.api.GuideEntry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -250,6 +251,10 @@ public class EntryResolver {
         if (rawId != null) {
             String rawStr = rawId.toString();
             if (unlockedEntries.contains(rawStr + suffix)) return true;
+
+            if (unlockedEntries instanceof IndexedUnlockSet indexed && indexed.canUseIndex()) {
+                return indexed.matches(rawId, id, variantId);
+            }
 
             for (String u : unlockedEntries) {
                 if (variantId != null && !variantId.isEmpty()) {

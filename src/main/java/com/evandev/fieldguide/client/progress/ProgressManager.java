@@ -1,5 +1,6 @@
 package com.evandev.fieldguide.client.progress;
 
+import com.evandev.fieldguide.optimization.IndexedUnlockSet;
 import com.evandev.fieldguide.Constants;
 import com.evandev.fieldguide.FieldGuideLimits;
 import com.evandev.fieldguide.api.EntryVariantData;
@@ -42,7 +43,7 @@ public class ProgressManager {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final ProgressManager INSTANCE = new ProgressManager();
 
-    private final Set<String> unlockedEntries = new HashSet<>();
+    private final Set<String> unlockedEntries = new IndexedUnlockSet();
     private final Set<String> seenEntries = new HashSet<>();
     private final Map<String, Long> discoveryTimes = new HashMap<>();
     private final Map<String, Long> discoveryGameTimes = new HashMap<>();

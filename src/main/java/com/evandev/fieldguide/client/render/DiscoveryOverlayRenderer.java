@@ -457,16 +457,16 @@ public final class DiscoveryOverlayRenderer {
                     }
                     for (int lx = 0; lx < 16; lx++) {
                         for (int lz = 0; lz < 16; lz++) {
-                            BlockState state = section.getBlockState(lx, ly, lz);
-                            if (state.isAir()) {
-                                continue;
-                            }
                             int wx = (cx << 4) + lx;
                             int wz = (cz << 4) + lz;
                             double dx = wx + 0.5 - px;
                             double dy = wy + 0.5 - py;
                             double dz = wz + 0.5 - pz;
                             if (dx * dx + dy * dy + dz * dz > maxSq) {
+                                continue;
+                            }
+                            BlockState state = section.getBlockState(lx, ly, lz);
+                            if (state.isAir()) {
                                 continue;
                             }
                             Block block = state.getBlock();
@@ -519,19 +519,15 @@ public final class DiscoveryOverlayRenderer {
 
     private static boolean isEntityPartiallyVisible(Level level, Player player, Vec3 eye, Entity entity) {
         AABB box = entity.getBoundingBox();
-        Vec3[] points = {
-                box.getCenter(),
-                new Vec3(box.minX, box.minY, box.minZ), new Vec3(box.maxX, box.minY, box.minZ),
-                new Vec3(box.minX, box.maxY, box.minZ), new Vec3(box.maxX, box.maxY, box.minZ),
-                new Vec3(box.minX, box.minY, box.maxZ), new Vec3(box.maxX, box.minY, box.maxZ),
-                new Vec3(box.minX, box.maxY, box.maxZ), new Vec3(box.maxX, box.maxY, box.maxZ)
-        };
-        for (Vec3 point : points) {
-            if (sightClear(level, player, eye, point, null)) {
-                return true;
-            }
-        }
-        return false;
+        if (sightClear(level, player, eye, box.getCenter(), null)) return true;
+        if (sightClear(level, player, eye, new Vec3(box.minX, box.minY, box.minZ), null)) return true;
+        if (sightClear(level, player, eye, new Vec3(box.maxX, box.minY, box.minZ), null)) return true;
+        if (sightClear(level, player, eye, new Vec3(box.minX, box.maxY, box.minZ), null)) return true;
+        if (sightClear(level, player, eye, new Vec3(box.maxX, box.maxY, box.minZ), null)) return true;
+        if (sightClear(level, player, eye, new Vec3(box.minX, box.minY, box.maxZ), null)) return true;
+        if (sightClear(level, player, eye, new Vec3(box.maxX, box.minY, box.maxZ), null)) return true;
+        if (sightClear(level, player, eye, new Vec3(box.minX, box.maxY, box.maxZ), null)) return true;
+        return sightClear(level, player, eye, new Vec3(box.maxX, box.maxY, box.maxZ), null);
     }
 
     private static boolean sightClear(Level level, Player player, Vec3 from, Vec3 to, BlockPos targetPos) {

@@ -1,5 +1,6 @@
 package com.evandev.fieldguide.client.manager;
 
+import com.evandev.fieldguide.optimization.FieldGuidePerformance;
 import com.evandev.fieldguide.ModDataComponents;
 import com.evandev.fieldguide.api.AutoPopulateRegistry;
 import com.evandev.fieldguide.api.EntryVariantData;
@@ -185,13 +186,7 @@ public class ClientLootManager {
     }
 
     private List<ItemStack> distinctLoot(List<ItemStack> rawDrops) {
-        List<ItemStack> distinct = new ArrayList<>();
-        for (ItemStack stack : rawDrops) {
-            if (distinct.stream().noneMatch(s -> isSameLootItem(s, stack))) {
-                distinct.add(stack);
-            }
-        }
-        return distinct;
+        return FieldGuidePerformance.distinctLoot(rawDrops);
     }
 
     private boolean isSameLootItem(ItemStack a, ItemStack b) {

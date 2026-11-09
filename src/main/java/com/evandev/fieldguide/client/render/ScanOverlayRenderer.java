@@ -349,6 +349,9 @@ public class ScanOverlayRenderer {
         //?} else {
         /*BlockModelRenderState blockRenderState = new BlockModelRenderState();
         BlockModelResolver resolver = new BlockModelResolver(mc.getModelManager());
+        float localScanLimitY = fillHeight >= 1.0f ? 10000.0f : (globalScanLimitY - (float) camPos.y);
+        SubmitNodeCollector depthCollector = new ScanNodeCollector(collector, 1f, 1f, 1f, 0f, localScanLimitY, true);
+        SubmitNodeCollector tintedCollector = new ScanNodeCollector(collector, red, green, blue, alpha, localScanLimitY, false);
         *///?}
 
         for (BlockPos pos : blocksToRender) {
@@ -363,13 +366,6 @@ public class ScanOverlayRenderer {
                 double x = pos.getX() - camPos.x + offset.x;
                 double y = pos.getY() - camPos.y + offset.y;
                 double z = pos.getZ() - camPos.z + offset.z;
-
-                //? if >=26.1 {
-                /*float localScanLimitY = fillHeight >= 1.0f ? 10000.0f : (globalScanLimitY - (float) camPos.y);
-
-                SubmitNodeCollector depthCollector = new ScanNodeCollector(collector, 1f, 1f, 1f, 0f, localScanLimitY, true);
-                SubmitNodeCollector tintedCollector = new ScanNodeCollector(collector, red, green, blue, alpha, localScanLimitY, false);
-                *///?}
 
                 poseStack.pushPose();
                 poseStack.translate(x, y, z);
@@ -477,7 +473,7 @@ public class ScanOverlayRenderer {
         BlockPos trunkStart = startPos;
 
         if (startState.is(BlockTags.LEAVES)) {
-            Queue<BlockPos> queue = new LinkedList<>();
+            Queue<BlockPos> queue = new ArrayDeque<>();
             Set<BlockPos> visited = new HashSet<>();
             queue.add(startPos);
             visited.add(startPos);
@@ -502,7 +498,7 @@ public class ScanOverlayRenderer {
         }
 
         Set<BlockPos> trunk = new HashSet<>();
-        Queue<BlockPos> trunkQueue = new LinkedList<>();
+        Queue<BlockPos> trunkQueue = new ArrayDeque<>();
         trunkQueue.add(trunkStart);
         trunk.add(trunkStart);
 
@@ -526,7 +522,7 @@ public class ScanOverlayRenderer {
 
         Set<BlockPos> leaves = new HashSet<>();
         Map<BlockPos, Integer> leafDistances = new HashMap<>();
-        Queue<BlockPos> leafQueue = new LinkedList<>();
+        Queue<BlockPos> leafQueue = new ArrayDeque<>();
 
         for (BlockPos logPos : trunk) {
             leafQueue.add(logPos);

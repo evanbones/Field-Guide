@@ -26,6 +26,7 @@ import net.minecraft.nbt.Tag;
 
 //? if >=26.1 {
 /*import com.mojang.serialization.DataResult;
+import com.mojang.serialization.DynamicOps;
 import net.minecraft.nbt.*;
 
 import java.util.Optional;
@@ -84,6 +85,9 @@ public class ClientCacheManager {
         HolderLookup.Provider provider = getRegistryAccess();
         Path dropFile = getSessionDir().resolve("drops.nbt");
         CompoundTag root = loadNbt(dropFile);
+        //? if >=26.1 {
+        /*DynamicOps<Tag> serializationContext = null;
+        *///?}
 
         for (Map.Entry<ResourceLocation, List<ItemStack>> entry : allDrops.entrySet()) {
             ListTag list = new ListTag();
@@ -93,7 +97,8 @@ public class ClientCacheManager {
                 //?} else if <1.21 {
                 /*if (!stack.isEmpty()) list.add(stack.save(new CompoundTag()));
                 *///?} else {
-                /*DataResult<Tag> result = ItemStack.OPTIONAL_CODEC.encodeStart(provider.createSerializationContext(NbtOps.INSTANCE), stack);
+                /*if (serializationContext == null) serializationContext = provider.createSerializationContext(NbtOps.INSTANCE);
+                DataResult<Tag> result = ItemStack.OPTIONAL_CODEC.encodeStart(serializationContext, stack);
                 result.ifSuccess(list::add);
                 *///?}
             }
@@ -127,8 +132,10 @@ public class ClientCacheManager {
             if (listOpt.isPresent()) {
                 ListTag list = listOpt.get();
                 List<ItemStack> drops = new ArrayList<>();
+                DynamicOps<Tag> serializationContext = null;
                 for (Tag tag : list) {
-                    DataResult<ItemStack> result = ItemStack.OPTIONAL_CODEC.parse(provider.createSerializationContext(NbtOps.INSTANCE), tag);
+                    if (serializationContext == null) serializationContext = provider.createSerializationContext(NbtOps.INSTANCE);
+                    DataResult<ItemStack> result = ItemStack.OPTIONAL_CODEC.parse(serializationContext, tag);
                     result.ifSuccess(drops::add);
                 }
                 return drops;

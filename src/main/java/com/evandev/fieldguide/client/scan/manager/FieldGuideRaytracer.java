@@ -1,5 +1,6 @@
 package com.evandev.fieldguide.client.scan.manager;
 
+import com.evandev.fieldguide.optimization.FieldGuidePerformance;
 import com.evandev.fieldguide.Constants;
 import com.evandev.fieldguide.api.AutoPopulateRegistry;
 import com.evandev.fieldguide.api.Category;
@@ -231,36 +232,38 @@ public class FieldGuideRaytracer {
         Object bestMatch = null;
         int maxScore = 0;
 
-        BlockPos canopyPos = ScanContextHelper.traceTreeCanopy(minecraft.level, hitPos, 32, upId -> {
-            for (Object entry : possibleEntries) {
-                if (entry instanceof GuideEntry composite && composite.containsComponent(upId)) {
-                    return true;
-                }
-            }
-            return false;
-        });
-
-        Map<Object, Integer> scoreMap = new HashMap<>();
-
-        ScanContextHelper.sampleNearbyBlocks(minecraft.level, hitPos, canopyPos, (pos, state) -> {
-            ResourceLocation blockId = BuiltInRegistries.BLOCK.getKey(state.getBlock());
-            if (state.getBlock().equals(actualTargetKey)) return;
-
-            for (Object entry : possibleEntries) {
-                if (entry instanceof GuideEntry composite && composite.isComposite()) {
-                    if (composite.displayId() != null && composite.displayId().equals(blockId)) {
-                        scoreMap.put(entry, scoreMap.getOrDefault(entry, 0) + 2);
-                    } else if (composite.childEntries() != null && composite.childEntries().contains(blockId)) {
-                        scoreMap.put(entry, scoreMap.getOrDefault(entry, 0) + 1);
+        if (FieldGuidePerformance.hasComposite(possibleEntries)) {
+            BlockPos canopyPos = ScanContextHelper.traceTreeCanopy(minecraft.level, hitPos, 32, upId -> {
+                for (Object entry : possibleEntries) {
+                    if (entry instanceof GuideEntry composite && composite.containsComponent(upId)) {
+                        return true;
                     }
                 }
-            }
-        });
+                return false;
+            });
 
-        for (Map.Entry<Object, Integer> entryScore : scoreMap.entrySet()) {
-            if (entryScore.getValue() > maxScore) {
-                maxScore = entryScore.getValue();
-                bestMatch = entryScore.getKey();
+            Map<Object, Integer> scoreMap = new HashMap<>();
+
+            ScanContextHelper.sampleNearbyBlocks(minecraft.level, hitPos, canopyPos, (pos, state) -> {
+                ResourceLocation blockId = BuiltInRegistries.BLOCK.getKey(state.getBlock());
+                if (state.getBlock().equals(actualTargetKey)) return;
+
+                for (Object entry : possibleEntries) {
+                    if (entry instanceof GuideEntry composite && composite.isComposite()) {
+                        if (composite.displayId() != null && composite.displayId().equals(blockId)) {
+                            scoreMap.put(entry, scoreMap.getOrDefault(entry, 0) + 2);
+                        } else if (composite.childEntries() != null && composite.childEntries().contains(blockId)) {
+                            scoreMap.put(entry, scoreMap.getOrDefault(entry, 0) + 1);
+                        }
+                    }
+                }
+            });
+
+            for (Map.Entry<Object, Integer> entryScore : scoreMap.entrySet()) {
+                if (entryScore.getValue() > maxScore) {
+                    maxScore = entryScore.getValue();
+                    bestMatch = entryScore.getKey();
+                }
             }
         }
 

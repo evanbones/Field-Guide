@@ -420,6 +420,15 @@ public class PlayerFieldGuideProgress {
             }
         }
 
+        List<String> killedOnly = ServerFieldGuideManager.getInstance().getAllEntryIds().stream()
+                .filter(id -> ServerFieldGuideManager.getInstance().getUnlockData(id).triggers().contains(EntryUnlockData.UnlockTrigger.KILL))
+                .map(ResourceLocation::toString)
+                .toList();
+        List<String> eatenOnly = ServerFieldGuideManager.getInstance().getAllEntryIds().stream()
+                .filter(id -> ServerFieldGuideManager.getInstance().getUnlockData(id).triggers().contains(EntryUnlockData.UnlockTrigger.EAT))
+                .map(ResourceLocation::toString)
+                .toList();
+
         boolean first = true;
         for (int i = 0; i < iterations; i += chunkSize) {
             List<String> unlockedChunk = chunkAt(allUnlocked, i, chunkSize);
@@ -452,14 +461,8 @@ public class PlayerFieldGuideProgress {
                             .customNames(names)
                             .customDescriptions(descs)
                             .selectedVariants(variants)
-                            .killedOnly(ServerFieldGuideManager.getInstance().getAllEntryIds().stream()
-                                    .filter(id -> ServerFieldGuideManager.getInstance().getUnlockData(id).triggers().contains(EntryUnlockData.UnlockTrigger.KILL))
-                                    .map(ResourceLocation::toString)
-                                    .toList())
-                            .eatenOnly(ServerFieldGuideManager.getInstance().getAllEntryIds().stream()
-                                    .filter(id -> ServerFieldGuideManager.getInstance().getUnlockData(id).triggers().contains(EntryUnlockData.UnlockTrigger.EAT))
-                                    .map(ResourceLocation::toString)
-                                    .toList())
+                            .killedOnly(killedOnly)
+                            .eatenOnly(eatenOnly)
                             .entryTriggers(first ? allTriggers : Collections.emptyMap())
                             .build(),
                     player
