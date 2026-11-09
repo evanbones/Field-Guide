@@ -225,42 +225,51 @@ public class FieldGuideRaytracer {
         return result;
     }
 
+    private static boolean hasComposite(List<Object> entries) {
+        for (Object entry : entries) {
+            if (entry instanceof GuideEntry ge && ge.isComposite()) return true;
+        }
+        return false;
+    }
+
     public Object disambiguateComposite(Minecraft minecraft, BlockPos hitPos, List<Object> possibleEntries, Object actualTargetKey) {
         if (minecraft.level == null || hitPos == null) return possibleEntries.get(0);
 
         Object bestMatch = null;
         int maxScore = 0;
 
-        BlockPos canopyPos = ScanContextHelper.traceTreeCanopy(minecraft.level, hitPos, 32, upId -> {
-            for (Object entry : possibleEntries) {
-                if (entry instanceof GuideEntry composite && composite.containsComponent(upId)) {
-                    return true;
-                }
-            }
-            return false;
-        });
-
-        Map<Object, Integer> scoreMap = new HashMap<>();
-
-        ScanContextHelper.sampleNearbyBlocks(minecraft.level, hitPos, canopyPos, (pos, state) -> {
-            ResourceLocation blockId = BuiltInRegistries.BLOCK.getKey(state.getBlock());
-            if (state.getBlock().equals(actualTargetKey)) return;
-
-            for (Object entry : possibleEntries) {
-                if (entry instanceof GuideEntry composite && composite.isComposite()) {
-                    if (composite.displayId() != null && composite.displayId().equals(blockId)) {
-                        scoreMap.put(entry, scoreMap.getOrDefault(entry, 0) + 2);
-                    } else if (composite.childEntries() != null && composite.childEntries().contains(blockId)) {
-                        scoreMap.put(entry, scoreMap.getOrDefault(entry, 0) + 1);
+        if (hasComposite(possibleEntries)) {
+            BlockPos canopyPos = ScanContextHelper.traceTreeCanopy(minecraft.level, hitPos, 32, upId -> {
+                for (Object entry : possibleEntries) {
+                    if (entry instanceof GuideEntry composite && composite.containsComponent(upId)) {
+                        return true;
                     }
                 }
-            }
-        });
+                return false;
+            });
 
-        for (Map.Entry<Object, Integer> entryScore : scoreMap.entrySet()) {
-            if (entryScore.getValue() > maxScore) {
-                maxScore = entryScore.getValue();
-                bestMatch = entryScore.getKey();
+            Map<Object, Integer> scoreMap = new HashMap<>();
+
+            ScanContextHelper.sampleNearbyBlocks(minecraft.level, hitPos, canopyPos, (pos, state) -> {
+                ResourceLocation blockId = BuiltInRegistries.BLOCK.getKey(state.getBlock());
+                if (state.getBlock().equals(actualTargetKey)) return;
+
+                for (Object entry : possibleEntries) {
+                    if (entry instanceof GuideEntry composite && composite.isComposite()) {
+                        if (composite.displayId() != null && composite.displayId().equals(blockId)) {
+                            scoreMap.put(entry, scoreMap.getOrDefault(entry, 0) + 2);
+                        } else if (composite.childEntries() != null && composite.childEntries().contains(blockId)) {
+                            scoreMap.put(entry, scoreMap.getOrDefault(entry, 0) + 1);
+                        }
+                    }
+                }
+            });
+
+            for (Map.Entry<Object, Integer> entryScore : scoreMap.entrySet()) {
+                if (entryScore.getValue() > maxScore) {
+                    maxScore = entryScore.getValue();
+                    bestMatch = entryScore.getKey();
+                }
             }
         }
 

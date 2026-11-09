@@ -27,6 +27,7 @@ import net.minecraft.nbt.Tag;
 //? if >=26.1 {
 /*import com.mojang.serialization.DataResult;
 import net.minecraft.nbt.*;
+import net.minecraft.resources.RegistryOps;
 
 import java.util.Optional;
 *///?}
@@ -84,6 +85,9 @@ public class ClientCacheManager {
         HolderLookup.Provider provider = getRegistryAccess();
         Path dropFile = getSessionDir().resolve("drops.nbt");
         CompoundTag root = loadNbt(dropFile);
+        //? if >=26.1 {
+        /*RegistryOps<Tag> ops = provider.createSerializationContext(NbtOps.INSTANCE);
+        *///?}
 
         for (Map.Entry<ResourceLocation, List<ItemStack>> entry : allDrops.entrySet()) {
             ListTag list = new ListTag();
@@ -93,7 +97,7 @@ public class ClientCacheManager {
                 //?} else if <1.21 {
                 /*if (!stack.isEmpty()) list.add(stack.save(new CompoundTag()));
                 *///?} else {
-                /*DataResult<Tag> result = ItemStack.OPTIONAL_CODEC.encodeStart(provider.createSerializationContext(NbtOps.INSTANCE), stack);
+                /*DataResult<Tag> result = ItemStack.OPTIONAL_CODEC.encodeStart(ops, stack);
                 result.ifSuccess(list::add);
                 *///?}
             }
@@ -127,8 +131,9 @@ public class ClientCacheManager {
             if (listOpt.isPresent()) {
                 ListTag list = listOpt.get();
                 List<ItemStack> drops = new ArrayList<>();
+                RegistryOps<Tag> ops = provider.createSerializationContext(NbtOps.INSTANCE);
                 for (Tag tag : list) {
-                    DataResult<ItemStack> result = ItemStack.OPTIONAL_CODEC.parse(provider.createSerializationContext(NbtOps.INSTANCE), tag);
+                    DataResult<ItemStack> result = ItemStack.OPTIONAL_CODEC.parse(ops, tag);
                     result.ifSuccess(drops::add);
                 }
                 return drops;

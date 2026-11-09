@@ -81,11 +81,17 @@ public final class DiscoveryOverlayRenderer {
             {0.1, 0.1, 0.9}, {0.9, 0.1, 0.9}, {0.1, 0.9, 0.9}, {0.9, 0.9, 0.9}
     };
 
+    private static final long REFRESH_BUDGET_NS = 1_500_000L;
+    private static final int COMPOSITE_CACHE_TICKS = 100;
+
     private static final List<BlockPos> blockTargets = new ArrayList<>();
     private static final Map<BlockPos, Float> blockFade = new HashMap<>();
     private static final Map<Entity, Float> entityFade = new HashMap<>();
     private static Level cachedLevel;
     private static long lastRecomputeTime = Long.MIN_VALUE;
+    private static RefreshJob refreshJob;
+    private static Map<BlockPos, CachedComposite> compositeCache = new HashMap<>();
+    private static Map<BlockPos, CachedComposite> nextCompositeCache = new HashMap<>();
     private static long lastRenderMs = 0L;
 
     //? if <26.1 {
@@ -124,6 +130,7 @@ public final class DiscoveryOverlayRenderer {
             }
             currentEntities = new HashSet<>(gatherEntityTargets(mc, player, activeRange, activeEntity, frustum));
         } else {
+            resetBlockTargets();
             currentBlocks = Collections.emptySet();
             currentEntities = Collections.emptySet();
         }
@@ -381,59 +388,110 @@ public final class DiscoveryOverlayRenderer {
         return result;
     }
 
+    private static void resetBlockTargets() {
+        blockTargets.clear();
+        refreshJob = null;
+        lastRecomputeTime = Long.MIN_VALUE;
+    }
+
     private static void refreshBlockTargets(Minecraft mc, Player player, double searchRange, Frustum frustum) {
         Level level = mc.level;
         if (level != cachedLevel) {
             cachedLevel = level;
-            blockTargets.clear();
-            lastRecomputeTime = Long.MIN_VALUE;
+            resetBlockTargets();
+            compositeCache.clear();
+            nextCompositeCache.clear();
         }
-        long now = level.getGameTime();
-        if (now == lastRecomputeTime) {
-            return;
-        }
-        if (lastRecomputeTime != Long.MIN_VALUE && now - lastRecomputeTime < RECOMPUTE_INTERVAL) {
-            return;
-        }
-        lastRecomputeTime = now;
-        blockTargets.clear();
-
-        BlockPos center = player.blockPosition();
-        int radius = (int) Math.ceil(searchRange);
-        double maxSq = searchRange * searchRange;
-        double px = player.getX();
-        double py = player.getEyeY();
-        double pz = player.getZ();
-        //? if <26.1 {
-        int minY = Math.max(level.getMinBuildHeight(), center.getY() - radius);
-        int maxY = Math.min(level.getMaxBuildHeight() - 1, center.getY() + radius);
-        //?} else {
-        /*int minY = Math.max(level.getMinY(), center.getY() - radius);
-        int maxY = Math.min(level.getMaxY(), center.getY() + radius);
-        *///?}
-        int chunkRadius = (radius >> 4) + 1;
-        int pcx = center.getX() >> 4;
-        int pcz = center.getZ() >> 4;
-
-        Map<Block, Integer> typeCode = new IdentityHashMap<>();
-        List<BlockPos> found = new ArrayList<>();
-
-        List<long[]> chunks = new ArrayList<>();
-        for (int cx = pcx - chunkRadius; cx <= pcx + chunkRadius; cx++) {
-            for (int cz = pcz - chunkRadius; cz <= pcz + chunkRadius; cz++) {
-                chunks.add(new long[]{cx, cz});
+        if (refreshJob == null) {
+            long now = level.getGameTime();
+            if (lastRecomputeTime != Long.MIN_VALUE && now - lastRecomputeTime < RECOMPUTE_INTERVAL) {
+                return;
             }
+            lastRecomputeTime = now;
+            refreshJob = new RefreshJob(level, player, searchRange);
         }
-        chunks.sort(Comparator.comparingDouble(c -> {
-            double ccx = (c[0] << 4) + 8 - px;
-            double ccz = (c[1] << 4) + 8 - pz;
-            return ccx * ccx + ccz * ccz;
-        }));
+        if (refreshJob.run(mc, player, frustum, System.nanoTime() + REFRESH_BUDGET_NS)) {
+            blockTargets.clear();
+            blockTargets.addAll(refreshJob.targets);
+            refreshJob = null;
+            compositeCache = nextCompositeCache;
+            nextCompositeCache = new HashMap<>();
+        }
+    }
 
-        outer:
-        for (long[] c : chunks) {
-            int cx = (int) c[0];
-            int cz = (int) c[1];
+    // TODO: this class is getting out of hand
+    private static final class RefreshJob {
+        private final double px, py, pz, maxSq;
+        private final int minY, maxY;
+        private final List<long[]> chunks = new ArrayList<>();
+        private final Map<Block, Integer> typeCode = new IdentityHashMap<>();
+        private final List<BlockPos> found = new ArrayList<>();
+        private final List<BlockPos> targets = new ArrayList<>();
+        private final BlockPos.MutableBlockPos neighbor = new BlockPos.MutableBlockPos();
+        private int chunkCursor;
+        private int verifyCursor = -1;
+
+        RefreshJob(Level level, Player player, double searchRange) {
+            BlockPos center = player.blockPosition();
+            int radius = (int) Math.ceil(searchRange);
+            maxSq = searchRange * searchRange;
+            px = player.getX();
+            py = player.getEyeY();
+            pz = player.getZ();
+            //? if <26.1 {
+            minY = Math.max(level.getMinBuildHeight(), center.getY() - radius);
+            maxY = Math.min(level.getMaxBuildHeight() - 1, center.getY() + radius);
+            //?} else {
+            /*minY = Math.max(level.getMinY(), center.getY() - radius);
+            maxY = Math.min(level.getMaxY(), center.getY() + radius);
+            *///?}
+            int chunkRadius = (radius >> 4) + 1;
+            int pcx = center.getX() >> 4;
+            int pcz = center.getZ() >> 4;
+            for (int cx = pcx - chunkRadius; cx <= pcx + chunkRadius; cx++) {
+                for (int cz = pcz - chunkRadius; cz <= pcz + chunkRadius; cz++) {
+                    chunks.add(new long[]{cx, cz});
+                }
+            }
+            chunks.sort(Comparator.comparingDouble(c -> {
+                double ccx = (c[0] << 4) + 8 - px;
+                double ccz = (c[1] << 4) + 8 - pz;
+                return ccx * ccx + ccz * ccz;
+            }));
+        }
+
+        boolean run(Minecraft mc, Player player, Frustum frustum, long deadline) {
+            Level level = mc.level;
+            while (verifyCursor < 0) {
+                if (chunkCursor >= chunks.size() || found.size() >= MAX_FOUND) {
+                    found.sort(Comparator.comparingDouble(p -> p.distToCenterSqr(px, py, pz)));
+                    verifyCursor = 0;
+                    break;
+                }
+                long[] c = chunks.get(chunkCursor++);
+                gatherChunk(level, (int) c[0], (int) c[1], frustum);
+                if (System.nanoTime() > deadline) {
+                    return false;
+                }
+            }
+
+            Vec3 eye = player.getEyePosition(1.0F);
+            while (verifyCursor < found.size() && targets.size() < MAX_RENDERED) {
+                BlockPos pos = found.get(verifyCursor++);
+                if (isBlockPartiallyVisible(level, player, eye, pos)) {
+                    Integer code = typeCode.get(level.getBlockState(pos).getBlock());
+                    if (code != null && (code == 1 || (code == 2 && isCompositeScannableAt(mc, pos)))) {
+                        targets.add(pos);
+                    }
+                }
+                if (System.nanoTime() > deadline) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private void gatherChunk(Level level, int cx, int cz, Frustum frustum) {
             LevelChunk chunk = level.getChunk(cx, cz);
             LevelChunkSection[] sections = chunk.getSections();
             //? if <26.1 {
@@ -457,16 +515,16 @@ public final class DiscoveryOverlayRenderer {
                     }
                     for (int lx = 0; lx < 16; lx++) {
                         for (int lz = 0; lz < 16; lz++) {
-                            BlockState state = section.getBlockState(lx, ly, lz);
-                            if (state.isAir()) {
-                                continue;
-                            }
                             int wx = (cx << 4) + lx;
                             int wz = (cz << 4) + lz;
                             double dx = wx + 0.5 - px;
                             double dy = wy + 0.5 - py;
                             double dz = wz + 0.5 - pz;
                             if (dx * dx + dy * dy + dz * dz > maxSq) {
+                                continue;
+                            }
+                            BlockState state = section.getBlockState(lx, ly, lz);
+                            if (state.isAir()) {
                                 continue;
                             }
                             Block block = state.getBlock();
@@ -478,12 +536,15 @@ public final class DiscoveryOverlayRenderer {
                             if (code == 0) {
                                 continue;
                             }
+                            if (isEnclosed(level, wx, wy, wz)) {
+                                continue;
+                            }
                             if (!frustum.isVisible(new AABB(wx, wy, wz, wx + 1, wy + 1, wz + 1))) {
                                 continue;
                             }
                             found.add(new BlockPos(wx, wy, wz));
                             if (found.size() >= MAX_FOUND) {
-                                break outer;
+                                return;
                             }
                         }
                     }
@@ -491,20 +552,33 @@ public final class DiscoveryOverlayRenderer {
             }
         }
 
-        found.sort(Comparator.comparingDouble(p -> p.distToCenterSqr(px, py, pz)));
-        Vec3 eye = player.getEyePosition(1.0F);
-        for (BlockPos pos : found) {
-            if (blockTargets.size() >= MAX_RENDERED) {
-                break;
-            }
-            if (!isBlockPartiallyVisible(level, player, eye, pos)) {
-                continue;
-            }
-            Integer code = typeCode.get(level.getBlockState(pos).getBlock());
-            if (code != null && (code == 1 || (code == 2 && isCompositeScannableAt(mc, pos)))) {
-                blockTargets.add(pos);
-            }
+        private boolean isEnclosed(Level level, int x, int y, int z) {
+            return isOpaque(level, x + 1, y, z) && isOpaque(level, x - 1, y, z)
+                    && isOpaque(level, x, y + 1, z) && isOpaque(level, x, y - 1, z)
+                    && isOpaque(level, x, y, z + 1) && isOpaque(level, x, y, z - 1);
         }
+
+        private boolean isOpaque(Level level, int x, int y, int z) {
+            neighbor.set(x, y, z);
+            //? if <26.1 {
+            return level.getBlockState(neighbor).isSolidRender(level, neighbor);
+            //?} else {
+            /*return level.getBlockState(neighbor).isSolidRender();
+            *///?}
+        }
+    }
+
+    private record CachedComposite(BlockState state, Object entry, long time) {
+    }
+
+    private static Object compositeEntryAt(Minecraft mc, BlockPos pos, BlockState state) {
+        long now = mc.level.getGameTime();
+        CachedComposite cached = compositeCache.get(pos);
+        if (cached == null || cached.state() != state || now - cached.time() > COMPOSITE_CACHE_TICKS) {
+            cached = new CachedComposite(state, FieldGuideRaytracer.getInstance().getContextAwareEntry(state.getBlock(), mc, pos), now);
+        }
+        nextCompositeCache.put(pos, cached);
+        return cached.entry();
     }
 
     private static boolean isBlockPartiallyVisible(Level level, Player player, Vec3 eye, BlockPos pos) {
@@ -567,8 +641,9 @@ public final class DiscoveryOverlayRenderer {
 
     private static boolean isCompositeScannableAt(Minecraft mc, BlockPos pos) {
         try {
-            Block block = mc.level.getBlockState(pos).getBlock();
-            Object entry = FieldGuideRaytracer.getInstance().getContextAwareEntry(block, mc, pos);
+            BlockState state = mc.level.getBlockState(pos);
+            Block block = state.getBlock();
+            Object entry = compositeEntryAt(mc, pos, state);
             if (entry == null) {
                 return false;
             }

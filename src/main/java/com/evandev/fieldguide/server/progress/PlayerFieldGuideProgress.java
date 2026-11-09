@@ -409,6 +409,8 @@ public class PlayerFieldGuideProgress {
         int iterations = Math.max(1, allUnlocked.size());
 
         Map<String, List<String>> allTriggers = new HashMap<>();
+        List<String> killedOnly = new ArrayList<>();
+        List<String> eatenOnly = new ArrayList<>();
         for (ResourceLocation resId : ServerFieldGuideManager.getInstance().getAllEntryIds()) {
             EntryUnlockData unlockData = ServerFieldGuideManager.getInstance().getUnlockData(resId);
             List<String> triggers = unlockData.triggers().stream()
@@ -418,6 +420,8 @@ public class PlayerFieldGuideProgress {
             if (!triggers.isEmpty()) {
                 allTriggers.put(resId.toString(), triggers);
             }
+            if (unlockData.triggers().contains(EntryUnlockData.UnlockTrigger.KILL)) killedOnly.add(resId.toString());
+            if (unlockData.triggers().contains(EntryUnlockData.UnlockTrigger.EAT)) eatenOnly.add(resId.toString());
         }
 
         boolean first = true;
@@ -452,14 +456,8 @@ public class PlayerFieldGuideProgress {
                             .customNames(names)
                             .customDescriptions(descs)
                             .selectedVariants(variants)
-                            .killedOnly(ServerFieldGuideManager.getInstance().getAllEntryIds().stream()
-                                    .filter(id -> ServerFieldGuideManager.getInstance().getUnlockData(id).triggers().contains(EntryUnlockData.UnlockTrigger.KILL))
-                                    .map(ResourceLocation::toString)
-                                    .toList())
-                            .eatenOnly(ServerFieldGuideManager.getInstance().getAllEntryIds().stream()
-                                    .filter(id -> ServerFieldGuideManager.getInstance().getUnlockData(id).triggers().contains(EntryUnlockData.UnlockTrigger.EAT))
-                                    .map(ResourceLocation::toString)
-                                    .toList())
+                            .killedOnly(killedOnly)
+                            .eatenOnly(eatenOnly)
                             .entryTriggers(first ? allTriggers : Collections.emptyMap())
                             .build(),
                     player

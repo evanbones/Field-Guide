@@ -186,28 +186,26 @@ public class ClientLootManager {
 
     private List<ItemStack> distinctLoot(List<ItemStack> rawDrops) {
         List<ItemStack> distinct = new ArrayList<>();
+        List<ItemStack> comparable = new ArrayList<>();
         for (ItemStack stack : rawDrops) {
-            if (distinct.stream().noneMatch(s -> isSameLootItem(s, stack))) {
+            ItemStack stripped = withoutDropData(stack);
+            if (comparable.stream().noneMatch(s -> ItemStack.isSameItemSameComponents(s, stripped))) {
                 distinct.add(stack);
+                comparable.add(stripped);
             }
         }
         return distinct;
     }
 
     private boolean isSameLootItem(ItemStack a, ItemStack b) {
-        if (!ItemStack.isSameItem(a, b)) return false;
+        return ItemStack.isSameItem(a, b) && ItemStack.isSameItemSameComponents(withoutDropData(a), withoutDropData(b));
+    }
 
-        ItemStack copyA = a.copy();
-        ItemStack copyB = b.copy();
-
-        ModDataComponents.remove(copyA, ModDataComponents.DROP_CHANCE);
-        ModDataComponents.remove(copyA, ModDataComponents.MIN_DROP);
-        ModDataComponents.remove(copyA, ModDataComponents.MAX_DROP);
-
-        ModDataComponents.remove(copyB, ModDataComponents.DROP_CHANCE);
-        ModDataComponents.remove(copyB, ModDataComponents.MIN_DROP);
-        ModDataComponents.remove(copyB, ModDataComponents.MAX_DROP);
-
-        return ItemStack.isSameItemSameComponents(copyA, copyB);
+    private static ItemStack withoutDropData(ItemStack stack) {
+        ItemStack copy = stack.copy();
+        ModDataComponents.remove(copy, ModDataComponents.DROP_CHANCE);
+        ModDataComponents.remove(copy, ModDataComponents.MIN_DROP);
+        ModDataComponents.remove(copy, ModDataComponents.MAX_DROP);
+        return copy;
     }
 }
