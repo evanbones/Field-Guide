@@ -1,4 +1,7 @@
+### Added
+
+- Added support for Neolithic variants.
+
 ### Fixed
 
-- Small performance improvements.
-- Periodic lag spikes when using the Lens.
+- Duplicate cow, chicken and pig variants when using Vanilla Backport.

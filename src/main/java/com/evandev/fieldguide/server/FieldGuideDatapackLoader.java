@@ -339,9 +339,9 @@ public final class FieldGuideDatapackLoader {
                 id -> id.getPath().endsWith(".json")
         );
 
-        // vanilla first so modded variants of the same entity are added after it
         List<Map.Entry<ResourceLocation, List<Resource>>> sortedVariantResources = new ArrayList<>(variantResources.entrySet());
-        sortedVariantResources.sort(Comparator.comparing(e -> !e.getKey().getNamespace().equals("minecraft")));
+        sortedVariantResources.sort(Comparator.<Map.Entry<ResourceLocation, List<Resource>>, Boolean>comparing(e -> !e.getKey().getNamespace().equals("minecraft"))
+                .thenComparing(e -> e.getValue().stream().noneMatch(r -> isOwnPack(r.sourcePackId()))));
 
         for (Map.Entry<ResourceLocation, List<Resource>> entry : sortedVariantResources) {
             for (Resource resource : entry.getValue()) {
@@ -379,7 +379,11 @@ public final class FieldGuideDatapackLoader {
                             DatapackVariantDefinition existing = data.variants.get(entityId);
                             if (existing != null && !replace) {
                                 List<DatapackVariant> merged = new ArrayList<>(existing.variants());
-                                merged.addAll(variantList);
+                                for (DatapackVariant variant : variantList) {
+                                    if (merged.stream().noneMatch(v -> v.nbt().equals(variant.nbt()))) {
+                                        merged.add(variant);
+                                    }
+                                }
                                 data.variants.put(entityId, new DatapackVariantDefinition(existing.replace(), merged));
                             } else {
                                 data.variants.put(entityId, new DatapackVariantDefinition(replace, variantList));
@@ -391,6 +395,10 @@ public final class FieldGuideDatapackLoader {
                 }
             }
         }
+    }
+
+    private static boolean isOwnPack(String packId) {
+        return packId.equals(Constants.MOD_ID) || packId.endsWith("/" + Constants.MOD_ID) || packId.endsWith(":" + Constants.MOD_ID);
     }
 
     private static void loadModifiers(ResourceManager resourceManager, String path, List<String> additions, List<String> removals) {

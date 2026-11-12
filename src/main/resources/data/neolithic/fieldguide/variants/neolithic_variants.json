@@ -1,0 +1,157 @@
+{
+  "entries": [
+    {
+      "id": "minecraft:cow",
+      "replace": true,
+      "conditions": [
+        {
+          "type": "mod_loaded",
+          "modid": "neolithic"
+        },
+        {
+          "type": "not",
+          "value": {
+            "type": "mod_loaded",
+            "modid": "mixed_litter"
+          }
+        }
+      ],
+      "variants": [
+        {
+          "id": "temperate",
+          "nbt": "{Variant: \"temperate\"}"
+        },
+        {
+          "id": "warm",
+          "nbt": "{Variant: \"warm\"}"
+        },
+        {
+          "id": "cold",
+          "nbt": "{Variant: \"cold\"}"
+        },
+        {
+          "id": "mountain",
+          "nbt": "{Variant: \"mountain\"}"
+        },
+        {
+          "id": "taiga",
+          "nbt": "{Variant: \"taiga\"}"
+        },
+        {
+          "id": "swamp",
+          "nbt": "{Variant: \"swamp\"}"
+        },
+        {
+          "id": "jungle",
+          "nbt": "{Variant: \"jungle\"}"
+        },
+        {
+          "id": "desert",
+          "nbt": "{Variant: \"desert\"}"
+        }
+      ]
+    },
+    {
+      "id": "minecraft:chicken",
+      "replace": true,
+      "conditions": [
+        {
+          "type": "mod_loaded",
+          "modid": "neolithic"
+        },
+        {
+          "type": "not",
+          "value": {
+            "type": "mod_loaded",
+            "modid": "mixed_litter"
+          }
+        }
+      ],
+      "variants": [
+        {
+          "id": "temperate",
+          "nbt": "{Variant: \"temperate\"}"
+        },
+        {
+          "id": "warm",
+          "nbt": "{Variant: \"warm\"}"
+        },
+        {
+          "id": "cold",
+          "nbt": "{Variant: \"cold\"}"
+        },
+        {
+          "id": "mountain",
+          "nbt": "{Variant: \"mountain\"}"
+        },
+        {
+          "id": "taiga",
+          "nbt": "{Variant: \"taiga\"}"
+        },
+        {
+          "id": "swamp",
+          "nbt": "{Variant: \"swamp\"}"
+        },
+        {
+          "id": "jungle",
+          "nbt": "{Variant: \"jungle\"}"
+        },
+        {
+          "id": "desert",
+          "nbt": "{Variant: \"desert\"}"
+        }
+      ]
+    },
+    {
+      "id": "minecraft:pig",
+      "replace": true,
+      "conditions": [
+        {
+          "type": "mod_loaded",
+          "modid": "neolithic"
+        },
+        {
+          "type": "not",
+          "value": {
+            "type": "mod_loaded",
+            "modid": "mixed_litter"
+          }
+        }
+      ],
+      "variants": [
+        {
+          "id": "temperate",
+          "nbt": "{Variant: \"temperate\"}"
+        },
+        {
+          "id": "warm",
+          "nbt": "{Variant: \"warm\"}"
+        },
+        {
+          "id": "cold",
+          "nbt": "{Variant: \"cold\"}"
+        },
+        {
+          "id": "mountain",
+          "nbt": "{Variant: \"mountain\"}"
+        },
+        {
+          "id": "taiga",
+          "nbt": "{Variant: \"taiga\"}"
+        },
+        {
+          "id": "swamp",
+          "nbt": "{Variant: \"swamp\"}"
+        },
+        {
+          "id": "jungle",
+          "nbt": "{Variant: \"jungle\"}"
+        },
+        {
+          "id": "desert",
+          "nbt": "{Variant: \"desert\"}"
+        }
+      ]
+    }
+  ]
+}
