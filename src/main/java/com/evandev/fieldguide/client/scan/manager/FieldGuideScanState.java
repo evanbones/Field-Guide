@@ -23,9 +23,6 @@ public class FieldGuideScanState {
     private BlockPos lastDisambiguatedPos = null;
     private Object lastDisambiguatedEntry = null;
 
-    private FieldGuideScanState() {
-    }
-
     public static FieldGuideScanState getInstance() {
         return INSTANCE;
     }

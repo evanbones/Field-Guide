@@ -11,8 +11,8 @@
         {
           "type": "not",
           "value": {
-            "type": "mod_loaded",
-            "modid": "mixed_litter"
+            "type": "mixed_litter_remodel",
+            "entity": "minecraft:cow"
           }
         }
       ],
@@ -62,8 +62,8 @@
         {
           "type": "not",
           "value": {
-            "type": "mod_loaded",
-            "modid": "mixed_litter"
+            "type": "mixed_litter_remodel",
+            "entity": "minecraft:chicken"
           }
         }
       ],
@@ -113,8 +113,8 @@
         {
           "type": "not",
           "value": {
-            "type": "mod_loaded",
-            "modid": "mixed_litter"
+            "type": "mixed_litter_remodel",
+            "entity": "minecraft:pig"
           }
         }
       ],

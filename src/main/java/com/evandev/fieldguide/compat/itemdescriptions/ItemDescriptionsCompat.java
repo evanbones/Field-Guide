@@ -15,9 +15,6 @@ import cc.cassian.item_descriptions.client.descriptions.ItemDescriptions;
 
 public class ItemDescriptionsCompat {
 
-    /**
-     * Attempts to find the best translation key using Item Descriptions' internal priorities
-     */
     public static String tryGetDescriptionKey(Object coreEntry) {
         DescriptionKey key = null;
 

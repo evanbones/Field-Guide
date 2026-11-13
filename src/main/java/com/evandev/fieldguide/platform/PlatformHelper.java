@@ -51,6 +51,14 @@ public class PlatformHelper {
         //?}
     }
 
+    public boolean isMixedLitterRemodelActive(String entityId) {
+        //? if neoforge && <26.1 {
+        return isModLoaded("mixed_litter") && MixedLitterCompat.isRemodelActive(entityId);
+        //?} else {
+        /*return false;
+        *///?}
+    }
+
     public void onEntryUnlocked(ServerPlayer player, ResourceLocation entryId, String variantId, boolean newlyUnlocked, PlayerFieldGuideProgress progress) {
         //? if (neoforge && <26.2) || <1.21 {
         if (isModLoaded("kubejs")) {

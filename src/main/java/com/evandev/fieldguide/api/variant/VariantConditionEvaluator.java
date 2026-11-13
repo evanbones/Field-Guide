@@ -35,6 +35,10 @@ public class VariantConditionEvaluator {
                 String modid = condition.get("modid").getAsString();
                 yield Services.PLATFORM.isModLoaded(modid);
             }
+            case "mixed_litter_remodel" -> {
+                String entity = condition.get("entity").getAsString();
+                yield Services.PLATFORM.isMixedLitterRemodelActive(entity);
+            }
             case "not" -> {
                 JsonObject value = condition.getAsJsonObject("value");
                 yield !evaluate(value);

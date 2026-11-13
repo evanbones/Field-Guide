@@ -61,9 +61,6 @@ public class ProgressManager {
     private long lastUnlockTime = 0;
     private Object lastUnlockedEntry = null;
 
-    private ProgressManager() {
-    }
-
     public static ProgressManager getInstance() {
         return INSTANCE;
     }

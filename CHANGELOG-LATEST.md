@@ -1,7 +1,3 @@
-### Added
-
-- Added support for Neolithic variants.
-
 ### Fixed
 
-- Duplicate cow, chicken and pig variants when using Vanilla Backport.
+- Neolithic cow, chicken and pig variants not showing when No Man's Land or Mixed Litter is installed with its remodels disabled.

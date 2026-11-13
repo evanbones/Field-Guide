@@ -9,9 +9,6 @@ import net.minecraft.world.entity.Entity;
 public class FieldGuideScanner {
     private static final FieldGuideScanner INSTANCE = new FieldGuideScanner();
 
-    private FieldGuideScanner() {
-    }
-
     public static FieldGuideScanner getInstance() {
         return INSTANCE;
     }

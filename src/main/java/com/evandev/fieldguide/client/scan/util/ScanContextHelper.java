@@ -16,9 +16,6 @@ import java.util.function.Predicate;
 
 public final class ScanContextHelper {
 
-    /**
-     * Traces vertically up a trunk/tree column up to maxSteps blocks, stopping when non-tree blocks or air are reached.
-     */
     public static BlockPos traceTreeCanopy(Level level, BlockPos basePos, int maxSteps, Predicate<ResourceLocation> isTreeComponent) {
         if (level == null || basePos == null) return basePos;
         BlockPos canopyPos = basePos;
@@ -41,9 +38,6 @@ public final class ScanContextHelper {
         return canopyPos;
     }
 
-    /**
-     * Samples nearby non-air blocks around sample centers (e.g. hit position and canopy position).
-     */
     public static void sampleNearbyBlocks(Level level, BlockPos hitPos, BlockPos canopyPos, BiConsumer<BlockPos, BlockState> visitor) {
         if (level == null || hitPos == null) return;
         Set<BlockPos> checked = new HashSet<>();

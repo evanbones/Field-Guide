@@ -56,14 +56,12 @@ public class MixedLitterCompat {
         return variant.type().getPath().contains("antler");
     }
 
-    /**
-     * Whether ML's remodel (and therefore its texture variants) is currently active for this entity.
-     * Players can disable a remodel via ML's startup config, in which case {@link RemodelRegistry}
-     * stops reporting a remodel for the entity and the vanilla appearance is used.
-     */
     private static boolean isRemodelActive(Entity entity) {
-        ResourceLocation entityId = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
-        return RemodelRegistry.remodelFor(entityId.toString()) != null;
+        return isRemodelActive(BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).toString());
+    }
+
+    public static boolean isRemodelActive(String entityId) {
+        return RemodelRegistry.remodelFor(entityId) != null;
     }
 
     private static boolean conditionsAllow(Optional<EntityConditions> conditions, boolean remodelActive) {
@@ -73,11 +71,6 @@ public class MixedLitterCompat {
         return ec.remodel().map(remodel -> remodel == remodelActive).orElse(true);
     }
 
-    /**
-     * Mirrors ML's own gating: a variant only renders when its own and its group's {@code remodel}
-     * condition matches the active remodel state, and it isn't flagged unobtainable. This keeps the
-     * field guide in sync with whatever the player has enabled in ML's config.
-     */
     private static boolean isVariantEnabled(Variant variant, Registry<VariantGroup> groupRegistry, boolean remodelActive) {
         if (!conditionsAllow(variant.conditions(), remodelActive)) return false;
         if (variant.group().isPresent()) {
@@ -106,11 +99,6 @@ public class MixedLitterCompat {
         return false;
     }
 
-    /**
-     * Returns true if ML has full visual-replacement variants for this entity (e.g. texture
-     * swaps like rabbit/brown).  Returns false for model-only variants like the sheep remodel,
-     * which complement the vanilla DyeColor system instead of replacing it.
-     */
     private static boolean hasFullVariants(Entity entity) {
         try {
             Registry<VariantGroup> groupRegistry = entity.registryAccess().registryOrThrow(MLRegistries.VARIANT_GROUP_KEY);

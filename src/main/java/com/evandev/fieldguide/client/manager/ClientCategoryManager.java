@@ -35,9 +35,6 @@ public class ClientCategoryManager {
     private Map<ResourceLocation, List<GuideEntry>> nbtEntriesByEntityType = null;
     private boolean needsResolution = false;
 
-    private ClientCategoryManager() {
-    }
-
     public static ClientCategoryManager getInstance() {
         return INSTANCE;
     }

@@ -36,9 +36,6 @@ public class FieldGuideScanManager {
     public static final int FADE_DURATION = 10;
     private static final FieldGuideScanManager INSTANCE = new FieldGuideScanManager();
 
-    private FieldGuideScanManager() {
-    }
-
     public static FieldGuideScanManager getInstance() {
         return INSTANCE;
     }

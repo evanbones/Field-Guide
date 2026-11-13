@@ -44,9 +44,6 @@ import net.minecraft.world.entity.boss.EnderDragonPart;
 public class FieldGuideRaytracer {
     private static final FieldGuideRaytracer INSTANCE = new FieldGuideRaytracer();
 
-    private FieldGuideRaytracer() {
-    }
-
     public static FieldGuideRaytracer getInstance() {
         return INSTANCE;
     }

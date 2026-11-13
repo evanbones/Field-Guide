@@ -19,9 +19,6 @@ public class ClientVisualManager {
 
     private final Map<ResourceLocation, EntryVisual> entryVisuals = new HashMap<>();
 
-    private ClientVisualManager() {
-    }
-
     public static ClientVisualManager getInstance() {
         return INSTANCE;
     }

@@ -24,9 +24,6 @@ public class ClientTextManager {
     private static final ClientTextManager INSTANCE = new ClientTextManager();
     private static boolean itemDescriptionsAvailable = true;
 
-    private ClientTextManager() {
-    }
-
     public static ClientTextManager getInstance() {
         return INSTANCE;
     }
