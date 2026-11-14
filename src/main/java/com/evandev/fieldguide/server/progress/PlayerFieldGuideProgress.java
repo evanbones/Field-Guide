@@ -157,6 +157,7 @@ public class PlayerFieldGuideProgress {
         }
 
         Set<String> candidates = new LinkedHashSet<>(unlockedEntries);
+        candidates.addAll(seenEntries);
         candidates.addAll(customNames.keySet());
         candidates.addAll(customDescriptions.keySet());
         candidates.addAll(entryPhotographs.keySet());
@@ -173,10 +174,10 @@ public class PlayerFieldGuideProgress {
             boolean hadData = entryPhotographs.remove(id) != null
                     | customNames.remove(id) != null
                     | customDescriptions.remove(id) != null
-                    | selectedVariants.remove(id) != null;
+                    | selectedVariants.remove(id) != null
+                    | seenEntries.remove(id);
 
             if (wasUnlocked || hadData) {
-                seenEntries.remove(id);
                 discoveryTimes.remove(id);
                 discoveryGameTimes.remove(id);
                 pendingRevokes.add(id);
@@ -311,7 +312,7 @@ public class PlayerFieldGuideProgress {
     }
 
     public void markSeen(String entryId) {
-        if (unlockedEntries.contains(entryId) && seenEntries.add(entryId)) {
+        if (isUnlocked(entryId) && seenEntries.add(entryId)) {
             pendingSeen.add(entryId);
             dirty = true;
         }

@@ -196,9 +196,13 @@ public class ProgressManager {
         ResourceLocation id = ResourceLocation.tryParse(idStr);
         if (id == null) return null;
 
-        for (Object entry : ClientFieldGuideManager.getValidEntries()) {
-            ResourceLocation entryId = ClientFieldGuideManager.getEntryId(entry);
-            if (id.equals(entryId)) return entry;
+        List<Object> entries = ClientFieldGuideManager.getValidEntries();
+        for (Object entry : entries) {
+            if (id.equals(ClientFieldGuideManager.getEntryId(entry))) return entry;
+        }
+        // Unlocks granted by a composite's own id are stored unprefixed.
+        for (Object entry : entries) {
+            if (entry instanceof GuideEntry ge && id.equals(ge.id())) return entry;
         }
         return null;
     }

@@ -76,7 +76,7 @@ If you want a single entry to feature multiple cycleable images or structures (e
 
 This lets you group mobs, blocks, and items from different mods/namespaces under one entry — for example consolidating several mods' palm trees, the maple-tree color variants of Biomes O' Plenty and Mystic's Biomes, or related mobs that other mods register as separate entities.
 
-When a variant uses `entity`/`block`/`item`, its **name, description, and loot are taken from that target automatically** (so each grouped mob/block/item shows its own info instead of the base entry's). You can still override per variant with a custom in-book edit or the lang keys `fieldguide.<type>.<path>.<variant_id>.description` and `fieldguide.name.<type>.<path>.<variant_id>`.
+When a variant uses `entity`/`block`/`item`, its **name, description, loot, and stats (alignment, health, armor) are taken from that target automatically** (so each grouped mob/block/item shows its own info instead of the base entry's). You can still override per variant with a custom in-book edit or the lang keys `fieldguide.<type>.<path>.<variant_id>.description` and `fieldguide.name.<type>.<path>.<variant_id>`.
 
 ```json
 {

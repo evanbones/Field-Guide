@@ -43,6 +43,7 @@ public class YaclConfigIntegration {
                 .option(createBoolOption("enable_lens_item", false, () -> serverConfig.enableLensItem, val -> serverConfig.enableLensItem = val))
                 .option(createBoolOption("require_item_to_open", false, () -> serverConfig.requireItemToOpen, val -> serverConfig.requireItemToOpen = val))
                 .option(createBoolOption("enable_copying_pages", true, () -> serverConfig.enableCopyingPages, val -> serverConfig.enableCopyingPages = val))
+                .group(createStringList("uncopyable_entries", new ArrayList<>(), () -> serverConfig.uncopyableEntries, val -> serverConfig.uncopyableEntries = new ArrayList<>(val)))
                 .option(createStringOption("default_screen", "last_opened_screen", () -> clientConfig.defaultScreen, val -> clientConfig.defaultScreen = val))
                 .option(createBoolOption("hide_tabs_until_unlocked", false, () -> serverConfig.hideTabsUntilUnlocked, val -> serverConfig.hideTabsUntilUnlocked = val))
                 .option(createBoolOption("show_undiscovered_names", false, () -> serverConfig.showUndiscoveredNames, val -> serverConfig.showUndiscoveredNames = val))

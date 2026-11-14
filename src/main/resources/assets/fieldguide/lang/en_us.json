@@ -240,6 +240,8 @@
 
   "option.fieldguide.enable_copying_pages": "Enable Copying Pages",
   "option.fieldguide.enable_copying_pages.tooltip": "If enabled, players can copy pages from their Field Guide to share with others.",
+  "option.fieldguide.uncopyable_entries": "Uncopyable Entries",
+  "option.fieldguide.uncopyable_entries.tooltip": "Entries that can never be copied, even when copying pages is enabled. Use entry IDs such as minecraft:wither, entity:minecraft/wither or a composite's ID.",
 
   "option.fieldguide.require_item_to_open": "Require Item to Open",
   "option.fieldguide.require_item_to_open.tooltip": "If enabled, players must have the physical item to open their Field Guide.",

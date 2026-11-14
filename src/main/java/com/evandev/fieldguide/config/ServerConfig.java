@@ -1,9 +1,11 @@
 package com.evandev.fieldguide.config;
 
 import com.evandev.fieldguide.Constants;
+import com.evandev.fieldguide.entry.EntryResolver;
 import com.evandev.fieldguide.platform.Services;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import net.minecraft.resources.ResourceLocation;
 
 import java.io.File;
 import java.io.FileReader;
@@ -34,6 +36,7 @@ public class ServerConfig {
     public boolean enableLensItem = false;
     public boolean requireItemToOpen = false;
     public boolean enableCopyingPages = true;
+    public List<String> uncopyableEntries = new ArrayList<>();
     public boolean disableObtainUnlocks = false;
 
     public boolean hideTabsUntilUnlocked = false;
@@ -114,6 +117,7 @@ public class ServerConfig {
                 if (INSTANCE.categoryScanCommands == null) INSTANCE.categoryScanCommands = new HashMap<>();
                 if (INSTANCE.entryScanCommands == null) INSTANCE.entryScanCommands = new HashMap<>();
                 if (INSTANCE.globalScanCommands == null) INSTANCE.globalScanCommands = new ArrayList<>();
+                if (INSTANCE.uncopyableEntries == null) INSTANCE.uncopyableEntries = new ArrayList<>();
                 if (INSTANCE.categoryXpAmounts == null) INSTANCE.categoryXpAmounts = defaultCategoryXpAmounts();
             } catch (Exception e) {
                 Constants.LOG.error("Failed to load fieldguide-server.json", e);
@@ -131,6 +135,15 @@ public class ServerConfig {
         } catch (IOException e) {
             Constants.LOG.error("Failed to save fieldguide-server.json", e);
         }
+    }
+
+    public boolean canCopyEntry(ResourceLocation entryId) {
+        if (!enableCopyingPages) return false;
+        if (entryId == null || uncopyableEntries == null || uncopyableEntries.isEmpty()) return true;
+        String id = entryId.toString();
+        ResourceLocation rawId = EntryResolver.getRawId(entryId);
+        String raw = rawId != null ? rawId.toString() : id;
+        return uncopyableEntries.stream().map(String::trim).noneMatch(e -> e.equals(id) || e.equals(raw));
     }
 
     public static ServerConfig fromJson(String json) {

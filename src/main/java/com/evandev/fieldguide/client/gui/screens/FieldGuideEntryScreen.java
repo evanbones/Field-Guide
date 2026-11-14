@@ -62,6 +62,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.NotNull;
 
 import java.text.SimpleDateFormat;
@@ -172,7 +173,7 @@ public class FieldGuideEntryScreen extends BookScreen {
             }
             exposureWidgets.clear();
 
-            String variantId = (!entityVariants.isEmpty() && currentVariantIndex < entityVariants.size()) ? entityVariants.get(currentVariantIndex).id() : null;
+            String variantId = currentVariantId();
             ClientExposureCompat.setupExposureWidgets(this, entry, variantId);
         }
         updateWidgetVisibility();
@@ -246,7 +247,7 @@ public class FieldGuideEntryScreen extends BookScreen {
         refreshExposureWidgets();
         setupFriendMoonWidget(unlocked);
 
-        if (unlocked && ServerConfig.get().enableCopyingPages) {
+        if (unlocked && ServerConfig.get().canCopyEntry(ClientFieldGuideManager.getEntryId(entry))) {
             boolean hasPaper = this.minecraft != null && this.minecraft.player != null && (this.minecraft.player.isCreative() || this.minecraft.player.getInventory().contains(Items.PAPER.getDefaultInstance()));
             boolean canCopy = hasPaper || (this.minecraft != null && this.minecraft.player != null && this.minecraft.player.isCreative());
 
@@ -296,8 +297,7 @@ public class FieldGuideEntryScreen extends BookScreen {
         int iconY = this.leftPageBounds.top() + 12;
 
         if (Services.PLATFORM.isModLoaded("exposure")) {
-            String variantId = (!entityVariants.isEmpty() && currentVariantIndex < entityVariants.size())
-                    ? entityVariants.get(currentVariantIndex).id() : null;
+            String variantId = currentVariantId();
             if (!ClientExposureCompat.willRenderAddPhotoButton(entry, variantId)) return;
             iconY += iconSize + 2;
         }
@@ -333,14 +333,10 @@ public class FieldGuideEntryScreen extends BookScreen {
 
             int currentY = titleY + LINE_HEIGHT + 2;
 
-            if (!entityVariants.isEmpty() && currentVariantIndex < entityVariants.size()) {
-                VariantDef variant = entityVariants.get(currentVariantIndex);
+            VariantDef variant = currentVariant();
+            if (variant != null) {
                 String variantId = variant.id();
-                String customVariantName = ProgressManager.getInstance().getCustomName(ClientFieldGuideManager.getEntryId(entry).toString() + "#" + variantId);
-                String defaultVariantName = (variant.value() instanceof EntryVariantData vd && vd.displayName() != null)
-                        ? vd.displayName().getString()
-                        : FieldGuideVariantManager.getVariantDisplayName(variant).getString();
-                String initialVariantName = customVariantName != null ? customVariantName : defaultVariantName;
+                String initialVariantName = getVariantName(variant).getString();
 
                 AbstractWidget variantWidget = ScholarCompat.createTextField(this.font, textX, currentY, textAreaWidth, LINE_HEIGHT, initialVariantName, ClientConfig.get().getTextMutedColorInt(), textAreaWidth, FieldGuideLimits.MAX_ENTRY_NAME_LENGTH,
                         newName -> {
@@ -353,7 +349,11 @@ public class FieldGuideEntryScreen extends BookScreen {
                 currentY += LINE_HEIGHT;
             }
 
-            this.activeAttributes = AttributeRegistry.getAttributes(entry, renderedEntity);
+            Entity attributeEntity = renderedEntity;
+            if (entry instanceof GuideEntry ge && ge.visualVariants() != null && currentVariantIndex < ge.visualVariants().size()) {
+                attributeEntity = getVisualVariantEntity(ge.visualVariants().get(currentVariantIndex));
+            }
+            this.activeAttributes = AttributeRegistry.getAttributes(entry, attributeEntity);
             if (!activeAttributes.isEmpty()) {
                 currentY += (LINE_HEIGHT * 3);
             } else {
@@ -570,22 +570,12 @@ public class FieldGuideEntryScreen extends BookScreen {
     }
 
     private ResourceLocation getDetailsTexture() {
-        if (!ClientFieldGuideManager.isUnlocked(entry)) {
-            return Constants.DETAILS_PAGE_TEXTURE;
-        }
+        if (!ClientFieldGuideManager.isUnlocked(entry)) return Constants.DETAILS_PAGE_TEXTURE;
 
         boolean hasVariants = !entityVariants.isEmpty();
         boolean hasAttributes = !activeAttributes.isEmpty();
-
-        if (hasVariants && hasAttributes) {
-            return Constants.DETAILS_PAGE_VA_TEXTURE;
-        } else if (hasVariants) {
-            return Constants.DETAILS_PAGE_V_TEXTURE;
-        } else if (hasAttributes) {
-            return Constants.DETAILS_PAGE_A_TEXTURE;
-        } else {
-            return Constants.DETAILS_PAGE_TEXTURE;
-        }
+        if (hasVariants) return hasAttributes ? Constants.DETAILS_PAGE_VA_TEXTURE : Constants.DETAILS_PAGE_V_TEXTURE;
+        return hasAttributes ? Constants.DETAILS_PAGE_A_TEXTURE : Constants.DETAILS_PAGE_TEXTURE;
     }
 
     @Override
@@ -600,181 +590,18 @@ public class FieldGuideEntryScreen extends BookScreen {
         GuiCompat.push(guiGraphics);
 
         GuiCompat.blit(guiGraphics, Constants.BOOK_TEXTURE, this.bounds.left(), this.bounds.top(), 0, 0, this.bounds.width(), this.bounds.height(), this.bounds.width(), this.bounds.height());
-
-        ResourceLocation detailsTexture = getDetailsTexture();
-        GuiCompat.blit(guiGraphics, detailsTexture, this.bounds.left(), this.bounds.top(), 0, 0, this.bounds.width(), this.bounds.height(), this.bounds.width(), this.bounds.height());
+        GuiCompat.blit(guiGraphics, getDetailsTexture(), this.bounds.left(), this.bounds.top(), 0, 0, this.bounds.width(), this.bounds.height(), this.bounds.width(), this.bounds.height());
 
         boolean unlocked = ClientFieldGuideManager.isUnlocked(entry);
-
-        int titleY = this.leftPageBounds.top() + 8;
-        int titleX = this.rightPageBounds.left() + 6;
-        int textAreaWidth = this.rightPageBounds.width() - 10;
-
-        if (!unlocked) {
-            String currentVariantId = (!entityVariants.isEmpty() && currentVariantIndex < entityVariants.size()) ? entityVariants.get(currentVariantIndex).id() : null;
-            String hintText = ClientTextManager.getInstance().getLockedHint(entry, currentVariantId);
-
-            //? if <26.1 {
-            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-            //?}
-            guiGraphics.drawString(this.font, GuiCompat.ellipsize(this.font, getTitleForEntry(entry).getString(), textAreaWidth), titleX, titleY, ClientConfig.get().getTextMutedColorInt(), false);
-            GuiCompat.textWithWordWrap(guiGraphics, font, Component.literal(hintText), titleX, titleY + 21, textAreaWidth, ClientConfig.get().getTextMutedColorInt());
+        if (unlocked) {
+            renderUnlockedText(guiGraphics, mouseX, mouseY);
         } else {
-            long discoveryTime = ProgressManager.getInstance().getDiscoveryTime(entry);
-            if (showsUnlockQuill()) {
-                Component dateComponent;
-
-                if (ClientConfig.get().useRealWorldDate) {
-                    String realDate = new SimpleDateFormat("MMM dd, yyyy")
-                            .format(new Date(discoveryTime));
-
-                    dateComponent = Component.literal(realDate);
-                } else {
-                    long gameTime = ProgressManager.getInstance().getDiscoveryGameTime(entry);
-                    long days = gameTime / 24000L + 1;
-                    String timeKey = getTimeKey(gameTime);
-
-                    dateComponent = Component.translatable("fieldguide.date.in_game", days, Component.translatable(timeKey));
-                }
-
-                int quillX = this.rightPageBounds.right() - 15;
-                int quillY = this.rightPageBounds.top() + 5;
-                //? if <26.1 {
-                RenderSystem.enableBlend();
-                //?}
-                GuiCompat.blit(guiGraphics, Constants.QUILL_ICON, quillX, quillY, 0, 0, 11, 11, 11, 11);
-                //? if <26.1 {
-                RenderSystem.disableBlend();
-                //?}
-
-                if (mouseX >= quillX && mouseX <= quillX + 11 && mouseY >= quillY && mouseY <= quillY + 11) {
-                    guiGraphics.renderTooltip(this.font, dateComponent, mouseX, mouseY);
-                }
-            }
-
-            if (ServerConfig.get().disableEditingNames) {
-                guiGraphics.drawString(this.font, GuiCompat.ellipsize(this.font, ClientFieldGuideManager.getEntryName(entry).getString(), getNameWidth()), titleX, titleY, ClientConfig.get().getTextTitleColorInt(), false);
-                if (!entityVariants.isEmpty() && currentVariantIndex < entityVariants.size()) {
-                    VariantDef variant = entityVariants.get(currentVariantIndex);
-                    String variantId = variant.id();
-                    String customVariantName = ProgressManager.getInstance().getCustomName(ClientFieldGuideManager.getEntryId(entry).toString() + "#" + variantId);
-
-                    Component variantName;
-                    if (variant.value() instanceof com.evandev.fieldguide.api.EntryVariantData vd && vd.displayName() != null) {
-                        variantName = vd.displayName();
-                    } else {
-                        variantName = customVariantName != null ? Component.literal(customVariantName) : FieldGuideVariantManager.getVariantDisplayName(variant);
-                    }
-
-                    guiGraphics.drawString(this.font, GuiCompat.ellipsize(this.font, variantName.getString(), textAreaWidth), titleX, titleY + LINE_HEIGHT + 3, ClientConfig.get().getTextMutedColorInt(), false);
-                }
-            }
-
-            renderDynamicAttributes(guiGraphics, mouseX, mouseY);
-
-            if (ServerConfig.get().disableEditingDescriptions) {
-                int textY = titleY + LINE_HEIGHT + 3; // Name
-                if (!entityVariants.isEmpty() && currentVariantIndex < entityVariants.size()) {
-                    textY += LINE_HEIGHT; // Variant
-                }
-                if (!activeAttributes.isEmpty()) {
-                    textY += (LINE_HEIGHT * 2); // Attributes
-                } else {
-                    textY += LINE_HEIGHT; // Buffer
-                }
-                this.descX = titleX;
-                this.descY = textY;
-                this.descW = textAreaWidth;
-                if (!NoMansLandCompat.isReplayActive()) {
-                    GuiCompat.textWithWordWrap(guiGraphics, font, Component.literal(ClientFieldGuideManager.getEntryDescription(entry)), titleX, textY, textAreaWidth, ClientConfig.get().getTextColorInt());
-                }
-            }
+            renderLockedText(guiGraphics);
         }
-
-        float bounce = 1.0f;
-        long elapsed = System.currentTimeMillis() - lastClickTime;
-        if (elapsed < 150) bounce = 1.0f - 0.05f * (float) Math.sin((elapsed / 150.0f) * Math.PI);
 
         int xPos = leftPageBounds.x_center();
         int yPos = leftPageBounds.y_center() - 15;
-
-        String variantId = (!entityVariants.isEmpty() && currentVariantIndex < entityVariants.size()) ? entityVariants.get(currentVariantIndex).id() : null;
-        boolean hideEntity = Services.PLATFORM.isModLoaded("exposure") && ClientExposureCompat.hasPhotograph(entry, variantId);
-
-        boolean mouseOverEntity = mouseX >= xPos - 50 && mouseX <= xPos + 50 && mouseY >= yPos - 50 && mouseY <= yPos + 50;
-
-        float targetScale = 1.0f;
-        if (!hideEntity && mouseOverEntity && ClientFieldGuideManager.isUnlocked(entry) && this.variantOverviewWidget != null && !this.variantOverviewWidget.isVisible()) {
-            boolean currentVariantUnlocked = ServerConfig.get().unlockAllVariants || entityVariants.isEmpty() || isVisualVariantUnlocked(entry, entityVariants.get(currentVariantIndex));
-            if (currentVariantUnlocked) {
-                targetScale = 1.05f;
-            }
-        }
-
-        long currentTime = System.currentTimeMillis();
-        if (lastRenderTime > 0) {
-            float deltaTime = (currentTime - lastRenderTime) / 1000.0f;
-            float speed = 10.0f;
-            float factor = 1.0f - (float) Math.pow(0.01, deltaTime * speed);
-            hoverScale = hoverScale + (targetScale - hoverScale) * factor;
-        }
-        lastRenderTime = currentTime;
-
-        bounce *= hoverScale;
-
-        Object renderEntry = EntryResolver.resolveCoreEntry(entry);
-
-        GuiCompat.push(guiGraphics);
-        GuiCompat.translate(guiGraphics, xPos, yPos);
-        GuiCompat.scale(guiGraphics, bounce);
-        GuiCompat.translate(guiGraphics, -xPos, -yPos);
-
-        if (entry instanceof GuideEntry ge && ge.visualVariants() != null && !ge.visualVariants().isEmpty() && currentVariantIndex < entityVariants.size()) {
-            if (!hideEntity) {
-                EntryVariantData currentVarData = ge.visualVariants().get(currentVariantIndex);
-                boolean variantUnlocked = isVisualVariantUnlocked(entry, entityVariants.get(currentVariantIndex));
-                Entity variantEntity = null;
-                if (currentVarData.displayType() == EntryVariantData.DisplayType.ENTITY && this.minecraft != null) {
-                    variantEntity = variantEntityCache.computeIfAbsent(currentVarData.variantId(),
-                            k -> EntryRenderHelper.createVariantEntity(this.minecraft.level, currentVarData.displayId(), currentVarData.nbt()));
-                }
-                EntryRenderHelper.renderVisualVariant(guiGraphics, ge, currentVarData, variantEntity, xPos, yPos, 112, variantUnlocked, true, 1.0f);
-            }
-        } else if (entry instanceof GuideEntry ge && ge.isStructure() && renderEntry instanceof Block block) {
-            if (!hideEntity) {
-                if (ge.structureData() != null && (ge.structureData().structureNbt() != null || (ge.structureData().stackedBlocks() != null && !ge.structureData().stackedBlocks().isEmpty()))) {
-                    EntryRenderHelper.renderStructure(guiGraphics, ge, xPos, yPos, 112, unlocked, true, 1.0f);
-                } else {
-                    EntryRenderHelper.renderBlock(guiGraphics, block, xPos, yPos, 40.0F, unlocked, true, 1.0f);
-                }
-            }
-        } else if (entry instanceof GuideEntry ge && FieldGuideCobblemonCompat.isCobblemonEntry(ge)) {
-            if (!hideEntity) {
-                EntryRenderHelper.renderCobblemon(guiGraphics, ge, xPos, yPos, 112, 112, unlocked, true, 1.0f);
-            }
-        } else if (entry instanceof GuideEntry ge && ge.isVirtual() && ge.virtualData() != null && ge.virtualData().virtualType().equals("tutorial")) {
-            if (!hideEntity) {
-                EntryRenderHelper.renderTutorial(guiGraphics, ge, xPos, yPos, 112, 112, unlocked, true, 1.0f);
-            }
-        } else if (renderEntry instanceof EntityType && renderedEntity != null) {
-            boolean variantUnlocked = unlocked;
-            if (unlocked && !entityVariants.isEmpty() && !ServerConfig.get().unlockAllVariants) {
-                variantUnlocked = ClientFieldGuideManager.isVariantUnlocked(entry, entityVariants.get(currentVariantIndex).id());
-            }
-
-            if (!hideEntity) {
-                EntryRenderHelper.renderEntityNormalized(guiGraphics, renderedEntity, xPos, yPos, 112, 112, variantUnlocked, true, 1.0f);
-            }
-        } else if (renderEntry instanceof Block block) {
-            if (!hideEntity) {
-                EntryRenderHelper.renderBlock(guiGraphics, block, xPos, yPos, 40.0F, unlocked, true, 1.0f);
-            }
-        } else if (renderEntry instanceof Item item) {
-            if (!hideEntity) {
-                EntryRenderHelper.renderItem(guiGraphics, item, xPos, yPos, 60.0F, unlocked, true, 1.0f);
-            }
-        }
-        GuiCompat.pop(guiGraphics);
+        renderPreview(guiGraphics, xPos, yPos, mouseX, mouseY, unlocked);
 
         if (unlocked) {
             renderSeasons(guiGraphics, xPos, yPos, mouseX, mouseY);
@@ -786,7 +613,7 @@ public class FieldGuideEntryScreen extends BookScreen {
 
         GuiCompat.pop(guiGraphics);
 
-        boolean replaying = ClientFieldGuideManager.isUnlocked(entry) && NoMansLandCompat.isReplayActive();
+        boolean replaying = unlocked && NoMansLandCompat.isReplayActive();
         if (this.descriptionWidget != null) this.descriptionWidget.visible = !replaying;
         //? if <26.1 {
         super.render(guiGraphics, mouseX, mouseY, partialTick);
@@ -796,6 +623,188 @@ public class FieldGuideEntryScreen extends BookScreen {
         if (replaying) {
             NoMansLandCompat.renderDescriptionRewrite(guiGraphics, this.font, descX, descY, descW, ClientConfig.get().getTextColorInt());
         }
+    }
+
+    @Nullable
+    private VariantDef currentVariant() {
+        return currentVariantIndex >= 0 && currentVariantIndex < entityVariants.size() ? entityVariants.get(currentVariantIndex) : null;
+    }
+
+    @Nullable
+    private String currentVariantId() {
+        VariantDef variant = currentVariant();
+        return variant != null ? variant.id() : null;
+    }
+
+    private Component getVariantName(VariantDef variant) {
+        String customName = ProgressManager.getInstance().getCustomName(ClientFieldGuideManager.getEntryId(entry).toString() + "#" + variant.id());
+        if (customName != null) return Component.literal(customName);
+        if (variant.value() instanceof EntryVariantData vd && vd.displayName() != null) return vd.displayName();
+        return FieldGuideVariantManager.getVariantDisplayName(variant);
+    }
+
+    private int titleX() {
+        return this.rightPageBounds.left() + 6;
+    }
+
+    private int titleY() {
+        return this.leftPageBounds.top() + 8;
+    }
+
+    private int staticTextWidth() {
+        return this.rightPageBounds.width() - 10;
+    }
+
+    private void renderLockedText(GuiGraphics guiGraphics) {
+        int muted = ClientConfig.get().getTextMutedColorInt();
+        String hintText = ClientTextManager.getInstance().getLockedHint(entry, currentVariantId());
+
+        //? if <26.1 {
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+        //?}
+        guiGraphics.drawString(this.font, GuiCompat.ellipsize(this.font, getTitleForEntry(entry).getString(), staticTextWidth()), titleX(), titleY(), muted, false);
+        GuiCompat.textWithWordWrap(guiGraphics, font, Component.literal(hintText), titleX(), titleY() + 21, staticTextWidth(), muted);
+    }
+
+    private void renderUnlockedText(GuiGraphics guiGraphics, int mouseX, int mouseY) {
+        if (showsUnlockQuill()) {
+            renderUnlockQuill(guiGraphics, mouseX, mouseY);
+        }
+        if (ServerConfig.get().disableEditingNames) {
+            renderStaticNames(guiGraphics);
+        }
+        renderDynamicAttributes(guiGraphics, mouseX, mouseY);
+        if (ServerConfig.get().disableEditingDescriptions) {
+            renderStaticDescription(guiGraphics);
+        }
+    }
+
+    private void renderUnlockQuill(GuiGraphics guiGraphics, int mouseX, int mouseY) {
+        int quillX = this.rightPageBounds.right() - 15;
+        int quillY = this.rightPageBounds.top() + 5;
+        //? if <26.1 {
+        RenderSystem.enableBlend();
+        //?}
+        GuiCompat.blit(guiGraphics, Constants.QUILL_ICON, quillX, quillY, 0, 0, 11, 11, 11, 11);
+        //? if <26.1 {
+        RenderSystem.disableBlend();
+        //?}
+
+        if (mouseX >= quillX && mouseX <= quillX + 11 && mouseY >= quillY && mouseY <= quillY + 11) {
+            guiGraphics.renderTooltip(this.font, getDiscoveryDate(), mouseX, mouseY);
+        }
+    }
+
+    private Component getDiscoveryDate() {
+        if (ClientConfig.get().useRealWorldDate) {
+            long discoveryTime = ProgressManager.getInstance().getDiscoveryTime(entry);
+            return Component.literal(new SimpleDateFormat("MMM dd, yyyy").format(new Date(discoveryTime)));
+        }
+        long gameTime = ProgressManager.getInstance().getDiscoveryGameTime(entry);
+        long days = gameTime / 24000L + 1;
+        return Component.translatable("fieldguide.date.in_game", days, Component.translatable(getTimeKey(gameTime)));
+    }
+
+    private void renderStaticNames(GuiGraphics guiGraphics) {
+        String name = ClientFieldGuideManager.getEntryName(entry).getString();
+        guiGraphics.drawString(this.font, GuiCompat.ellipsize(this.font, name, getNameWidth()), titleX(), titleY(), ClientConfig.get().getTextTitleColorInt(), false);
+
+        VariantDef variant = currentVariant();
+        if (variant != null) {
+            String variantName = getVariantName(variant).getString();
+            guiGraphics.drawString(this.font, GuiCompat.ellipsize(this.font, variantName, staticTextWidth()), titleX(), titleY() + LINE_HEIGHT + 3, ClientConfig.get().getTextMutedColorInt(), false);
+        }
+    }
+
+    private void renderStaticDescription(GuiGraphics guiGraphics) {
+        int textY = titleY() + LINE_HEIGHT + 3;
+        if (currentVariant() != null) textY += LINE_HEIGHT;
+        textY += activeAttributes.isEmpty() ? LINE_HEIGHT : LINE_HEIGHT * 2;
+
+        this.descX = titleX();
+        this.descY = textY;
+        this.descW = staticTextWidth();
+        if (!NoMansLandCompat.isReplayActive()) {
+            GuiCompat.textWithWordWrap(guiGraphics, font, Component.literal(ClientFieldGuideManager.getEntryDescription(entry)), descX, descY, descW, ClientConfig.get().getTextColorInt());
+        }
+    }
+
+    private void renderPreview(GuiGraphics guiGraphics, int xPos, int yPos, int mouseX, int mouseY, boolean unlocked) {
+        boolean hideEntity = Services.PLATFORM.isModLoaded("exposure") && ClientExposureCompat.hasPhotograph(entry, currentVariantId());
+        boolean mouseOverEntity = mouseX >= xPos - 50 && mouseX <= xPos + 50 && mouseY >= yPos - 50 && mouseY <= yPos + 50;
+        updateHoverScale(!hideEntity && mouseOverEntity && unlocked && isPreviewInteractive());
+        if (hideEntity) return;
+
+        float scale = hoverScale;
+        long elapsed = System.currentTimeMillis() - lastClickTime;
+        if (elapsed < 150) scale *= 1.0f - 0.05f * (float) Math.sin((elapsed / 150.0f) * Math.PI);
+
+        GuiCompat.push(guiGraphics);
+        GuiCompat.translate(guiGraphics, xPos, yPos);
+        GuiCompat.scale(guiGraphics, scale);
+        GuiCompat.translate(guiGraphics, -xPos, -yPos);
+        renderPreviewContent(guiGraphics, xPos, yPos, unlocked);
+        GuiCompat.pop(guiGraphics);
+    }
+
+    private boolean isPreviewInteractive() {
+        if (this.variantOverviewWidget == null || this.variantOverviewWidget.isVisible()) return false;
+        VariantDef variant = currentVariant();
+        return ServerConfig.get().unlockAllVariants || variant == null || isVisualVariantUnlocked(entry, variant);
+    }
+
+    private void updateHoverScale(boolean hovered) {
+        float targetScale = hovered ? 1.05f : 1.0f;
+        long currentTime = System.currentTimeMillis();
+        if (lastRenderTime > 0) {
+            float deltaTime = (currentTime - lastRenderTime) / 1000.0f;
+            float factor = 1.0f - (float) Math.pow(0.01, deltaTime * 10.0f);
+            hoverScale += (targetScale - hoverScale) * factor;
+        }
+        lastRenderTime = currentTime;
+    }
+
+    private void renderPreviewContent(GuiGraphics guiGraphics, int xPos, int yPos, boolean unlocked) {
+        Object renderEntry = EntryResolver.resolveCoreEntry(entry);
+        VariantDef variant = currentVariant();
+
+        if (entry instanceof GuideEntry ge) {
+            if (ge.visualVariants() != null && !ge.visualVariants().isEmpty() && variant != null) {
+                EntryVariantData data = ge.visualVariants().get(currentVariantIndex);
+                boolean variantUnlocked = isVisualVariantUnlocked(entry, variant);
+                EntryRenderHelper.renderVisualVariant(guiGraphics, ge, data, getVisualVariantEntity(data), xPos, yPos, 112, variantUnlocked, true, 1.0f);
+                return;
+            }
+            if (ge.isStructure() && renderEntry instanceof Block && hasStructureData(ge)) {
+                EntryRenderHelper.renderStructure(guiGraphics, ge, xPos, yPos, 112, unlocked, true, 1.0f);
+                return;
+            }
+            if (FieldGuideCobblemonCompat.isCobblemonEntry(ge)) {
+                EntryRenderHelper.renderCobblemon(guiGraphics, ge, xPos, yPos, 112, 112, unlocked, true, 1.0f);
+                return;
+            }
+            if (ge.isVirtual() && ge.virtualData() != null && ge.virtualData().virtualType().equals("tutorial")) {
+                EntryRenderHelper.renderTutorial(guiGraphics, ge, xPos, yPos, 112, 112, unlocked, true, 1.0f);
+                return;
+            }
+        }
+
+        if (renderEntry instanceof EntityType && renderedEntity != null) {
+            boolean variantUnlocked = unlocked;
+            if (unlocked && variant != null && !ServerConfig.get().unlockAllVariants) {
+                variantUnlocked = ClientFieldGuideManager.isVariantUnlocked(entry, variant.id());
+            }
+            EntryRenderHelper.renderEntityNormalized(guiGraphics, renderedEntity, xPos, yPos, 112, 112, variantUnlocked, true, 1.0f);
+        } else if (renderEntry instanceof Block block) {
+            EntryRenderHelper.renderBlock(guiGraphics, block, xPos, yPos, 40.0F, unlocked, true, 1.0f);
+        } else if (renderEntry instanceof Item item) {
+            EntryRenderHelper.renderItem(guiGraphics, item, xPos, yPos, 60.0F, unlocked, true, 1.0f);
+        }
+    }
+
+    private static boolean hasStructureData(GuideEntry ge) {
+        var data = ge.structureData();
+        return data != null && (data.structureNbt() != null || (data.stackedBlocks() != null && !data.stackedBlocks().isEmpty()));
     }
 
     private void renderSeasons(GuiGraphics guiGraphics, int x, int y, int mouseX, int mouseY) {
@@ -853,6 +862,13 @@ public class FieldGuideEntryScreen extends BookScreen {
         if (hoveredSeason != null) {
             guiGraphics.renderTooltip(this.font, hoveredSeason.getDisplayName(), mouseX, mouseY);
         }
+    }
+
+    @Nullable
+    private Entity getVisualVariantEntity(EntryVariantData data) {
+        if (data.displayType() != EntryVariantData.DisplayType.ENTITY || this.minecraft == null || this.minecraft.level == null) return null;
+        return variantEntityCache.computeIfAbsent(data.variantId(),
+                k -> EntryRenderHelper.createVariantEntity(this.minecraft.level, data.displayId(), data.nbt()));
     }
 
     private void cycleVariant(int dir) {
@@ -1012,7 +1028,7 @@ public class FieldGuideEntryScreen extends BookScreen {
         int titleWithVariantHeight = 35;
 
         int currentY = this.leftPageBounds.top();
-        if (!entityVariants.isEmpty() && currentVariantIndex < entityVariants.size()) {
+        if (currentVariant() != null) {
             currentY += titleWithVariantHeight;
         } else {
             currentY += titleHeight;

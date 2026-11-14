@@ -1,6 +1,7 @@
 package com.evandev.fieldguide.network;
 
 import com.evandev.fieldguide.Constants;
+import com.evandev.fieldguide.config.ServerConfig;
 import com.evandev.fieldguide.ModDataComponents;
 import com.evandev.fieldguide.compat.cobblemon.FieldGuideCobblemonCompat;
 import com.evandev.fieldguide.entry.EntryResolutionHelper;
@@ -55,14 +56,14 @@ public record CopyPagePacket(ResourceLocation entryId) implements CustomPacketPa
         PlayerFieldGuideProgress progress = FieldGuideProgressManager.getInstance().getProgress(player);
         if (progress == null) return;
 
+        if (!ServerConfig.getLocal().canCopyEntry(entryId)) return;
+
         String idStr = entryId.toString();
         if (!progress.isUnlocked(idStr)) return;
 
-        // Check for paper
         boolean hasPaper = player.isCreative() || player.getInventory().contains(new ItemStack(Items.PAPER));
         if (!hasPaper) return;
 
-        // Give item
         ItemStack page = new ItemStack(ModItems.PAGE.get());
         ModDataComponents.set(page, ModDataComponents.ENTRY_ID, entryId);
         ModDataComponents.set(page, ModDataComponents.AUTHOR, player.getScoreboardName());

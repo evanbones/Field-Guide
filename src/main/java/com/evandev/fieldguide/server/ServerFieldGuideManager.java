@@ -155,7 +155,8 @@ public class ServerFieldGuideManager extends SimplePreparableReloadListener<Serv
             for (Object entry : entries) {
                 if (entry instanceof GuideEntry ge) {
                     ResourceLocation id = EntryResolver.getEntryId(ge);
-                    if (entryId.equals(id) || (canonicalId != null && canonicalId.equals(id))) {
+                    if (entryId.equals(id) || entryId.equals(ge.id())
+                            || (canonicalId != null && (canonicalId.equals(id) || canonicalId.equals(ge.id())))) {
                         return ge;
                     }
                 }
