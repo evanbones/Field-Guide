@@ -2,6 +2,7 @@ package com.evandev.fieldguide.client;
 
 import com.evandev.fieldguide.api.AutoPopulateRegistry;
 import com.evandev.fieldguide.api.Category;
+import com.evandev.fieldguide.api.EntryVariantData;
 import com.evandev.fieldguide.api.GuideEntry;
 import com.evandev.fieldguide.api.variant.DatapackVariantDefinition;
 import com.evandev.fieldguide.client.data.EntryVisual;
@@ -287,6 +288,14 @@ public class ClientFieldGuideManager implements ResourceManagerReloadListener {
             return biomeCache.get(cacheKey);
         }
 
+        if (isVariant && entry instanceof GuideEntry ge && ge.hasVisualVariants()) {
+            List<ResourceLocation> variantBiomes = resolveVisualVariantBiomes(ge, variantId);
+            if (variantBiomes != null) {
+                biomeCache.put(cacheKey, variantBiomes);
+                return variantBiomes;
+            }
+        }
+
         List<ResourceLocation> diskBiomes = ClientCacheManager.loadBiomes(entryId);
 
         if (!isVariant && diskBiomes != null) {
@@ -324,6 +333,32 @@ public class ClientFieldGuideManager implements ResourceManagerReloadListener {
         }
 
         return result;
+    }
+
+    private List<ResourceLocation> resolveVisualVariantBiomes(GuideEntry ge, String variantId) {
+        EntryVariantData variant = ge.visualVariants().stream()
+                .filter(v -> v.variantId().equals(variantId)).findFirst().orElse(null);
+        if (variant == null) return null;
+
+        Set<Object> targets = new LinkedHashSet<>(EntryResolver.resolveAllRegistryObjects(variant.displayId()));
+        if (variant.components() != null) {
+            for (String comp : variant.components()) {
+                int pipe = comp.indexOf('|');
+                targets.addAll(EntryResolver.resolveAllRegistryObjects(ResourceLocation.tryParse(pipe >= 0 ? comp.substring(0, pipe) : comp)));
+            }
+        }
+        targets.removeIf(t -> !(t instanceof EntityType<?>) && !(t instanceof Block));
+        if (targets.isEmpty()) return null;
+
+        Set<ResourceLocation> biomes = new LinkedHashSet<>();
+        for (Object target : targets) {
+            biomes.addAll(getResolvedBiomes(target, null));
+        }
+
+        ClientCategoryManager categoryManager = ClientCategoryManager.getInstance();
+        biomes.addAll(categoryManager.getVariantBiomeAdditions(ge, variantId));
+        categoryManager.getVariantBiomeRemovals(ge, variantId).forEach(biomes::remove);
+        return new ArrayList<>(biomes);
     }
 
     public void applyServerUpdate(ProgressUpdatePacket packet) {

@@ -300,6 +300,24 @@ public class ClientCategoryManager {
         return removals;
     }
 
+    public List<ResourceLocation> getVariantBiomeAdditions(Object entry, String variantId) {
+        return collectVariantOnly(indexedBiomeAdditions, entry, variantId);
+    }
+
+    public List<ResourceLocation> getVariantBiomeRemovals(Object entry, String variantId) {
+        return collectVariantOnly(indexedBiomeRemovals, entry, variantId);
+    }
+
+    private List<ResourceLocation> collectVariantOnly(Map<String, List<ResourceLocation>> index, Object entry, String variantId) {
+        List<ResourceLocation> result = new ArrayList<>();
+        for (String lookupKey : getLookupKeys(entry, variantId)) {
+            if (!lookupKey.contains("#")) continue;
+            List<ResourceLocation> list = index.get(lookupKey);
+            if (list != null) result.addAll(list);
+        }
+        return result;
+    }
+
     public List<ResourceLocation> getLootAdditions(Object entry) {
         return getLootAdditions(entry, null);
     }
