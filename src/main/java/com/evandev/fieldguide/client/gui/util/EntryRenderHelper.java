@@ -386,7 +386,13 @@ public class EntryRenderHelper {
 
         if (entity.blockPosition().equals(BlockPos.ZERO) && Services.PLATFORM.isModLoaded("entity_texture_features")) {
             ResourceLocation typeId = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
-            EtfCompat.markAsDisplayEntity(entity, typeId.hashCode());
+            long identity = typeId.hashCode();
+            //? if neoforge && <26.1 {
+            if (Services.PLATFORM.isModLoaded("quark")) {
+                identity = com.evandev.fieldguide.compat.quark.QuarkVariantTextures.displayIdentity(entity, identity);
+            }
+            //?}
+            EtfCompat.markAsDisplayEntity(entity, identity);
         }
 
         //? if <26.1 {

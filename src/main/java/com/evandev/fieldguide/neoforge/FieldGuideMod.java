@@ -68,6 +68,10 @@ public class FieldGuideMod {
         if (ModList.get().isLoaded("primal")) {
             FieldGuideVariantManager.registerProvider(Mob.class, new com.evandev.fieldguide.neoforge.compat.primal.PrimalVariantProvider());
         }
+
+        if (ModList.get().isLoaded("quark")) {
+            com.evandev.fieldguide.compat.quark.QuarkVariantTextures.register();
+        }
     }
 
     private void registerExposureCompat() {
