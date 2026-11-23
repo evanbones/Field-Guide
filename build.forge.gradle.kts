@@ -45,6 +45,16 @@ tasks.named<ProcessResources>("processResources") {
     filesMatching(mixinConfigs) {
         filter { line -> line.replace("\"package\":", refmapEntry) }
     }
+
+    val mainClasses = project.the<SourceSetContainer>()["main"].output.classesDirs
+    val sourceRoot = rootProject.file("src/main/java")
+    dependsOn("compileJava")
+    inputs.files(mainClasses).withPropertyName("mixinClasses")
+    doLast {
+        destinationDir.walkTopDown()
+            .filter { it.isFile && it.name.endsWith(".mixins.json") }
+            .forEach { pruneMixinConfig(it, mainClasses, sourceRoot, logger) }
+    }
 }
 
 version = "${property("mod.version")}+${property("deps.minecraft")}-forge"

@@ -166,6 +166,7 @@ public final class DiscoveryOverlayRenderer {
         *///?}
 
         //? if <26.1 {
+        LevelOverlays.saveDepth();
         RenderSystem.clear(GL11.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
 
         renderBlocks(mc, poseStack, camPos, bufferSource, r, g, b, pulsed);

@@ -102,3 +102,22 @@ value class ModData(private val project: Project) {
     fun prop(key: String) = requireNotNull(project.prop("mod.$key")) { "Missing 'mod.$key'" }
     fun dep(key: String) = requireNotNull(project.prop("deps.$key")) { "Missing 'deps.$key'" }
 }
+
+private val MIXIN_LISTS = listOf("mixins", "client", "server")
+
+@Suppress("UNCHECKED_CAST")
+fun pruneMixinConfig(config: java.io.File, classesDirs: Iterable<java.io.File>, sourceRoot: java.io.File, logger: org.gradle.api.logging.Logger) {
+    val json = groovy.json.JsonSlurper().parse(config) as MutableMap<String, Any?>
+    val packagePath = (json["package"] as String).replace('.', '/')
+    for (list in MIXIN_LISTS) {
+        val entries = json[list] as? List<String> ?: continue
+        json[list] = entries.filter { entry ->
+            val path = "$packagePath/${entry.replace('.', '/')}"
+            check(java.io.File(sourceRoot, "$path.java").isFile) { "${config.name} lists $entry, which has no source file" }
+            val compiled = classesDirs.any { java.io.File(it, "$path.class").isFile }
+            if (!compiled) logger.info("Pruned {} from {}: not compiled for this version", entry, config.name)
+            compiled
+        }
+    }
+    config.writeText(groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(json)) + "\n")
+}

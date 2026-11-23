@@ -29,12 +29,4 @@ public class FontMixin {
         }
     }
 }
-//?} else {
-/*import com.moulberry.mixinconstraints.annotations.IfMinecraftVersion;
-import org.spongepowered.asm.mixin.Mixin;
-
-@IfMinecraftVersion(maxVersion = "1.21.1", maxInclusive = true)
-@Mixin(targets = "net.minecraft.client.gui.Font", remap = false)
-public class FontMixin {
-}
-*///?}
+//?}

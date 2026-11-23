@@ -5,7 +5,6 @@ import com.evandev.fieldguide.client.FieldGuideClient;
 import com.evandev.fieldguide.client.gui.screens.FieldGuideCategoryScreen;
 import com.evandev.fieldguide.compat.emi.EmiCompat;
 import com.evandev.fieldguide.platform.Services;
-import com.moulberry.mixinconstraints.annotations.IfMinecraftVersion;
 import com.moulberry.mixinconstraints.annotations.IfModLoaded;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.EditBox;
@@ -18,7 +17,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Locale;
 
-@IfMinecraftVersion(maxVersion = "1.21.1", maxInclusive = true)
 @IfModLoaded("emi")
 @Mixin(Screen.class)
 public class ScreenMixin {
@@ -44,14 +42,4 @@ public class ScreenMixin {
         }
     }
 }
-//?} else {
-/*import com.moulberry.mixinconstraints.annotations.IfMinecraftVersion;
-import com.moulberry.mixinconstraints.annotations.IfModLoaded;
-import org.spongepowered.asm.mixin.Mixin;
-
-@IfMinecraftVersion(maxVersion = "1.21.1", maxInclusive = true)
-@IfModLoaded("emi")
-@Mixin(targets = "net.minecraft.client.gui.screens.Screen", remap = false)
-public class ScreenMixin {
-}
-*///?}
+//?}

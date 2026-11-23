@@ -1,19 +1,10 @@
 package com.evandev.fieldguide.mixin.client;
 
-//? if fabric && <26.1 {
-/*import com.moulberry.mixinconstraints.annotations.IfMinecraftVersion;
-import org.spongepowered.asm.mixin.Mixin;
-
-@IfMinecraftVersion(minVersion = "26.1")
-@Mixin(targets = "com.evandev.fieldguide.client.render.ScanNodeCollector", remap = false)
-public abstract class ScanNodeCollectorFabricMixin {
-}
-*///?} else if fabric {
+//? if fabric && >=26.1 {
 /*import com.evandev.fieldguide.client.ModRenderTypes;
 import com.evandev.fieldguide.client.render.ScanNodeCollector;
 import com.evandev.fieldguide.client.render.ScanOverlayRenderer;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.moulberry.mixinconstraints.annotations.IfMinecraftVersion;
 import net.fabricmc.fabric.api.client.renderer.v1.Renderer;
 import net.fabricmc.fabric.api.client.renderer.v1.mesh.Mesh;
 import net.fabricmc.fabric.api.client.renderer.v1.mesh.MutableMesh;
@@ -46,7 +37,6 @@ import net.minecraft.client.renderer.SubmitNodeCollector;
 /^import net.minecraft.client.renderer.OrderedSubmitNodeCollector;
 ^///?}
 
-@IfMinecraftVersion(minVersion = "26.1")
 @Mixin(ScanNodeCollector.class)
 public abstract class ScanNodeCollectorFabricMixin implements FabricOrderedSubmitNodeCollector {
 

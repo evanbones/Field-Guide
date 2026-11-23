@@ -92,6 +92,7 @@ public class ScanOverlayRenderer {
 
         if (targetEntity == null && targetBlock == null) return;
         //? if <26.1 {
+        LevelOverlays.saveDepth();
         RenderSystem.clear(GL11.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
         //?}
 

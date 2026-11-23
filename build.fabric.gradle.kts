@@ -37,6 +37,16 @@ tasks.named<ProcessResources>("processResources") {
     filesMatching(listOf("pack.mcmeta", "fabric.mod.json", "*.mixins.json")) {
         expand(props)
     }
+
+    val mainClasses = project.the<SourceSetContainer>()["main"].output.classesDirs
+    val sourceRoot = rootProject.file("src/main/java")
+    dependsOn("compileJava")
+    inputs.files(mainClasses).withPropertyName("mixinClasses")
+    doLast {
+        destinationDir.walkTopDown()
+            .filter { it.isFile && it.name.endsWith(".mixins.json") }
+            .forEach { pruneMixinConfig(it, mainClasses, sourceRoot, logger) }
+    }
 }
 
 tasks.named("processResources") {

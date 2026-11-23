@@ -1,25 +1,14 @@
 package com.evandev.fieldguide.mixin.accessor;
 
-import com.moulberry.mixinconstraints.annotations.IfMinecraftVersion;
-import org.spongepowered.asm.mixin.Mixin;
-
 //? if >=26.1 {
 /*import net.minecraft.client.renderer.rendertype.RenderSetup;
 import net.minecraft.client.renderer.rendertype.RenderType;
+import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
-*///?}
 
-@IfMinecraftVersion(minVersion = "26.1")
-//? if <1.21 {
-/*@Mixin(targets = "net.minecraft.client.renderer.RenderType", remap = false)
-*///?} else if <26.1 {
-@Mixin(targets = "net.minecraft.client.renderer.rendertype.RenderType", remap = false)
-//?} else {
-/*@Mixin(RenderType.class)
-*///?}
+@Mixin(RenderType.class)
 public interface RenderTypeAccessor {
-    //? if >=26.1 {
-    /*@Accessor("state")
+    @Accessor("state")
     RenderSetup fieldguide$getState();
-    *///?}
 }
+*///?}
