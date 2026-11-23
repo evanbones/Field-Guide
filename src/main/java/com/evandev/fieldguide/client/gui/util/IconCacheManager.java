@@ -23,6 +23,7 @@ import java.util.concurrent.*;
 import java.util.stream.Stream;
 
 //? if <26.1 {
+import com.evandev.fieldguide.client.render.GuideBlockTint;
 import com.mojang.blaze3d.vertex.VertexSorting;
 import net.minecraft.client.renderer.MultiBufferSource;
 import org.joml.Matrix4f;
@@ -74,7 +75,7 @@ import com.mojang.renderpearl.api.commands.RenderPass;
 public class IconCacheManager {
     private static final Path CACHE_DIR = Services.PLATFORM.getConfigDirectory().resolve("../fieldguide_cache");
     private static final int RENDER_SIZE = 256;
-    private static final int CACHE_FORMAT = 6;
+    private static final int CACHE_FORMAT = 7;
 
     @FunctionalInterface
     public interface RenderAction {
@@ -422,7 +423,12 @@ public class IconCacheManager {
 
         try {
             //? if <26.1 {
-            renderAction.render(new PoseStack(), mc.renderBuffers().bufferSource());
+            GuideBlockTint.begin();
+            try {
+                renderAction.render(new PoseStack(), mc.renderBuffers().bufferSource());
+            } finally {
+                GuideBlockTint.end();
+            }
             //?} else if <26.2 {
             /*renderAction.render(poseStack, storage);
             featureDispatcher.renderAllFeatures();

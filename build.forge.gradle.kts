@@ -126,6 +126,7 @@ tasks {
 
 dependencies {
     annotationProcessor("org.spongepowered:mixin:0.8.5:processor")
+    compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.5.0")!!)
     compileOnly("org.jetbrains:annotations:26.0.2-1")
 
     // YACL
