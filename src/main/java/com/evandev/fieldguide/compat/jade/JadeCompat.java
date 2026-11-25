@@ -2,9 +2,13 @@ package com.evandev.fieldguide.compat.jade;
 
 import com.evandev.fieldguide.api.GuideEntry;
 import com.evandev.fieldguide.client.ClientFieldGuideManager;
+import com.evandev.fieldguide.api.variant.VariantDef;
 import com.evandev.fieldguide.client.manager.ClientCategoryManager;
+import com.evandev.fieldguide.client.progress.ProgressManager;
 import com.evandev.fieldguide.client.scan.manager.FieldGuideRaytracer;
 import com.evandev.fieldguide.config.ServerConfig;
+import com.evandev.fieldguide.variant.FieldGuideVariantManager;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
@@ -43,7 +47,11 @@ class JadeCompat {
     /*static void onTooltipCollected(BoxElement box, Accessor<?> accessor) {
         ITooltip tooltip = box.getTooltip();
     *///?}
-        if (!ServerConfig.get().hideUndiscoveredInJade || !isLocked(accessor)) return;
+        boolean locked = isLocked(accessor);
+        if (!locked || !ServerConfig.get().hideUndiscoveredInJade) {
+            addVariantName(tooltip, accessor);
+        }
+        if (!ServerConfig.get().hideUndiscoveredInJade || !locked) return;
 
         Component hidden = Component.translatable("fieldguide.undiscovered");
         //? if <1.21 {
@@ -53,6 +61,26 @@ class JadeCompat {
         *///?} else {
         tooltip.replace(JadeIds.CORE_OBJECT_NAME, hidden);
         //?}
+    }
+
+    private static void addVariantName(ITooltip tooltip, Accessor<?> accessor) {
+        if (!ServerConfig.get().showVariantsInJade || tooltip.isEmpty()) return;
+        if (!(accessor instanceof EntityAccessor entityAccessor) || !(entityAccessor.getEntity() instanceof Mob mob)) return;
+        String variantId = FieldGuideVariantManager.getTrackedVariantId(mob);
+        if (variantId.isEmpty() || variantId.equals("default")) return;
+        Component name = customVariantName(mob, variantId);
+        if (name == null) name = FieldGuideVariantManager.getVariantDisplayName(new VariantDef(variantId, null));
+        tooltip.add(1, name.copy().withStyle(ChatFormatting.GRAY));
+    }
+
+    private static Component customVariantName(Mob mob, String variantId) {
+        ClientFieldGuideManager manager = ClientFieldGuideManager.getInstance();
+        for (Object entry : manager.getEntriesForTarget(FieldGuideRaytracer.resolveEntityTarget(mob))) {
+            if (manager.getCategoryForEntry(entry) == null) continue;
+            String custom = ProgressManager.getInstance().getCustomName(ClientFieldGuideManager.getEntryId(entry) + "#" + variantId);
+            if (custom != null) return Component.literal(custom);
+        }
+        return null;
     }
 
     private static boolean isLocked(Accessor<?> accessor) {

@@ -47,6 +47,8 @@
   "option.fieldguide.hide_undiscovered_from_search.tooltip": "If enabled, undiscovered entries will be hidden from search results.",
   "option.fieldguide.hide_undiscovered_in_jade": "Hide Undiscovered Names in Jade",
   "option.fieldguide.hide_undiscovered_in_jade.tooltip": "If enabled, Jade will show '???' instead of the name of mobs and blocks that have not been discovered yet.",
+  "option.fieldguide.show_variants_in_jade": "Show Variants in Jade",
+  "option.fieldguide.show_variants_in_jade.tooltip": "If enabled, Jade shows which Field Guide variant a mob is under its name.",
 
   "option.fieldguide.disable_scanning": "Disable Scanning",
   "option.fieldguide.disable_scanning.tooltip": "If enabled, you will no longer be able to scan entries with spyglasses.",

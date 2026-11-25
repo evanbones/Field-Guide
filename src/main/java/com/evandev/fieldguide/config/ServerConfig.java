@@ -62,6 +62,7 @@ public class ServerConfig {
     public boolean showUndiscoveredNames = false;
     public boolean hideUndiscoveredFromSearch = false;
     public boolean hideUndiscoveredInJade = false;
+    public boolean showVariantsInJade = true;
 
     public double scanSpeed = 1.0D;
     public double minScanHitboxSize = 1.0D;

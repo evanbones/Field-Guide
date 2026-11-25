@@ -1,6 +1,7 @@
 package com.evandev.fieldguide.variant;
 
 import com.evandev.fieldguide.api.variant.DatapackVariant;
+import com.evandev.fieldguide.compat.quark.ShibaVariantProvider;
 import com.evandev.fieldguide.api.variant.DatapackVariantDefinition;
 import com.evandev.fieldguide.api.variant.VariantDef;
 import com.evandev.fieldguide.api.variant.VariantProvider;
@@ -245,6 +246,8 @@ public class FieldGuideVariantManager {
                 return new VariantDef(entity.getVariant().getSerializedName(), entity.getVariant());
             }
         });
+
+        ShibaVariantProvider.register();
 
         //? if >=26.1 {
         /*// Tropical Fish

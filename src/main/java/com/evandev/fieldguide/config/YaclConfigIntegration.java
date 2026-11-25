@@ -49,6 +49,7 @@ public class YaclConfigIntegration {
                 .option(createBoolOption("show_undiscovered_names", false, () -> serverConfig.showUndiscoveredNames, val -> serverConfig.showUndiscoveredNames = val))
                 .option(createBoolOption("hide_undiscovered_from_search", false, () -> serverConfig.hideUndiscoveredFromSearch, val -> serverConfig.hideUndiscoveredFromSearch = val))
                 .option(createBoolOption("hide_undiscovered_in_jade", false, () -> serverConfig.hideUndiscoveredInJade, val -> serverConfig.hideUndiscoveredInJade = val))
+                .option(createBoolOption("show_variants_in_jade", true, () -> serverConfig.showVariantsInJade, val -> serverConfig.showVariantsInJade = val))
                 .option(createBoolOption("disable_scanning", false, () -> serverConfig.disableScanning, val -> serverConfig.disableScanning = val))
                 .option(createBoolOption("disable_obtain_unlocks", false, () -> serverConfig.disableObtainUnlocks, val -> serverConfig.disableObtainUnlocks = val))
                 .option(createBoolOption("enable_spyglass_scanning", true, () -> serverConfig.enableSpyglassScanning, val -> serverConfig.enableSpyglassScanning = val))
